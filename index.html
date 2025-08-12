@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v4.0 - SC 2026</title>
+    <title>Sala de Guerra Eleitoral v4.1 - Edição Tática</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -46,9 +46,17 @@
             transition: all 0.3s ease-in-out;
             border-left-width: 4px;
         }
-        .risk-card.gain { border-color: #22c55e; }
-        .risk-card.lose { border-color: #ef4444; }
+        .clickable { cursor: pointer; transition: background-color 0.2s; }
+        .clickable:hover { background-color: #334155; }
         
+        /* Modal Styles */
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
@@ -63,7 +71,7 @@
             <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
                 <div>
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v4.0</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v4.1</span>
                     </h1>
                     <p class="text-text-light text-sm">Simulador de Cenários Dinâmicos - Deputado Estadual SC 2026</p>
                 </div>
@@ -101,19 +109,19 @@
             <section class="lg:col-span-3 space-y-8">
                 <!-- KPIs -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div class="bg-card p-5 rounded-lg border border-border text-center">
+                    <div id="kpi-card-qe" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('qe')">
                         <p class="text-sm font-semibold text-text-light uppercase">QUOCIENTE ELEITORAL</p>
                         <p id="kpi-qe" class="text-4xl font-extrabold text-primary number-dynamic">0</p>
                     </div>
-                    <div class="bg-card p-5 rounded-lg border border-border text-center">
+                    <div id="kpi-card-vv" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('vv')">
                         <p class="text-sm font-semibold text-text-light uppercase">VOTOS VÁLIDOS</p>
                         <p id="kpi-votos-validos" class="text-4xl font-extrabold text-success number-dynamic">0</p>
                     </div>
-                    <div class="bg-card p-5 rounded-lg border border-border text-center">
+                    <div id="kpi-card-nc" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('nc')">
                         <p class="text-sm font-semibold text-text-light uppercase">NOTA DE CORTE MÉDIA</p>
                         <p id="kpi-nota-corte-media" class="text-4xl font-extrabold text-warning number-dynamic">0</p>
                     </div>
-                    <div class="bg-card p-5 rounded-lg border border-border text-center">
+                    <div id="kpi-card-vr" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('vr')">
                         <p class="text-sm font-semibold text-text-light uppercase">VAGAS EM RISCO</p>
                         <p id="kpi-vagas-risco" class="text-4xl font-extrabold text-danger number-dynamic">0</p>
                     </div>
@@ -123,7 +131,7 @@
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     <div class="bg-card p-6 rounded-lg border border-border">
                         <h2 class="text-xl font-bold mb-4">Distribuição de Vagas (Simulação)</h2>
-                        <div id="vagas-dist-container" class="space-y-3"></div>
+                        <div id="vagas-dist-container" class="space-y-2"></div>
                     </div>
                     <div class="bg-card p-6 rounded-lg border border-border">
                         <h2 class="text-xl font-bold mb-4 text-danger"><i class="fa-solid fa-fire-flame-curved"></i>Cadeiras em Risco</h2>
@@ -134,6 +142,15 @@
         </main>
     </div>
 
+    <!-- Modal Genérico -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div id="modal-overlay" class="absolute inset-0 bg-black/70 modal-overlay" onclick="closeModal()"></div>
+        <div id="modal-content" class="bg-card border border-border rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative modal-content">
+            <!-- Conteúdo do Modal será injetado aqui -->
+        </div>
+    </div>
+
+
     <script>
     // =================================================================================
     // DADOS E CONFIGURAÇÕES
@@ -142,6 +159,7 @@
     const PARTY_COLORS = { 'PL': '#0ea5e9', 'MDB': '#facc15', 'PT': '#dc2626', 'Podemos': '#38bdf8', 'PP': '#0284c7', 'PSD': '#f97316', 'UNIÃO': '#1e3a8a', 'PSDB': '#0c4a6e', 'NOVO': '#ea580c', 'PDT': '#0d9488', 'PSOL': '#f59e0b', 'PTB': '#4b5563', 'Republicanos': '#2563eb' };
     
     let baseScenario = {};
+    let currentSimulatedScenario = {};
 
     // =================================================================================
     // LÓGICA PRINCIPAL
@@ -196,7 +214,6 @@
     }
 
     function updateScenario() {
-        // 1. Coletar valores dos controles
         const abstentionRate = parseFloat(document.getElementById('abstention-rate').value) / 100;
         const electorateGrowth = parseFloat(document.getElementById('electorate-growth').value) / 100;
         document.getElementById('abstention-value').textContent = (abstentionRate * 100).toFixed(1);
@@ -209,11 +226,8 @@
             if(boostValueEl) boostValueEl.textContent = `${(p.boost * 100).toFixed(0)}%`;
         });
         
-        // 2. Calcular o cenário simulado
-        const simulatedScenario = calculateSimulatedScenario(abstentionRate, electorateGrowth);
-
-        // 3. Renderizar todos os componentes
-        renderAll(simulatedScenario);
+        currentSimulatedScenario = calculateSimulatedScenario(abstentionRate, electorateGrowth);
+        renderAll(currentSimulatedScenario);
     }
 
     function calculateSimulatedScenario(abstentionRate, electorateGrowth) {
@@ -228,20 +242,21 @@
             
             const notaCorte = Math.max(
                 Math.ceil(p.ultimoEleitoVotosBase * (1 + tendenciaLimitada)),
-                Math.ceil(QE * 0.20)
+                (QE > 0 ? Math.ceil(QE * 0.20) : 0)
             );
 
             return {
                 ...p,
                 votos: votosFinais,
+                votosProjetadosBase,
                 notaCorte
             };
         });
 
-        return distributeVagas(partidosSimulados, QE, votosValidosProjetado);
+        return distributeVagas(partidosSimulados, QE, votosValidosProjetado, eleitoradoProjetado);
     }
 
-    function distributeVagas(partidos, QE, totalVotos) {
+    function distributeVagas(partidos, QE, totalVotos, totalEleitores) {
         let cenarios = JSON.parse(JSON.stringify(partidos));
         let totalVagasDiretas = 0;
 
@@ -280,21 +295,25 @@
 
         cenarios.forEach(p => { p.totalVagas = p.vagasDiretas + p.vagasSobras; });
         
-        return { QE, totalVotos, cenarios, sobrasLog };
+        return { QE, totalVotos, totalEleitores, cenarios, sobrasLog };
     }
     
+    // =================================================================================
+    // FUNÇÕES DE RENDERIZAÇÃO
+    // =================================================================================
     function renderAll(simulatedScenario) {
         const { QE, totalVotos, cenarios, sobrasLog } = simulatedScenario;
 
-        // Animação de números
         const animateNumber = (el, value) => {
-            el.textContent = value.toLocaleString('pt-BR');
-            el.style.transform = 'scale(1.1)';
-            el.style.color = tailwind.config.theme.extend.colors.secondary;
-            setTimeout(() => {
-                el.style.transform = 'scale(1)';
-                el.style.color = el.dataset.originalColor || '';
-            }, 200);
+            if (el.textContent !== value.toLocaleString('pt-BR')) {
+                el.textContent = value.toLocaleString('pt-BR');
+                el.style.transform = 'scale(1.1)';
+                el.style.color = tailwind.config.theme.extend.colors.secondary;
+                setTimeout(() => {
+                    el.style.transform = 'scale(1)';
+                    el.style.color = el.dataset.originalColor || '';
+                }, 200);
+            }
         };
         
         const kpiQE = document.getElementById('kpi-qe');
@@ -305,14 +324,15 @@
         if (!kpiVotos.dataset.originalColor) kpiVotos.dataset.originalColor = tailwind.config.theme.extend.colors.success;
         animateNumber(kpiVotos, totalVotos);
 
-        const notaCorteMedia = cenarios.filter(p => p.totalVagas > 0).reduce((acc, p) => acc + p.notaCorte, 0) / cenarios.filter(p => p.totalVagas > 0).length;
+        const partidosComVaga = cenarios.filter(p => p.totalVagas > 0);
+        const notaCorteMedia = partidosComVaga.length > 0 ? partidosComVaga.reduce((acc, p) => acc + p.notaCorte, 0) / partidosComVaga.length : 0;
         const kpiNotaCorte = document.getElementById('kpi-nota-corte-media');
         if (!kpiNotaCorte.dataset.originalColor) kpiNotaCorte.dataset.originalColor = tailwind.config.theme.extend.colors.warning;
         animateNumber(kpiNotaCorte, Math.ceil(notaCorteMedia) || 0);
 
         const kpiRisco = document.getElementById('kpi-vagas-risco');
         if (!kpiRisco.dataset.originalColor) kpiRisco.dataset.originalColor = tailwind.config.theme.extend.colors.danger;
-        animateNumber(kpiRisco, sobrasLog.slice(-5).length);
+        animateNumber(kpiRisco, sobrasLog.length);
 
         renderVagasDist(cenarios);
         renderRisk(sobrasLog.slice(-5).reverse());
@@ -327,6 +347,8 @@
             if (p.totalVagas === 0) return;
             const color = PARTY_COLORS[p.nome] || '#64748b';
             const item = document.createElement('div');
+            item.className = 'p-2 rounded-lg clickable';
+            item.setAttribute('onclick', `showPartyModal('${p.nome}')`);
             item.innerHTML = `
                 <div class="flex justify-between items-center mb-1">
                     <div class="flex items-center">
@@ -336,10 +358,10 @@
                     <span class="font-bold text-lg">${p.totalVagas} <span class="text-sm font-normal text-text-light">vaga(s)</span></span>
                 </div>
                 <div class="w-full bg-slate-700 rounded-full h-4">
-                    <div class="bg-primary h-4 rounded-full party-bar" style="width: ${p.vagasDiretas / p.totalVagas * 100}%" title="Vagas Diretas: ${p.vagasDiretas}"></div>
+                    <div class="bg-primary h-4 rounded-full party-bar" style="width: ${p.totalVagas > 0 ? (p.vagasDiretas / p.totalVagas * 100) : 0}%" title="Vagas Diretas: ${p.vagasDiretas}"></div>
                 </div>
                 <div class="text-xs text-text-light mt-1">
-                    ${p.vagasDiretas} direta(s) / ${p.vagasSobras} sobra(s) | Nota de Corte: ${p.notaCorte.toLocaleString('pt-BR')}
+                    ${p.vagasDiretas} direta(s) / ${p.vagasSobras} sobra(s) | NC: ${p.notaCorte.toLocaleString('pt-BR')}
                 </div>
             `;
             container.appendChild(item);
@@ -350,14 +372,15 @@
         const container = document.getElementById('risk-container');
         container.innerHTML = '';
         if(riskLog.length === 0) {
-            container.innerHTML = `<p class="text-center text-text-light">Nenhuma vaga de sobra disputada neste cenário.</p>`;
+            container.innerHTML = `<p class="text-center text-text-light p-4">Nenhuma vaga de sobra disputada neste cenário.</p>`;
             return;
         }
 
-        riskLog.forEach(log => {
+        riskLog.forEach((log, index) => {
             const diff = Math.ceil(log.mediaVencedor - log.mediaPerdedor);
             const item = document.createElement('div');
-            item.className = 'bg-slate-900/50 p-3 rounded-lg risk-card gain';
+            item.className = 'bg-slate-900/50 p-3 rounded-lg risk-card gain clickable';
+            item.setAttribute('onclick', `showRiskModal(${index})`);
             item.innerHTML = `
                 <div class="flex justify-between items-center">
                     <div class="font-bold text-sm">VAGA #${log.vaga}</div>
@@ -380,6 +403,207 @@
             container.appendChild(item);
         });
     }
+    
+    // =================================================================================
+    // LÓGICA DOS MODAIS
+    // =================================================================================
+    function showModal(content) {
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalOverlay = document.getElementById('modal-overlay');
+        
+        modalContent.innerHTML = content;
+        modal.classList.remove('hidden');
+        
+        setTimeout(() => {
+            modalOverlay.classList.remove('opacity-0');
+            modalOverlay.classList.add('opacity-100');
+            modalContent.classList.remove('opacity-0', 'scale-95');
+            modalContent.classList.add('opacity-100', 'scale-100');
+        }, 10);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalOverlay = document.getElementById('modal-overlay');
+
+        modalOverlay.classList.remove('opacity-100');
+        modalOverlay.classList.add('opacity-0');
+        modalContent.classList.remove('opacity-100', 'scale-100');
+        modalContent.classList.add('opacity-0', 'scale-95');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modalContent.innerHTML = '';
+        }, 300);
+    }
+    
+    function showKpiModal(kpi) {
+        const { QE, totalVotos, totalEleitores, cenarios } = currentSimulatedScenario;
+        let title, content;
+        
+        switch(kpi) {
+            case 'qe':
+                title = 'Quociente Eleitoral (QE)';
+                content = `
+                    <p>O QE é o "preço" de uma vaga direta. É o primeiro número que um partido precisa superar.</p>
+                    <div class="mt-4 bg-background p-4 rounded-lg font-mono text-sm">
+                        <p>Votos Válidos: ${totalVotos.toLocaleString('pt-BR')}</p>
+                        <p>Vagas na ALESC: ÷ ${DADOS_ELEICOES.SC.de.vagas}</p>
+                        <hr class="border-border my-2">
+                        <p class="text-lg text-primary">QE = ${QE.toLocaleString('pt-BR')}</p>
+                    </div>
+                `;
+                break;
+            case 'vv':
+                title = 'Votos Válidos';
+                content = `
+                    <p>Estimativa do total de votos que serão considerados na eleição, desconsiderando brancos e nulos.</p>
+                     <div class="mt-4 bg-background p-4 rounded-lg font-mono text-sm">
+                        <p>Eleitorado Projetado: ${totalEleitores.toLocaleString('pt-BR')}</p>
+                        <p>Taxa de Comparecimento: × ${(100 - parseFloat(document.getElementById('abstention-rate').value)).toFixed(1)}%</p>
+                        <hr class="border-border my-2">
+                        <p class="text-lg text-success">Votos Válidos = ${totalVotos.toLocaleString('pt-BR')}</p>
+                    </div>
+                `;
+                break;
+            case 'nc':
+                const partidosComVaga = cenarios.filter(p => p.totalVagas > 0);
+                const notaCorteMedia = partidosComVaga.length > 0 ? Math.ceil(partidosComVaga.reduce((acc, p) => acc + p.notaCorte, 0) / partidosComVaga.length) : 0;
+                title = 'Nota de Corte Média';
+                content = `
+                    <p>A "Nota de Corte" é a votação mínima que um candidato precisa para se eleger em seu partido. Este KPI mostra a média das notas de corte de todos os partidos que elegeram alguém no cenário atual.</p>
+                    <p class="mt-2 text-sm text-text-light">É um bom termômetro da "dificuldade" geral da eleição.</p>
+                    <div class="mt-4 bg-background p-4 rounded-lg text-center">
+                        <p class="text-4xl font-bold text-warning">${notaCorteMedia.toLocaleString('pt-BR')}</p>
+                        <p class="text-text-light">Média de Votos</p>
+                    </div>
+                `;
+                break;
+            case 'vr':
+                title = 'Vagas em Risco';
+                content = `
+                    <p>São as vagas distribuídas pelas "sobras", ou seja, pela média de votos. Elas não são garantidas pelo Quociente Eleitoral e representam as disputas mais acirradas da eleição.</p>
+                    <p class="mt-2 text-sm text-text-light">Pequenas variações na votação dos partidos podem fazer essas cadeiras trocarem de mãos. É aqui que a estratégia de campanha faz a diferença.</p>
+                `;
+                break;
+        }
+        
+        const modalHtml = `
+            <div class="p-6">
+                <div class="flex justify-between items-start">
+                    <h2 class="text-xl font-bold text-secondary mb-4">${title}</h2>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main">&times;</button>
+                </div>
+                <div class="text-text-light">${content}</div>
+            </div>
+        `;
+        showModal(modalHtml);
+    }
+
+    function showPartyModal(partyName) {
+        const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
+        if (!partyData) return;
+
+        const color = PARTY_COLORS[partyName] || '#64748b';
+        const modalHtml = `
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full mr-3" style="background-color: ${color}"></div>
+                        <div>
+                            <h2 class="text-2xl font-bold">${partyName}</h2>
+                            <p class="text-text-light">Dossiê do Partido no Cenário Atual</p>
+                        </div>
+                    </div>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-6">
+                    <div class="bg-background p-3 rounded-lg">
+                        <p class="text-sm text-text-light">VOTOS TOTAIS</p>
+                        <p class="text-2xl font-bold text-primary">${partyData.votos.toLocaleString('pt-BR')}</p>
+                    </div>
+                    <div class="bg-background p-3 rounded-lg">
+                        <p class="text-sm text-text-light">VAGAS TOTAIS</p>
+                        <p class="text-2xl font-bold text-secondary">${partyData.totalVagas}</p>
+                    </div>
+                    <div class="bg-background p-3 rounded-lg">
+                        <p class="text-sm text-text-light">NOTA DE CORTE</p>
+                        <p class="text-2xl font-bold text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</p>
+                    </div>
+                </div>
+
+                <div class="bg-background p-4 rounded-lg">
+                    <h3 class="font-bold mb-2">Composição dos Votos</h3>
+                    <ul class="text-sm space-y-2 font-mono">
+                        <li class="flex justify-between"><span>Base de Votos (2022 + Tendência):</span> <span>${partyData.votosProjetadosBase.toLocaleString('pt-BR')}</span></li>
+                        <li class="flex justify-between"><span>Impulso de Campanha (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li>
+                        <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL PROJETADO:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li>
+                    </ul>
+                </div>
+            </div>
+        `;
+        showModal(modalHtml);
+    }
+
+    function showRiskModal(logIndex) {
+        const log = currentSimulatedScenario.sobrasLog.slice(-5).reverse()[logIndex];
+        if (!log) return;
+
+        const { vencedor, perdedor, mediaVencedor, mediaPerdedor, vaga } = log;
+        const diff = Math.ceil(mediaVencedor - mediaPerdedor);
+        
+        const vencedorData = currentSimulatedScenario.cenarios.find(p => p.nome === vencedor);
+        const perdedorData = currentSimulatedScenario.cenarios.find(p => p.nome === perdedor);
+
+        let analise = '';
+        if (perdedorData) {
+            const votosNecessarios = Math.ceil((mediaVencedor - perdedorData.mediaVotos) * (perdedorData.totalVagas + 1));
+            const boostNecessario = (votosNecessarios / perdedorData.votos) * 100;
+            analise = `
+                <h3 class="font-bold mt-4 mb-2 text-secondary">Análise de Virada</h3>
+                <p class="text-sm text-text-light">Para o <strong>${perdedor}</strong> tomar esta vaga, precisaria de um adicional de <strong>${votosNecessarios.toLocaleString('pt-BR')}</strong> votos, o que equivale a um "Impulso de Campanha" de aproximadamente <strong>+${boostNecessario.toFixed(1)}%</strong>.</p>
+            `;
+        }
+
+        const modalHtml = `
+             <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-danger">Análise Tática: Vaga #${vaga}</h2>
+                        <p class="text-text-light">Disputa pela última cadeira das sobras.</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-success/10 p-4 rounded-lg border border-success/30">
+                        <p class="text-sm font-bold text-success">CONQUISTANDO A VAGA</p>
+                        <p class="text-xl font-bold">${vencedor}</p>
+                        <p class="font-mono text-lg">${Math.ceil(mediaVencedor).toLocaleString('pt-BR')} <span class="text-xs text-text-light"> Média de Votos</span></p>
+                    </div>
+                    <div class="bg-warning/10 p-4 rounded-lg border border-warning/30">
+                        <p class="text-sm font-bold text-warning">AMEAÇA IMEDIATA</p>
+                        <p class="text-xl font-bold">${perdedor || 'N/A'}</p>
+                        <p class="font-mono text-lg">${perdedor ? Math.ceil(mediaPerdedor).toLocaleString('pt-BR') : '-'} <span class="text-xs text-text-light"> Média de Votos</span></p>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center bg-background p-3 rounded-lg">
+                    <p class="text-sm text-text-light">Diferença de Média para Virada</p>
+                    <p class="text-2xl font-bold text-secondary">${diff.toLocaleString('pt-BR')} Votos</p>
+                </div>
+                
+                <div class="bg-background p-4 rounded-lg mt-4">
+                    ${analise}
+                </div>
+             </div>
+        `;
+        showModal(modalHtml);
+    }
+
 
     </script>
 </body>
