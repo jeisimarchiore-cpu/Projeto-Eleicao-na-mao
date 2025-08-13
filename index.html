@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v4.1 - Edição Tática</title>
+    <title>Sala de Guerra Eleitoral v5.7 - Editor de Legendas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -62,6 +62,13 @@
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px;}
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* Alliance Checkbox */
+        .alliance-checkbox:checked + label {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -71,7 +78,7 @@
             <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
                 <div>
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v4.1</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v5.7</span>
                     </h1>
                     <p class="text-text-light text-sm">Simulador de Cenários Dinâmicos - Deputado Estadual SC 2026</p>
                 </div>
@@ -88,20 +95,43 @@
                         <div>
                             <label for="abstention-rate" class="block text-sm font-medium text-text-light mb-1">Taxa de Abstenção</label>
                             <input type="range" id="abstention-rate" min="15" max="30" value="20" step="0.5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
-                            <div class="text-right text-sm font-mono text-primary"><span id="abstention-value">20.0</span>%</div>
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-xs text-text-light">Base 2022: <span id="base-abstention-display" class="font-mono"></span>%</span>
+                                <span class="text-sm font-mono text-primary"><span id="abstention-value">20.0</span>%</span>
+                            </div>
                         </div>
                         <div>
                             <label for="electorate-growth" class="block text-sm font-medium text-text-light mb-1">Crescimento do Eleitorado</label>
-                            <input type="range" id="electorate-growth" min="0" max="5" value="2.5" step="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
-                             <div class="text-right text-sm font-mono text-primary"><span id="electorate-growth-value">2.5</span>%</div>
+                            <input type="range" id="electorate-growth" min="-10" max="10" value="0" step="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
+                             <div class="flex justify-between items-center mt-1">
+                                <span class="text-xs text-text-light">Base 2022: <span id="base-electorate-display" class="font-mono"></span></span>
+                                <span class="text-sm font-mono text-primary"><span id="electorate-growth-value">0.0</span>%</span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="bg-card p-5 rounded-lg border border-border">
                     <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-chart-line mr-2"></i>Impulso de Campanha</h2>
-                    <div id="party-boost-container" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    <div id="party-boost-container" class="space-y-3 max-h-60 overflow-y-auto pr-2">
                         <!-- Inputs de partido serão inseridos aqui -->
                     </div>
+                </div>
+                 <!-- MÓDULO: Simulador de Alianças -->
+                <div class="bg-card p-5 rounded-lg border border-border">
+                    <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-handshake mr-2"></i>Simulador de Alianças</h2>
+                    <p class="text-xs text-text-light mb-3">Selecione 2 ou mais partidos para analisar uma possível coligação.</p>
+                    <div id="alliance-party-container" class="flex flex-wrap gap-2 mb-4"></div>
+                    <button id="alliance-button" onclick="simularAlianca()" class="w-full bg-primary text-white font-bold py-2 rounded-lg shadow-md hover:bg-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Analisar Aliança
+                    </button>
+                </div>
+                 <!-- NOVO MÓDULO: Editor de Legendas -->
+                <div class="bg-card p-5 rounded-lg border border-border">
+                    <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-user-pen mr-2"></i>Editor de Legendas</h2>
+                    <p class="text-xs text-text-light mb-3">Crie legendas personalizadas para testar cenários específicos.</p>
+                    <button onclick="openLegendaEditor()" class="w-full bg-secondary text-white font-bold py-2 rounded-lg shadow-md hover:bg-orange-400 transition-all duration-200">
+                        Abrir Editor
+                    </button>
                 </div>
             </aside>
 
@@ -130,12 +160,12 @@
                 <!-- Distribuição de Vagas e Cadeiras em Risco -->
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     <div class="bg-card p-6 rounded-lg border border-border">
-                        <h2 class="text-xl font-bold mb-4">Distribuição de Vagas (Simulação)</h2>
+                        <h2 class="text-xl font-bold mb-4">Ranking de Oportunidade (por Nota de Corte)</h2>
                         <div id="vagas-dist-container" class="space-y-2"></div>
                     </div>
-                    <div class="bg-card p-6 rounded-lg border border-border">
+                    <div class="bg-card p-6 rounded-lg border border-border flex flex-col">
                         <h2 class="text-xl font-bold mb-4 text-danger"><i class="fa-solid fa-fire-flame-curved"></i>Cadeiras em Risco</h2>
-                        <div id="risk-container" class="space-y-4"></div>
+                        <div id="risk-container" class="space-y-4 flex-grow overflow-y-auto pr-2"></div>
                     </div>
                 </div>
             </section>
@@ -155,7 +185,7 @@
     // =================================================================================
     // DADOS E CONFIGURAÇÕES
     // =================================================================================
-    const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 40, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4124024, abstencao: 0.20, partidos: { 'PL': { votos: 882396, ultimo_eleito_votos: 25622 }, 'MDB': { votos: 505571, ultimo_eleito_votos: 33733 }, 'PT': { votos: 456849, ultimo_eleito_votos: 26803 }, 'Podemos': { votos: 218631, ultimo_eleito_votos: 23053 },'PP': { votos: 369639, ultimo_eleito_votos: 28809 }, 'PSD': { votos: 407801, ultimo_eleito_votos: 36923 },'UNIÃO': { votos: 286222, ultimo_eleito_votos: 25845 }, 'PSDB': { votos: 183427, ultimo_eleito_votos: 39797 }, 'NOVO': { votos: 111760, ultimo_eleito_votos: 12390 }, 'PDT': { votos: 75934, ultimo_eleito_votos: 28685 }, 'PSOL': { votos: 94590, ultimo_eleito_votos: 40329 },'PTB': { votos: 85341, ultimo_eleito_votos: 34912 },'Republicanos': { votos: 177977, ultimo_eleito_votos: 44666 } } }, { ano: 2018, partidos: { 'PL': { votos: 183110 }, 'MDB': { votos: 437638 }, 'PT': { votos: 400492 }, 'PSD': { votos: 343213 }, 'PP': { votos: 298717 }, 'UNIÃO': { votos: 127977 }, 'PSDB': { votos: 123986 }, 'NOVO': { votos: 87894 }, 'PDT': { votos: 115000 }, 'PSOL': { votos: 75000 }, 'Republicanos': { votos: 95000 }, 'Podemos': { votos: 100000 }, 'PTB': {votos: 70000} } } ] } } };
+    const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 40, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4124024, abstencao: 0.20, partidos: { 'PL': { votos: 882396, eleitos: [ { nome: 'Ana Campagnolo', votos: 196571 }, { nome: 'Sargento Lima', votos: 71185 }, { nome: 'Maurício Eskudlark', votos: 65638 }, { nome: 'Jessé Lopes', votos: 55013 }, { nome: 'Carlos Humberto', votos: 46445 }, { nome: 'Ivan Naatz', votos: 45304 }, { nome: 'Berlanda', votos: 41488 }, { nome: 'Marcius Machado', votos: 39749 }, { nome: 'Massocco', votos: 31659 }, { nome: 'Oscar Gutz', votos: 26812 }, { nome: 'Soratto', votos: 25622 } ] }, 'MDB': { votos: 505571, eleitos: [ { nome: 'Antídio Lunelli', votos: 74500 }, { nome: 'Mauro de Nadal', votos: 67065 }, { nome: 'Jerry Comper', votos: 64145 }, { nome: 'Fernando Krelling', votos: 54320 }, { nome: 'Volnei Weber', votos: 45995 }, { nome: 'Tiago Zilli', votos: 33733 } ] }, 'PT': { votos: 456849, eleitos: [ { nome: 'Luciane Carminatti', votos: 92478 }, { nome: 'Neodi Saretta', votos: 38729 }, { nome: 'Fabiano da Luz', votos: 34972 }, { nome: 'Padre Pedro', votos: 26803 } ] }, 'Podemos': { votos: 218631, eleitos: [ { nome: 'Paulinha', votos: 58694 }, { nome: 'Camilo Martins', votos: 44925 }, { nome: 'Lucas Neves', votos: 23053 } ] },'PP': { votos: 369639, eleitos: [ { nome: 'Zé Milton', votos: 56585 }, { nome: 'Altair Silva', votos: 46445 }, { nome: 'Pepê Collaço', votos: 28809 } ] }, 'PSD': { votos: 407801, eleitos: [ { nome: 'Mário Motta', votos: 56363 }, { nome: 'Júlio Garcia', votos: 49958 }, { nome: 'Napoleão Bernardes', votos: 36923 } ] },'UNIÃO': { votos: 286222, eleitos: [ { nome: 'Jair Miotto', votos: 33682 }, { nome: 'Repórter Sérgio Guimarães', votos: 27977 }, { nome: 'Marcos da Rosa', votos: 25845 } ] }, 'PSDB': { votos: 183427, eleitos: [ { nome: 'Marcos Vieira', votos: 48466 }, { nome: 'Dr. Vicente', votos: 39797 } ] }, 'NOVO': { votos: 111760, eleitos: [ { nome: 'Matheus Cadorin', votos: 12390 } ] }, 'PDT': { votos: 75934, eleitos: [ { nome: 'Rodrigo Minotto', votos: 28685 } ] }, 'PSOL': { votos: 94590, eleitos: [ { nome: 'Marquito', votos: 40329 } ] },'PTB': { votos: 85341, eleitos: [ { nome: 'Delegado Egidio Ferrari', votos: 34912 } ] },'Republicanos': { votos: 177977, eleitos: [ { nome: 'Sergio Motta', votos: 44666 } ] } } } ] } } };
     const PARTY_COLORS = { 'PL': '#0ea5e9', 'MDB': '#facc15', 'PT': '#dc2626', 'Podemos': '#38bdf8', 'PP': '#0284c7', 'PSD': '#f97316', 'UNIÃO': '#1e3a8a', 'PSDB': '#0c4a6e', 'NOVO': '#ea580c', 'PDT': '#0d9488', 'PSOL': '#f59e0b', 'PTB': '#4b5563', 'Republicanos': '#2563eb' };
     
     let baseScenario = {};
@@ -172,17 +202,14 @@
 
     function prepareBaseScenario() {
         const historico2022 = DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2022);
-        const historico2018 = DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2018);
         
         const partidos = Object.keys(historico2022.partidos).map(nome => {
             const p2022 = historico2022.partidos[nome];
-            const p2018 = historico2018.partidos[nome] || { votos: 0 };
-            const tendencia = (p2022.votos / (p2018.votos || 1)) - 1;
             return {
                 nome,
                 votosBase2022: p2022.votos,
-                ultimoEleitoVotosBase: p2022.ultimo_eleito_votos,
-                tendencia,
+                eleitos2022: p2022.eleitos.sort((a,b) => b.votos - a.votos), // Garante que a lista de eleitos está ordenada
+                customEleitos: null, // Para legendas personalizadas
                 boost: 0
             };
         });
@@ -195,11 +222,19 @@
     }
     
     function initializeControls() {
-        const container = document.getElementById('party-boost-container');
+        const boostContainer = document.getElementById('party-boost-container');
+        const allianceContainer = document.getElementById('alliance-party-container');
+        
+        // Popula os dados base de 2022
+        document.getElementById('base-abstention-display').textContent = (DADOS_ELEICOES.SC.de.historico[0].abstencao * 100).toFixed(1);
+        document.getElementById('base-electorate-display').textContent = DADOS_ELEICOES.SC.de.historico[0].eleitorado.toLocaleString('pt-BR');
+
         baseScenario.partidos.sort((a,b) => b.votosBase2022 - a.votosBase2022).forEach(p => {
             const color = PARTY_COLORS[p.nome] || '#64748b';
-            const item = document.createElement('div');
-            item.innerHTML = `
+            
+            // Boost controls
+            const boostItem = document.createElement('div');
+            boostItem.innerHTML = `
                 <label for="boost-${p.nome}" class="flex items-center text-sm font-medium text-text-light mb-1">
                     <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color}"></div>
                     ${p.nome}
@@ -209,7 +244,15 @@
                     <span id="boost-value-${p.nome}" class="font-mono text-xs w-12 text-right">0%</span>
                 </div>
             `;
-            container.appendChild(item);
+            boostContainer.appendChild(boostItem);
+
+            // Alliance controls
+            const allianceItem = document.createElement('div');
+            allianceItem.innerHTML = `
+                <input type="checkbox" id="alliance-${p.nome}" value="${p.nome}" class="hidden alliance-checkbox" onchange="updateAllianceButton()">
+                <label for="alliance-${p.nome}" class="cursor-pointer border border-border px-2 py-1 rounded-md text-xs font-semibold text-text-light transition-all duration-200">${p.nome}</label>
+            `;
+            allianceContainer.appendChild(allianceItem);
         });
     }
 
@@ -230,28 +273,49 @@
         renderAll(currentSimulatedScenario);
     }
 
-    function calculateSimulatedScenario(abstentionRate, electorateGrowth) {
+    function calculateSimulatedScenario(abstentionRate, electorateGrowth, allianceParties = []) {
         const eleitoradoProjetado = Math.floor(baseScenario.eleitoradoBase2022 * (1 + electorateGrowth));
         const votosValidosProjetado = Math.floor(eleitoradoProjetado * (1 - abstentionRate));
         const QE = Math.floor(votosValidosProjetado / DADOS_ELEICOES.SC.de.vagas);
 
-        const partidosSimulados = baseScenario.partidos.map(p => {
-            const tendenciaLimitada = Math.max(-0.02, Math.min(0.02, p.tendencia));
-            const votosProjetadosBase = p.votosBase2022 * (1 + tendenciaLimitada);
-            const votosFinais = Math.floor(votosProjetadosBase * (1 + p.boost));
-            
-            const notaCorte = Math.max(
-                Math.ceil(p.ultimoEleitoVotosBase * (1 + tendenciaLimitada)),
-                (QE > 0 ? Math.ceil(QE * 0.20) : 0)
-            );
+        let partidosSimulados = baseScenario.partidos.map(p => {
+            let votosFinais;
+            let notaCorte;
+            let eleitos;
 
-            return {
-                ...p,
-                votos: votosFinais,
-                votosProjetadosBase,
-                notaCorte
-            };
+            if (p.customEleitos) {
+                votosFinais = p.customEleitos.reduce((sum, cand) => sum + cand.votos, 0);
+                eleitos = p.customEleitos;
+                const ultimoEleito = eleitos[eleitos.length - 1];
+                notaCorte = ultimoEleito ? ultimoEleito.votos : 0;
+            } else {
+                votosFinais = Math.floor(p.votosBase2022 * (1 + p.boost));
+                eleitos = p.eleitos2022;
+                const ultimoEleitoBase = eleitos[eleitos.length - 1];
+                notaCorte = ultimoEleitoBase ? Math.floor(ultimoEleitoBase.votos * (1 + p.boost)) : 0;
+            }
+            
+            const notaCorteFinal = Math.max(notaCorte, (QE > 0 ? Math.ceil(QE * 0.20) : 0));
+
+            return { ...p, votos: votosFinais, notaCorte: notaCorteFinal, eleitos2022: eleitos };
         });
+
+        if (allianceParties.length > 1) {
+            const allianceData = { nome: `ALIANÇA (${allianceParties.join('+')})`, votos: 0, notaCorte: 0, boost: 0, eleitos2022: [] };
+            const remainingParties = [];
+            
+            partidosSimulados.forEach(p => {
+                if (allianceParties.includes(p.nome)) {
+                    allianceData.votos += p.votos;
+                    allianceData.notaCorte = Math.max(allianceData.notaCorte, p.notaCorte);
+                    allianceData.eleitos2022.push(...p.eleitos2022);
+                } else {
+                    remainingParties.push(p);
+                }
+            });
+            allianceData.eleitos2022.sort((a,b) => b.votos - a.votos);
+            partidosSimulados = [allianceData, ...remainingParties];
+        }
 
         return distributeVagas(partidosSimulados, QE, votosValidosProjetado, eleitoradoProjetado);
     }
@@ -335,25 +399,26 @@
         animateNumber(kpiRisco, sobrasLog.length);
 
         renderVagasDist(cenarios);
-        renderRisk(sobrasLog.slice(-5).reverse());
+        renderRisk(sobrasLog.reverse());
     }
 
     function renderVagasDist(cenarios) {
         const container = document.getElementById('vagas-dist-container');
         container.innerHTML = '';
-        const sorted = [...cenarios].sort((a, b) => b.totalVagas - a.totalVagas || b.votos - a.votos);
+        const sorted = [...cenarios].filter(p => p.totalVagas > 0).sort((a, b) => a.notaCorte - b.notaCorte);
 
         sorted.forEach(p => {
-            if (p.totalVagas === 0) return;
             const color = PARTY_COLORS[p.nome] || '#64748b';
             const item = document.createElement('div');
             item.className = 'p-2 rounded-lg clickable';
             item.setAttribute('onclick', `showPartyModal('${p.nome}')`);
+            const customIcon = p.customEleitos ? '<i class="fa-solid fa-user-pen text-secondary text-xs ml-2"></i>' : '';
             item.innerHTML = `
                 <div class="flex justify-between items-center mb-1">
                     <div class="flex items-center">
                         <div class="w-4 h-4 rounded-full mr-2" style="background-color: ${color}"></div>
                         <span class="font-bold">${p.nome}</span>
+                        ${customIcon}
                     </div>
                     <span class="font-bold text-lg">${p.totalVagas} <span class="text-sm font-normal text-text-light">vaga(s)</span></span>
                 </div>
@@ -361,7 +426,7 @@
                     <div class="bg-primary h-4 rounded-full party-bar" style="width: ${p.totalVagas > 0 ? (p.vagasDiretas / p.totalVagas * 100) : 0}%" title="Vagas Diretas: ${p.vagasDiretas}"></div>
                 </div>
                 <div class="text-xs text-text-light mt-1">
-                    ${p.vagasDiretas} direta(s) / ${p.vagasSobras} sobra(s) | NC: ${p.notaCorte.toLocaleString('pt-BR')}
+                    ${p.vagasDiretas} direta(s) / ${p.vagasSobras} sobra(s) | NC: <span class="font-bold text-warning">${p.notaCorte.toLocaleString('pt-BR')}</span>
                 </div>
             `;
             container.appendChild(item);
@@ -507,6 +572,34 @@
         if (!partyData) return;
 
         const color = PARTY_COLORS[partyName] || '#64748b';
+        
+        const diretas = Array.from({ length: partyData.vagasDiretas }, (_, i) => i);
+        const sobras = Array.from({ length: partyData.vagasSobras }, (_, i) => i + partyData.vagasDiretas);
+
+        const generateCandidateHtml = (index) => {
+            const candidato = partyData.eleitos2022[index];
+            if (!candidato) return '';
+            const votosProjetados = partyData.customEleitos ? candidato.votos : Math.floor(candidato.votos * (1 + partyData.boost));
+            const diff = votosProjetados - partyData.notaCorte;
+            return `
+                <li class="bg-background p-2 rounded-md">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-sm">${index + 1}. ${candidato.nome}</span>
+                        <span class="font-bold text-lg text-primary">${votosProjetados.toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div class="text-xs text-text-light flex justify-between items-center mt-1">
+                        <span>Votos Base: ${candidato.votos.toLocaleString('pt-BR')}</span>
+                        <span class="${diff >= 0 ? 'text-success' : 'text-danger'}">
+                            ${diff >= 0 ? '+' : ''}${diff.toLocaleString('pt-BR')} vs. NC
+                        </span>
+                    </div>
+                </li>
+            `;
+        };
+
+        const diretasHtml = diretas.length > 0 ? diretas.map(generateCandidateHtml).join('') : '<li class="text-sm text-text-light text-center p-2">Nenhuma cadeira direta conquistada.</li>';
+        const sobrasHtml = sobras.length > 0 ? sobras.map(generateCandidateHtml).join('') : '<li class="text-sm text-text-light text-center p-2">Nenhuma cadeira de sobra conquistada.</li>';
+
         const modalHtml = `
             <div class="p-6">
                 <div class="flex justify-between items-start mb-4">
@@ -520,28 +613,34 @@
                     <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-6">
-                    <div class="bg-background p-3 rounded-lg">
-                        <p class="text-sm text-text-light">VOTOS TOTAIS</p>
-                        <p class="text-2xl font-bold text-primary">${partyData.votos.toLocaleString('pt-BR')}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="bg-background p-4 rounded-lg">
+                        <h3 class="font-bold mb-2">Composição dos Votos</h3>
+                        <ul class="text-sm space-y-2 font-mono">
+                            <li class="flex justify-between"><span>Base de Votos (2022):</span> <span>${partyData.votosProjetadosBase.toLocaleString('pt-BR')}</span></li>
+                            <li class="flex justify-between"><span>Impulso (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li>
+                            <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL PROJETADO:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li>
+                        </ul>
                     </div>
-                    <div class="bg-background p-3 rounded-lg">
-                        <p class="text-sm text-text-light">VAGAS TOTAIS</p>
-                        <p class="text-2xl font-bold text-secondary">${partyData.totalVagas}</p>
-                    </div>
-                    <div class="bg-background p-3 rounded-lg">
-                        <p class="text-sm text-text-light">NOTA DE CORTE</p>
-                        <p class="text-2xl font-bold text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</p>
+                     <div class="bg-background p-4 rounded-lg">
+                        <h3 class="font-bold mb-2">Cálculo da Nota de Corte</h3>
+                        <ul class="text-sm space-y-2 font-mono">
+                            <li class="flex justify-between"><span>Último Eleito (Base):</span> <span>${partyData.eleitos2022.length > 0 ? partyData.eleitos2022[partyData.eleitos2022.length - 1].votos.toLocaleString('pt-BR') : 'N/A'}</span></li>
+                            <li class="flex justify-between"><span>Impulso de Campanha:</span> <span>${(partyData.boost * 100).toFixed(0)}%</span></li>
+                            <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>META PROJETADA:</strong> <strong class="text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</strong></li>
+                        </ul>
                     </div>
                 </div>
-
-                <div class="bg-background p-4 rounded-lg">
-                    <h3 class="font-bold mb-2">Composição dos Votos</h3>
-                    <ul class="text-sm space-y-2 font-mono">
-                        <li class="flex justify-between"><span>Base de Votos (2022 + Tendência):</span> <span>${partyData.votosProjetadosBase.toLocaleString('pt-BR')}</span></li>
-                        <li class="flex justify-between"><span>Impulso de Campanha (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li>
-                        <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL PROJETADO:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li>
-                    </ul>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-background p-4 rounded-lg">
+                        <h3 class="font-bold mb-2"><i class="fa-solid fa-bolt text-primary mr-1"></i>Cadeiras Diretas (${diretas.length})</h3>
+                        <ul class="text-sm space-y-2">${diretasHtml}</ul>
+                    </div>
+                    <div class="bg-background p-4 rounded-lg">
+                        <h3 class="font-bold mb-2"><i class="fa-solid fa-shuffle text-warning mr-1"></i>Cadeiras de Sobra (${sobras.length})</h3>
+                        <ul class="text-sm space-y-2">${sobrasHtml}</ul>
+                    </div>
                 </div>
             </div>
         `;
@@ -549,7 +648,7 @@
     }
 
     function showRiskModal(logIndex) {
-        const log = currentSimulatedScenario.sobrasLog.slice(-5).reverse()[logIndex];
+        const log = currentSimulatedScenario.sobrasLog.slice().reverse()[logIndex];
         if (!log) return;
 
         const { vencedor, perdedor, mediaVencedor, mediaPerdedor, vaga } = log;
@@ -561,7 +660,7 @@
         let analise = '';
         if (perdedorData) {
             const votosNecessarios = Math.ceil((mediaVencedor - perdedorData.mediaVotos) * (perdedorData.totalVagas + 1));
-            const boostNecessario = (votosNecessarios / perdedorData.votos) * 100;
+            const boostNecessario = (perdedorData.votos > 0) ? (votosNecessarios / perdedorData.votos) * 100 : 0;
             analise = `
                 <h3 class="font-bold mt-4 mb-2 text-secondary">Análise de Virada</h3>
                 <p class="text-sm text-text-light">Para o <strong>${perdedor}</strong> tomar esta vaga, precisaria de um adicional de <strong>${votosNecessarios.toLocaleString('pt-BR')}</strong> votos, o que equivale a um "Impulso de Campanha" de aproximadamente <strong>+${boostNecessario.toFixed(1)}%</strong>.</p>
@@ -573,7 +672,7 @@
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <h2 class="text-2xl font-bold text-danger">Análise Tática: Vaga #${vaga}</h2>
-                        <p class="text-text-light">Disputa pela última cadeira das sobras.</p>
+                        <p class="text-text-light">Disputa por uma cadeira de sobra.</p>
                     </div>
                     <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
                 </div>
@@ -602,6 +701,234 @@
              </div>
         `;
         showModal(modalHtml);
+    }
+    
+    // =================================================================================
+    // LÓGICA DO SIMULADOR DE ALIANÇAS
+    // =================================================================================
+    function updateAllianceButton() {
+        const selected = document.querySelectorAll('.alliance-checkbox:checked').length;
+        document.getElementById('alliance-button').disabled = selected < 2;
+    }
+
+    function simularAlianca() {
+        const selectedParties = Array.from(document.querySelectorAll('.alliance-checkbox:checked')).map(el => el.value);
+        if (selectedParties.length < 2) return;
+
+        const abstentionRate = parseFloat(document.getElementById('abstention-rate').value) / 100;
+        const electorateGrowth = parseFloat(document.getElementById('electorate-growth').value) / 100;
+        
+        const allianceScenario = calculateSimulatedScenario(abstentionRate, electorateGrowth, selectedParties);
+        const baselineScenario = currentSimulatedScenario;
+
+        const allianceResult = allianceScenario.cenarios.find(p => p.nome.startsWith('ALIANÇA'));
+        const vagasAlianca = allianceResult ? allianceResult.totalVagas : 0;
+
+        let vagasSeparados = 0;
+        selectedParties.forEach(partyName => {
+            const baselineParty = baselineScenario.cenarios.find(p => p.nome === partyName);
+            if (baselineParty) {
+                vagasSeparados += baselineParty.totalVagas;
+            }
+        });
+
+        const ganhoLiquido = vagasAlianca - vagasSeparados;
+        let impactoHtml = '';
+        baselineScenario.cenarios.forEach(baselineParty => {
+            if (selectedParties.includes(baselineParty.nome)) return;
+            const allianceParty = allianceScenario.cenarios.find(p => p.nome === baselineParty.nome);
+            const diff = (allianceParty ? allianceParty.totalVagas : 0) - baselineParty.totalVagas;
+            if (diff !== 0) {
+                const color = diff > 0 ? 'text-success' : 'text-danger';
+                const icon = diff > 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                impactoHtml += `<li class="flex justify-between"><span>${baselineParty.nome}</span> <span class="font-bold ${color}">${diff > 0 ? '+' : ''}${diff} vaga(s) <i class="fa-solid ${icon}"></i></span></li>`;
+            }
+        });
+
+        const modalHtml = `
+            <div class="p-6">
+                 <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-secondary">Análise de Aliança</h2>
+                        <p class="text-text-light">${selectedParties.join(' + ')}</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-center">
+                    <div class="bg-background p-4 rounded-lg">
+                        <p class="text-sm text-text-light">Vagas (Separados)</p>
+                        <p class="text-4xl font-bold">${vagasSeparados}</p>
+                    </div>
+                    <div class="bg-primary/20 p-4 rounded-lg">
+                        <p class="text-sm text-primary">Vagas (Aliança)</p>
+                        <p class="text-4xl font-bold text-primary">${vagasAlianca}</p>
+                    </div>
+                </div>
+                <div class="mt-4 text-center bg-background p-3 rounded-lg">
+                    <p class="text-sm text-text-light">Ganho Líquido</p>
+                    <p class="text-2xl font-bold ${ganhoLiquido > 0 ? 'text-success' : ganhoLiquido < 0 ? 'text-danger' : ''}">${ganhoLiquido > 0 ? '+' : ''}${ganhoLiquido} Vaga(s)</p>
+                </div>
+                <div class="mt-4 bg-background p-4 rounded-lg">
+                    <h3 class="font-bold mb-2">Impacto no Cenário</h3>
+                    <ul class="text-sm space-y-2">${impactoHtml || '<li class="text-text-light">Nenhum outro partido foi impactado.</li>'}</ul>
+                </div>
+            </div>
+        `;
+        showModal(modalHtml);
+    }
+    
+    // =================================================================================
+    // LÓGICA DO EDITOR DE LEGENDAS
+    // =================================================================================
+    
+    function openLegendaEditor() {
+        let optionsHtml = baseScenario.partidos.map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
+        const modalHtml = `
+            <div class="p-6">
+                 <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-secondary">Editor de Legendas</h2>
+                        <p class="text-text-light">Selecione um partido para editar sua lista de candidatos.</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
+                </div>
+                <div class="flex items-end gap-4">
+                    <div class="flex-grow">
+                        <label for="legenda-party-select" class="text-sm font-medium text-text-light">Partido</label>
+                        <select id="legenda-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1">
+                            <option value="">Selecione...</option>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                    <button class="bg-primary px-4 py-2 rounded-lg" onclick="loadPartyEditor()">Carregar</button>
+                </div>
+                <div id="legenda-editor-content" class="mt-4"></div>
+            </div>
+        `;
+        showModal(modalHtml);
+    }
+
+    function loadPartyEditor() {
+        const partyName = document.getElementById('legenda-party-select').value;
+        if (!partyName) return;
+
+        const partyData = baseScenario.partidos.find(p => p.nome === partyName);
+        const candidates = partyData.customEleitos || partyData.eleitos2022;
+        
+        let candidatesHtml = candidates.map((cand, index) => `
+            <div class="flex items-center gap-2" data-candidate-index="${index}">
+                <input type="text" placeholder="Nome do Candidato" value="${cand.nome}" class="w-full bg-slate-900 p-2 rounded-lg border border-border">
+                <input type="number" placeholder="Votos" value="${cand.votos}" class="w-1/2 bg-slate-900 p-2 rounded-lg border border-border">
+                <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button>
+                <button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar Candidato" onclick="migrateCandidate(this, '${partyName}', ${index})"><i class="fa-solid fa-right-left"></i></button>
+            </div>
+        `).join('');
+
+        const editorContent = `
+            <div id="candidate-list" class="space-y-2 max-h-64 overflow-y-auto pr-2">${candidatesHtml}</div>
+            <button class="mt-2 text-sm text-primary" onclick="addCandidateRow()"><i class="fa-solid fa-plus mr-2"></i>Adicionar Candidato</button>
+            <div class="mt-4 flex justify-between">
+                <button class="text-sm text-danger" onclick="resetLegenda('${partyName}')">Restaurar Padrão (2022)</button>
+                <div>
+                    <button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveLegenda('${partyName}')">Salvar e Simular</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('legenda-editor-content').innerHTML = editorContent;
+    }
+
+    function addCandidateRow() {
+        const list = document.getElementById('candidate-list');
+        const newRow = document.createElement('div');
+        newRow.className = 'flex items-center gap-2';
+        newRow.innerHTML = `
+            <input type="text" placeholder="Nome do Candidato" class="w-full bg-slate-900 p-2 rounded-lg border border-border">
+            <input type="number" placeholder="Votos" class="w-1/2 bg-slate-900 p-2 rounded-lg border border-border">
+            <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button>
+            <div class="w-10"></div>
+        `;
+        list.appendChild(newRow);
+    }
+
+    function removeCandidateRow(button) {
+        button.parentElement.remove();
+    }
+
+    function saveLegenda(partyName) {
+        const partyData = baseScenario.partidos.find(p => p.nome === partyName);
+        const rows = document.querySelectorAll('#candidate-list > div');
+        const newEleitos = [];
+        let totalVotes = 0;
+        rows.forEach(row => {
+            const nameInput = row.children[0];
+            const votesInput = row.children[1];
+            const name = nameInput.value.trim();
+            const votes = parseInt(votesInput.value, 10) || 0;
+            if (name && votes > 0) {
+                newEleitos.push({ nome: name, votos: votes });
+                totalVotes += votes;
+            }
+        });
+
+        newEleitos.sort((a,b) => b.votos - a.votos);
+        partyData.customEleitos = newEleitos;
+        partyData.votosBase2022 = totalVotes; // Override base votes with the sum of custom candidates
+        
+        // Disable boost for this party as it's now manually controlled
+        const boostInput = document.getElementById(`boost-${partyName}`);
+        if(boostInput) {
+            boostInput.value = 0;
+            boostInput.disabled = true;
+        }
+
+        closeModal();
+        updateScenario();
+    }
+
+    function resetLegenda(partyName) {
+        const partyData = baseScenario.partidos.find(p => p.nome === partyName);
+        partyData.customEleitos = null;
+        partyData.votosBase2022 = DADOS_ELEICOES.SC.de.historico[0].partidos[partyName].votos; // Restore original base votes
+        
+        const boostInput = document.getElementById(`boost-${partyName}`);
+        if(boostInput) {
+            boostInput.disabled = false;
+        }
+        
+        loadPartyEditor(); // Reload editor to show default
+    }
+    
+    function migrateCandidate(button, fromPartyName, candidateIndex) {
+        const toPartyName = prompt("Digite a sigla do partido de destino:");
+        if (!toPartyName || toPartyName.trim() === '' || toPartyName.toUpperCase() === fromPartyName) return;
+
+        const toParty = baseScenario.partidos.find(p => p.nome.toUpperCase() === toPartyName.toUpperCase());
+        if (!toParty) {
+            alert("Partido de destino não encontrado.");
+            return;
+        }
+
+        const fromParty = baseScenario.partidos.find(p => p.nome === fromPartyName);
+        
+        // Garante que ambos os partidos usem listas customizadas a partir de agora
+        if (!fromParty.customEleitos) fromParty.customEleitos = JSON.parse(JSON.stringify(fromParty.eleitos2022));
+        if (!toParty.customEleitos) toParty.customEleitos = JSON.parse(JSON.stringify(toParty.eleitos2022));
+
+        const candidate = fromParty.customEleitos.splice(candidateIndex, 1)[0];
+        toParty.customEleitos.push(candidate);
+        toParty.customEleitos.sort((a, b) => b.votos - a.votos);
+
+        // Recalcula os votos base de ambos os partidos
+        fromParty.votosBase2022 = fromParty.customEleitos.reduce((sum, cand) => sum + cand.votos, 0);
+        toParty.votosBase2022 = toParty.customEleitos.reduce((sum, cand) => sum + cand.votos, 0);
+        
+        // Desabilita o boost para ambos
+        const boostInputFrom = document.getElementById(`boost-${fromParty.nome}`);
+        if(boostInputFrom) boostInputFrom.disabled = true;
+        const boostInputTo = document.getElementById(`boost-${toParty.nome}`);
+        if(boostInputTo) boostInputTo.disabled = true;
+
+        loadPartyEditor(); // Recarrega o editor do partido de origem
     }
 
 
