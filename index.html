@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v5.7 - Editor de Legendas</title>
+    <title>Sala de Guerra Eleitoral v6.6 - Base de Dados UNIÃO</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -69,106 +69,130 @@
             border-color: #2563eb;
             color: white;
         }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom-color: #2563eb;
+            color: #2563eb;
+        }
     </style>
 </head>
 <body class="antialiased">
     <div class="min-h-screen">
         <!-- Cabeçalho -->
         <header class="bg-card/50 backdrop-blur-sm sticky top-0 z-20 border-b border-border">
-            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-                <div>
-                    <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v5.7</span>
-                    </h1>
-                    <p class="text-text-light text-sm">Simulador de Cenários Dinâmicos - Deputado Estadual SC 2026</p>
-                </div>
+            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                 <h1 class="text-2xl font-bold text-text-main">
+                    <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v6.6</span>
+                </h1>
+                <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
             </div>
+            <!-- Navegação Principal -->
+            <nav class="max-w-screen-2xl mx-auto flex justify-center items-center space-x-4 sm:space-x-8" id="main-tabs">
+                <button class="tab-button active font-semibold py-3 px-2 sm:px-4" onclick="changeTab('simulador')"><i class="fa-solid fa-sliders mr-2"></i>Simulador de Cenário</button>
+                <button class="tab-button font-semibold py-3 px-2 sm:px-4" onclick="changeTab('candidatos')"><i class="fa-solid fa-users mr-2"></i>Base de Candidatos 2022</button>
+            </nav>
         </header>
 
-        <main class="max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- Painel de Controle -->
-            <aside class="lg:col-span-1 space-y-6">
-                <div class="bg-card p-5 rounded-lg border border-border">
-                    <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-sliders mr-2"></i>Painel de Controle do Cenário</h2>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label for="abstention-rate" class="block text-sm font-medium text-text-light mb-1">Taxa de Abstenção</label>
-                            <input type="range" id="abstention-rate" min="15" max="30" value="20" step="0.5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
-                            <div class="flex justify-between items-center mt-1">
-                                <span class="text-xs text-text-light">Base 2022: <span id="base-abstention-display" class="font-mono"></span>%</span>
-                                <span class="text-sm font-mono text-primary"><span id="abstention-value">20.0</span>%</span>
+        <main class="max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8">
+            <!-- ABA: SIMULADOR -->
+            <div id="content-simulador">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    <!-- Painel de Controle -->
+                    <aside class="lg:col-span-1 space-y-6">
+                        <div class="bg-card p-5 rounded-lg border border-border">
+                            <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-sliders mr-2"></i>Painel de Controle do Cenário</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="abstention-rate" class="block text-sm font-medium text-text-light mb-1">Taxa de Abstenção</label>
+                                    <input type="range" id="abstention-rate" min="15" max="30" value="20" step="0.5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
+                                    <div class="flex justify-between items-center mt-1">
+                                        <span class="text-xs text-text-light">Base 2022: <span id="base-abstention-display" class="font-mono"></span>%</span>
+                                        <span class="text-sm font-mono text-primary"><span id="abstention-value">20.0</span>%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="electorate-growth" class="block text-sm font-medium text-text-light mb-1">Crescimento do Eleitorado</label>
+                                    <input type="range" id="electorate-growth" min="-10" max="10" value="0" step="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
+                                     <div class="flex justify-between items-center mt-1">
+                                        <span class="text-xs text-text-light">Base 2022: <span id="base-electorate-display" class="font-mono"></span></span>
+                                        <span class="text-sm font-mono text-primary"><span id="electorate-growth-value">0.0</span>%</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <label for="electorate-growth" class="block text-sm font-medium text-text-light mb-1">Crescimento do Eleitorado</label>
-                            <input type="range" id="electorate-growth" min="-10" max="10" value="0" step="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
-                             <div class="flex justify-between items-center mt-1">
-                                <span class="text-xs text-text-light">Base 2022: <span id="base-electorate-display" class="font-mono"></span></span>
-                                <span class="text-sm font-mono text-primary"><span id="electorate-growth-value">0.0</span>%</span>
+                        <div class="bg-card p-5 rounded-lg border border-border">
+                            <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-chart-line mr-2"></i>Impulso de Campanha</h2>
+                            <div id="party-boost-container" class="space-y-3 max-h-60 overflow-y-auto pr-2"></div>
+                        </div>
+                        <div class="bg-card p-5 rounded-lg border border-border">
+                            <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-handshake mr-2"></i>Simulador de Alianças</h2>
+                            <p class="text-xs text-text-light mb-3">Selecione 2 ou mais partidos para analisar uma possível coligação.</p>
+                            <div id="alliance-party-container" class="flex flex-wrap gap-2 mb-4"></div>
+                            <button id="alliance-button" onclick="simularAlianca()" class="w-full bg-primary text-white font-bold py-2 rounded-lg shadow-md hover:bg-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Analisar Aliança
+                            </button>
+                        </div>
+                        <div class="bg-card p-5 rounded-lg border border-border">
+                            <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-user-pen mr-2"></i>Editor de Legendas</h2>
+                            <p class="text-xs text-text-light mb-3">Crie legendas personalizadas para testar cenários específicos.</p>
+                            <button onclick="openLegendaEditor()" class="w-full bg-secondary text-white font-bold py-2 rounded-lg shadow-md hover:bg-orange-400 transition-all duration-200">
+                                Abrir Editor
+                            </button>
+                        </div>
+                    </aside>
+
+                    <!-- Dashboard Principal -->
+                    <section class="lg:col-span-3 space-y-8">
+                        <!-- KPIs -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div id="kpi-card-qe" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('qe')">
+                                <p class="text-sm font-semibold text-text-light uppercase">QUOCIENTE ELEITORAL</p>
+                                <p id="kpi-qe" class="text-4xl font-extrabold text-primary number-dynamic">0</p>
+                            </div>
+                            <div id="kpi-card-vv" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('vv')">
+                                <p class="text-sm font-semibold text-text-light uppercase">VOTOS VÁLIDOS</p>
+                                <p id="kpi-votos-validos" class="text-4xl font-extrabold text-success number-dynamic">0</p>
+                            </div>
+                            <div id="kpi-card-nc" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('nc')">
+                                <p class="text-sm font-semibold text-text-light uppercase">NOTA DE CORTE MÉDIA</p>
+                                <p id="kpi-nota-corte-media" class="text-4xl font-extrabold text-warning number-dynamic">0</p>
+                            </div>
+                            <div id="kpi-card-vr" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('vr')">
+                                <p class="text-sm font-semibold text-text-light uppercase">VAGAS EM RISCO</p>
+                                <p id="kpi-vagas-risco" class="text-4xl font-extrabold text-danger number-dynamic">0</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="bg-card p-5 rounded-lg border border-border">
-                    <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-chart-line mr-2"></i>Impulso de Campanha</h2>
-                    <div id="party-boost-container" class="space-y-3 max-h-60 overflow-y-auto pr-2">
-                        <!-- Inputs de partido serão inseridos aqui -->
-                    </div>
-                </div>
-                 <!-- MÓDULO: Simulador de Alianças -->
-                <div class="bg-card p-5 rounded-lg border border-border">
-                    <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-handshake mr-2"></i>Simulador de Alianças</h2>
-                    <p class="text-xs text-text-light mb-3">Selecione 2 ou mais partidos para analisar uma possível coligação.</p>
-                    <div id="alliance-party-container" class="flex flex-wrap gap-2 mb-4"></div>
-                    <button id="alliance-button" onclick="simularAlianca()" class="w-full bg-primary text-white font-bold py-2 rounded-lg shadow-md hover:bg-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        Analisar Aliança
-                    </button>
-                </div>
-                 <!-- NOVO MÓDULO: Editor de Legendas -->
-                <div class="bg-card p-5 rounded-lg border border-border">
-                    <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-user-pen mr-2"></i>Editor de Legendas</h2>
-                    <p class="text-xs text-text-light mb-3">Crie legendas personalizadas para testar cenários específicos.</p>
-                    <button onclick="openLegendaEditor()" class="w-full bg-secondary text-white font-bold py-2 rounded-lg shadow-md hover:bg-orange-400 transition-all duration-200">
-                        Abrir Editor
-                    </button>
-                </div>
-            </aside>
 
-            <!-- Dashboard Principal -->
-            <section class="lg:col-span-3 space-y-8">
-                <!-- KPIs -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div id="kpi-card-qe" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('qe')">
-                        <p class="text-sm font-semibold text-text-light uppercase">QUOCIENTE ELEITORAL</p>
-                        <p id="kpi-qe" class="text-4xl font-extrabold text-primary number-dynamic">0</p>
+                        <!-- Distribuição de Vagas e Cadeiras em Risco -->
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                            <div class="bg-card p-6 rounded-lg border border-border">
+                                <h2 class="text-xl font-bold mb-4">Ranking de Oportunidade (por Nota de Corte)</h2>
+                                <div id="vagas-dist-container" class="space-y-2"></div>
+                            </div>
+                            <div class="bg-card p-6 rounded-lg border border-border flex flex-col">
+                                <h2 class="text-xl font-bold mb-4 text-danger"><i class="fa-solid fa-fire-flame-curved"></i>Cadeiras em Risco</h2>
+                                <div id="risk-container" class="space-y-4 flex-grow overflow-y-auto pr-2"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            
+            <!-- ABA: BASE DE CANDIDATOS -->
+            <div id="content-candidatos" class="hidden">
+                 <div class="bg-card p-6 rounded-lg border border-border">
+                    <h2 class="text-2xl font-bold mb-4">Base de Candidatos (Eleições 2022)</h2>
+                    <div class="mb-6">
+                        <input type="text" id="candidato-search" placeholder="Pesquisar por nome do candidato..." class="w-full p-3 bg-slate-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                     </div>
-                    <div id="kpi-card-vv" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('vv')">
-                        <p class="text-sm font-semibold text-text-light uppercase">VOTOS VÁLIDOS</p>
-                        <p id="kpi-votos-validos" class="text-4xl font-extrabold text-success number-dynamic">0</p>
-                    </div>
-                    <div id="kpi-card-nc" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('nc')">
-                        <p class="text-sm font-semibold text-text-light uppercase">NOTA DE CORTE MÉDIA</p>
-                        <p id="kpi-nota-corte-media" class="text-4xl font-extrabold text-warning number-dynamic">0</p>
-                    </div>
-                    <div id="kpi-card-vr" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('vr')">
-                        <p class="text-sm font-semibold text-text-light uppercase">VAGAS EM RISCO</p>
-                        <p id="kpi-vagas-risco" class="text-4xl font-extrabold text-danger number-dynamic">0</p>
+                    <div id="candidatos-accordion-container" class="space-y-2">
+                        <!-- Accordion será gerado aqui -->
                     </div>
                 </div>
-
-                <!-- Distribuição de Vagas e Cadeiras em Risco -->
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                    <div class="bg-card p-6 rounded-lg border border-border">
-                        <h2 class="text-xl font-bold mb-4">Ranking de Oportunidade (por Nota de Corte)</h2>
-                        <div id="vagas-dist-container" class="space-y-2"></div>
-                    </div>
-                    <div class="bg-card p-6 rounded-lg border border-border flex flex-col">
-                        <h2 class="text-xl font-bold mb-4 text-danger"><i class="fa-solid fa-fire-flame-curved"></i>Cadeiras em Risco</h2>
-                        <div id="risk-container" class="space-y-4 flex-grow overflow-y-auto pr-2"></div>
-                    </div>
-                </div>
-            </section>
+            </div>
         </main>
     </div>
 
@@ -185,8 +209,36 @@
     // =================================================================================
     // DADOS E CONFIGURAÇÕES
     // =================================================================================
-    const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 40, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4124024, abstencao: 0.20, partidos: { 'PL': { votos: 882396, eleitos: [ { nome: 'Ana Campagnolo', votos: 196571 }, { nome: 'Sargento Lima', votos: 71185 }, { nome: 'Maurício Eskudlark', votos: 65638 }, { nome: 'Jessé Lopes', votos: 55013 }, { nome: 'Carlos Humberto', votos: 46445 }, { nome: 'Ivan Naatz', votos: 45304 }, { nome: 'Berlanda', votos: 41488 }, { nome: 'Marcius Machado', votos: 39749 }, { nome: 'Massocco', votos: 31659 }, { nome: 'Oscar Gutz', votos: 26812 }, { nome: 'Soratto', votos: 25622 } ] }, 'MDB': { votos: 505571, eleitos: [ { nome: 'Antídio Lunelli', votos: 74500 }, { nome: 'Mauro de Nadal', votos: 67065 }, { nome: 'Jerry Comper', votos: 64145 }, { nome: 'Fernando Krelling', votos: 54320 }, { nome: 'Volnei Weber', votos: 45995 }, { nome: 'Tiago Zilli', votos: 33733 } ] }, 'PT': { votos: 456849, eleitos: [ { nome: 'Luciane Carminatti', votos: 92478 }, { nome: 'Neodi Saretta', votos: 38729 }, { nome: 'Fabiano da Luz', votos: 34972 }, { nome: 'Padre Pedro', votos: 26803 } ] }, 'Podemos': { votos: 218631, eleitos: [ { nome: 'Paulinha', votos: 58694 }, { nome: 'Camilo Martins', votos: 44925 }, { nome: 'Lucas Neves', votos: 23053 } ] },'PP': { votos: 369639, eleitos: [ { nome: 'Zé Milton', votos: 56585 }, { nome: 'Altair Silva', votos: 46445 }, { nome: 'Pepê Collaço', votos: 28809 } ] }, 'PSD': { votos: 407801, eleitos: [ { nome: 'Mário Motta', votos: 56363 }, { nome: 'Júlio Garcia', votos: 49958 }, { nome: 'Napoleão Bernardes', votos: 36923 } ] },'UNIÃO': { votos: 286222, eleitos: [ { nome: 'Jair Miotto', votos: 33682 }, { nome: 'Repórter Sérgio Guimarães', votos: 27977 }, { nome: 'Marcos da Rosa', votos: 25845 } ] }, 'PSDB': { votos: 183427, eleitos: [ { nome: 'Marcos Vieira', votos: 48466 }, { nome: 'Dr. Vicente', votos: 39797 } ] }, 'NOVO': { votos: 111760, eleitos: [ { nome: 'Matheus Cadorin', votos: 12390 } ] }, 'PDT': { votos: 75934, eleitos: [ { nome: 'Rodrigo Minotto', votos: 28685 } ] }, 'PSOL': { votos: 94590, eleitos: [ { nome: 'Marquito', votos: 40329 } ] },'PTB': { votos: 85341, eleitos: [ { nome: 'Delegado Egidio Ferrari', votos: 34912 } ] },'Republicanos': { votos: 177977, eleitos: [ { nome: 'Sergio Motta', votos: 44666 } ] } } } ] } } };
-    const PARTY_COLORS = { 'PL': '#0ea5e9', 'MDB': '#facc15', 'PT': '#dc2626', 'Podemos': '#38bdf8', 'PP': '#0284c7', 'PSD': '#f97316', 'UNIÃO': '#1e3a8a', 'PSDB': '#0c4a6e', 'NOVO': '#ea580c', 'PDT': '#0d9488', 'PSOL': '#f59e0b', 'PTB': '#4b5563', 'Republicanos': '#2563eb' };
+    const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 40, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4124024, abstencao: 0.20, partidos: { 
+        'PL': { votos: 878708, candidatos: [ { nome: 'Ana Campagnolo', votos: 196571, isEleito: true }, { nome: 'Sargento Lima', votos: 71185, isEleito: true }, { nome: 'Mauricio Eskudlark', votos: 65638, isEleito: true }, { nome: 'Jessé Lopes', votos: 55013, isEleito: true }, { nome: 'Carlos Humberto', votos: 46445, isEleito: true }, { nome: 'Ivan Naatz', votos: 45304, isEleito: true }, { nome: 'Berlanda', votos: 41488, isEleito: true }, { nome: 'Marcius Machado', votos: 39749, isEleito: true }, { nome: 'Massocco', votos: 31659, isEleito: true }, { nome: 'Oscar Gutz', votos: 26812, isEleito: true }, { nome: 'Soratto', votos: 25622, isEleito: true }, { nome: 'Maurício Peixer', votos: 22028, isEleito: false }, { nome: 'A Alex Brasil', votos: 20271, isEleito: false }, { nome: 'Jeferson Cardozo Canal Atalaia', votos: 17934, isEleito: false }, { nome: 'Rafael Laske - Mamão', votos: 15730, isEleito: false }, { nome: 'Frigo', votos: 15090, isEleito: false }, { nome: 'Leticia Mattos', votos: 11068, isEleito: false }, { nome: 'Dr. Jorge', votos: 8810, isEleito: false }, { nome: 'Neuri Mantelli', votos: 8484, isEleito: false }, { nome: 'Turibio Torres', votos: 7282, isEleito: false }, { nome: 'Alemãozinho - Claudir Henz', votos: 6893, isEleito: false }, { nome: 'Marcio Cardoso', votos: 5990, isEleito: false }, { nome: 'Roberto Salum', votos: 5082, isEleito: false }, { nome: 'Andresa Ribeiro', votos: 5071, isEleito: false }, { nome: 'A Guerreira Salete Cardoso', votos: 4829, isEleito: false }, { nome: 'Rabuja', votos: 4799, isEleito: false }, { nome: 'Maryanne Mattos', votos: 4420, isEleito: false }, { nome: 'Alex Wehrle Professor', votos: 3999, isEleito: false }, { nome: 'Eloir Dedonatti', votos: 3958, isEleito: false }, { nome: 'Enfermeiro Victor Nascimento', votos: 3700, isEleito: false }, { nome: 'Moacir Bertoldi', votos: 3688, isEleito: false }, { nome: 'Simone Lerner', votos: 2810, isEleito: false }, { nome: 'Leonardo Tatim', votos: 1650, isEleito: false }, { nome: 'Professor Hahne', votos: 1332, isEleito: false }, { nome: 'Odete Enfermeira', votos: 564, isEleito: false }, { nome: 'Engenheira Alessandra Kingeski', votos: 515, isEleito: false }, { nome: 'Betinha Thomaselli', votos: 506, isEleito: false }, { nome: 'Sueli Zincoski', votos: 407, isEleito: false }, { nome: 'Marta Efrayim', votos: 135, isEleito: false }, { nome: 'Silvana', votos: 112, isEleito: false } ] }, 
+        'MDB': { votos: 505571, candidatos: [ { nome: 'Antídio Lunelli', votos: 74500, isEleito: true }, { nome: 'Mauro de Nadal', votos: 67065, isEleito: true }, { nome: 'Jerry Comper', votos: 64145, isEleito: true }, { nome: 'Fernando Krelling', votos: 54320, isEleito: true }, { nome: 'Volnei Weber', votos: 45995, isEleito: true }, { nome: 'Tiago Zilli', votos: 33733, isEleito: true }, { nome: 'Emerson Stein', votos: 25063, isEleito: false }, { nome: 'Rosi Maldaner', votos: 20189, isEleito: false }, { nome: 'Dirce Heiderscheidt', votos: 16906, isEleito: false }, { nome: 'Adilson Girardi', votos: 15943, isEleito: false }, { nome: 'Cleiton Fossa', votos: 12364, isEleito: false }, { nome: 'Paulo Basilio', votos: 10561, isEleito: false }, { nome: 'Carelli', votos: 10138, isEleito: false }, { nome: 'Suelen Geremia', votos: 4825, isEleito: false }, { nome: 'Marcelo Fett', votos: 4552, isEleito: false }, { nome: 'Ari Galeski', votos: 4473, isEleito: false }, { nome: 'Guella', votos: 3743, isEleito: false }, { nome: 'Juarez Matos', votos: 3602, isEleito: false }, { nome: 'Flávia Vicente', votos: 2943, isEleito: false }, { nome: 'Professor Toldo', votos: 2027, isEleito: false }, { nome: 'William', votos: 1685, isEleito: false }, { nome: 'Leila Conci', votos: 1502, isEleito: false }, { nome: 'Psicóloga Ronize Ferreira', votos: 1478, isEleito: false }, { nome: 'Mano Cadore', votos: 1359, isEleito: false }, { nome: 'Chico Bento', votos: 1089, isEleito: false }, { nome: 'Micheline', votos: 803, isEleito: false }, { nome: 'Biriba', votos: 553, isEleito: false }, { nome: 'Jairo Santos', votos: 292, isEleito: false }, { nome: 'Franciel Britos', votos: 233, isEleito: false }, { nome: 'Mairi', votos: 110, isEleito: false }, { nome: 'Zélia Grah', votos: 71, isEleito: false }, { nome: 'Keli Cordeiro', votos: 42, isEleito: false } ] }, 
+        'PT': { votos: 438030, candidatos: [ { nome: 'Luciane Carminatti', votos: 92478, isEleito: true }, { nome: 'Neodi Saretta', votos: 38729, isEleito: true }, { nome: 'Fabiano da Luz', votos: 34972, isEleito: true }, { nome: 'Padre Pedro', votos: 26803, isEleito: true }, { nome: 'Professora Vanessa da Rosa', votos: 16832, isEleito: false }, { nome: 'Paulo Eccel', votos: 16561, isEleito: false }, { nome: 'Dirceu Dresch', votos: 14370, isEleito: false }, { nome: 'Rodrigo Preis', votos: 12844, isEleito: false }, { nome: 'Luci Choinacki', votos: 12699, isEleito: false }, { nome: 'Jean Volpato', votos: 12499, isEleito: false }, { nome: 'Adriano Pereira', votos: 10988, isEleito: false }, { nome: 'Celso Zuchi', votos: 9159, isEleito: false }, { nome: 'Professor Lino Peres', votos: 8619, isEleito: false }, { nome: 'Rodolfo de Ramos', votos: 8128, isEleito: false }, { nome: 'Marisa Zanoni', votos: 7826, isEleito: false }, { nome: 'Dani Coletivo Juventude', votos: 7752, isEleito: false }, { nome: 'Júlio Bittencourt', votos: 7495, isEleito: false }, { nome: 'Célio Elias', votos: 6938, isEleito: false }, { nome: 'Adriana Rossi', votos: 6188, isEleito: false }, { nome: 'Professor Alessandro', votos: 5404, isEleito: false }, { nome: 'Cléo Comunello', votos: 5171, isEleito: false }, { nome: 'Glauter', votos: 4070, isEleito: false }, { nome: 'Vanda Pinedo Nossa Força e Voz', votos: 3978, isEleito: false }, { nome: 'Matheus Madeira', votos: 3853, isEleito: false }, { nome: 'Professor Raul Ribas', votos: 3822, isEleito: false }, { nome: 'Rodrigo de Oliveira', votos: 3730, isEleito: false }, { nome: 'Claudia Bratti', votos: 3425, isEleito: false }, { nome: 'Tomio', votos: 2396, isEleito: false }, { nome: 'Valmor de Paula', votos: 2311, isEleito: false }, { nome: 'Sérgio', votos: 2279, isEleito: false }, { nome: 'Professor Chico do Sinte', votos: 2257, isEleito: false }, { nome: 'Gislaine Durski', votos: 2237, isEleito: false }, { nome: 'Elvira Manfroi', votos: 2219, isEleito: false }, { nome: 'Rafael Coletivo Feliz de Novo', votos: 1047, isEleito: false }, { nome: 'Cláudio Márcio', votos: 547, isEleito: false } ] }, 
+        'PSD': { votos: 293675, candidatos: [ { nome: 'Mario Motta', votos: 56363, isEleito: true }, { nome: 'Julio Garcia', votos: 49958, isEleito: true }, { nome: 'Napoleão Bernardes', votos: 36923, isEleito: true }, { nome: 'Zé Caramori', votos: 24394, isEleito: false }, { nome: 'Gerri da Consoli', votos: 22668, isEleito: false }, { nome: 'Silvio Alexandre Zancanaro', votos: 19672, isEleito: false }, { nome: 'Adeliana Dal Pont', votos: 18484, isEleito: false }, { nome: 'Polaco', votos: 9719, isEleito: false }, { nome: 'Wellington', votos: 8381, isEleito: false }, { nome: 'Mario Marcondes', votos: 7739, isEleito: false }, { nome: 'Gerson', votos: 3265, isEleito: false }, { nome: 'Carla Hofmann', votos: 3014, isEleito: false }, { nome: 'Arlindo Cruz', votos: 2559, isEleito: false }, { nome: 'Coronel Vonk', votos: 2352, isEleito: false }, { nome: 'Bete Werner Quandt', votos: 2037, isEleito: false }, { nome: 'Deyvid Breis Boca Aberta', votos: 1369, isEleito: false }, { nome: 'Sargento Stoklosa', votos: 1217, isEleito: false }, { nome: 'Helenice Pereira Duarte', votos: 1056, isEleito: false }, { nome: 'Cláudio Motoboy do Coletivo SC', votos: 1054, isEleito: false }, { nome: 'Ciro Girardi', votos: 995, isEleito: false }, { nome: 'Marcia Badalotti', votos: 801, isEleito: false }, { nome: 'Voltolini Taxista', votos: 736, isEleito: false }, { nome: 'Inajara Rodrigues', votos: 589, isEleito: false }, { nome: 'Henrique Ávila', votos: 382, isEleito: false }, { nome: 'Isa Simas', votos: 151, isEleito: false }, { nome: 'Katielly Lanzini', votos: 53, isEleito: false } ] },
+        'PP': { votos: 280551, candidatos: [ { nome: 'Zé Milton', votos: 56585, isEleito: true }, { nome: 'Altair Silva', votos: 46086, isEleito: true }, { nome: 'Pepê Collaço', votos: 28809, isEleito: true }, { nome: 'Pedrão', votos: 27344, isEleito: false }, { nome: 'João Amin', votos: 19154, isEleito: false }, { nome: 'Luizinho da Regional', votos: 15324, isEleito: false }, { nome: 'Fernando Cruzzetta', votos: 10650, isEleito: false }, { nome: 'Anelisio da Assessoritec', votos: 9848, isEleito: false }, { nome: 'Almir Vieira', votos: 9390, isEleito: false }, { nome: 'Magno Bollmann', votos: 9278, isEleito: false }, { nome: 'Maurilio Moraes', votos: 7981, isEleito: false }, { nome: 'Cattoni', votos: 4789, isEleito: false }, { nome: 'Diego Pandini Diabo Loiro', votos: 4700, isEleito: false }, { nome: 'Mara da Saúde', votos: 4654, isEleito: false }, { nome: 'Julio Kaminski', votos: 3546, isEleito: false }, { nome: 'Gaúcho Amarelo', votos: 3537, isEleito: false }, { nome: 'Douglas Steffen Contador', votos: 2516, isEleito: false }, { nome: 'Katsumi', votos: 2506, isEleito: false }, { nome: 'Manjuva Caminhoneiro', votos: 1395, isEleito: false }, { nome: 'Giovana Menegotto', votos: 1325, isEleito: false }, { nome: 'Simone Andrade', votos: 704, isEleito: false }, { nome: 'Paulinha do Big Lojão', votos: 697, isEleito: false }, { nome: 'Adri Joias', votos: 404, isEleito: false }, { nome: 'Eneida Pereira', votos: 398, isEleito: false }, { nome: 'Professora Rosa Maria Tesser', votos: 370, isEleito: false }, { nome: 'Cabo Camargo', votos: 344, isEleito: false }, { nome: 'Mabel Ziegler', votos: 228, isEleito: false }, { nome: 'João Mira Taxista', votos: 191, isEleito: false }, { nome: 'Luciano Niua', votos: 90, isEleito: false }, { nome: 'Mari Rieke', votos: 54, isEleito: false }, { nome: 'Jaques Rodrigues', votos: 16, isEleito: false } ] },
+        'UNIÃO': { votos: 265764, candidatos: [ { nome: 'Jair Miotto', votos: 33682, isEleito: true }, { nome: 'Repórter Sérgio Guimarães', votos: 27977, isEleito: true }, { nome: 'Marcos da Rosa', votos: 25845, isEleito: true }, { nome: 'Laércio Schuster', votos: 24605, isEleito: false }, { nome: 'Constancio Maciel', votos: 23614, isEleito: false }, { nome: 'Márcio Burigo', votos: 15296, isEleito: false }, { nome: 'Felipe Estevão', votos: 15146, isEleito: false }, { nome: 'Dr João', votos: 12169, isEleito: false }, { nome: 'Tânia Larson', votos: 11556, isEleito: false }, { nome: 'Mauro Dresch', votos: 9424, isEleito: false }, { nome: 'Sidney Sabel', votos: 7295, isEleito: false }, { nome: 'Jaime Pasqualini', votos: 5857, isEleito: false }, { nome: 'Lioilson', votos: 5502, isEleito: false }, { nome: 'Nadir Bau', votos: 5453, isEleito: false }, { nome: 'Samuel Ramos', votos: 4557, isEleito: false }, { nome: 'Sub Tenente Wancarlos', votos: 3873, isEleito: false }, { nome: 'Abrahão Mussi', votos: 3126, isEleito: false }, { nome: 'Ezequiel de Souza', votos: 3081, isEleito: false }, { nome: 'Aa ST Veterana Margareth Prats', votos: 2650, isEleito: false }, { nome: 'Paulo Zwiefka', votos: 2306, isEleito: false }, { nome: 'Mari Schorr', votos: 2292, isEleito: false }, { nome: 'Professor Arlindo', votos: 1623, isEleito: false }, { nome: 'Fernando Amorim', votos: 1458, isEleito: false }, { nome: 'Sandro Fortes', votos: 1446, isEleito: false }, { nome: 'Ivan da Luz', votos: 1294, isEleito: false }, { nome: 'Cris da Saúde', votos: 1257, isEleito: false }, { nome: 'Luciano Camargo', votos: 1254, isEleito: false }, { nome: 'Nina', votos: 1034, isEleito: false }, { nome: 'Cleuse Soares', votos: 958, isEleito: false }, { nome: 'Mauro Goedert', votos: 857, isEleito: false }, { nome: 'Youtuber Gabriela Zamboni', votos: 562, isEleito: false }, { nome: 'Luis Olavo Nandi', votos: 521, isEleito: false }, { nome: 'Xuxa', votos: 504, isEleito: false }, { nome: 'Xandi da Toca', votos: 497, isEleito: false }, { nome: 'Márcia Gueno', votos: 398, isEleito: false }, { nome: 'Edilberto Santos', votos: 223, isEleito: false }, { nome: 'Bia Machado', votos: 144, isEleito: false }, { nome: 'Eliana Patriota', votos: 58, isEleito: false }, { nome: 'Arlene Ramon', votos: 32, isEleito: false } ] }, 
+        'PODE': { votos: 237137, candidatos: [ { nome: 'Paulinha', votos: 58694, isEleito: true }, { nome: 'Camilo Martins', votos: 44925, isEleito: true }, { nome: 'Lucas Neves', votos: 23053, isEleito: true } ] }, 
+        'PSDB': { votos: 211208, candidatos: [ { nome: 'Marcos Vieira', votos: 48466, isEleito: true }, { nome: 'Dr. Vicente', votos: 39797, isEleito: true } ] }, 
+        'REPU': { votos: 163410, candidatos: [ { nome: 'Sergio Motta', votos: 44666, isEleito: true } ] }, 
+        'NOVO': { votos: 136632, candidatos: [ { nome: 'Matheus Cadorin', votos: 12390, isEleito: true } ] }, 
+        'PTB': { votos: 96767, candidatos: [ { nome: 'Delegado Egidio Ferrari', votos: 34912, isEleito: true } ] }, 
+        'PSB': { votos: 92851, candidatos: [ { nome: 'Candidato Principal (PSB)', votos: 20000, isEleito: false } ] }, 
+        'PATRI': { votos: 88159, candidatos: [ { nome: 'Candidato Principal (PATRI)', votos: 18000, isEleito: false } ] }, 
+        'PSOL': { votos: 83044, candidatos: [ { nome: 'Marquito', votos: 40329, isEleito: true } ] }, 
+        'PDT': { votos: 82141, candidatos: [ { nome: 'Rodrigo Minotto', votos: 28685, isEleito: true } ] },
+        'DC': { votos: 30781, candidatos: [ { nome: 'Candidato Principal (DC)', votos: 6000, isEleito: false } ] },
+        'SD': { votos: 30557, candidatos: [ { nome: 'Candidato Principal (SD)', votos: 6000, isEleito: false } ] },
+        'PSC': { votos: 30036, candidatos: [ { nome: 'Candidato Principal (PSC)', votos: 6000, isEleito: false } ] },
+        'CIDA': { votos: 25109, candidatos: [ { nome: 'Candidato Principal (CIDA)', votos: 5000, isEleito: false } ] },
+        'PC do B': { votos: 17985, candidatos: [ { nome: 'Candidato Principal (PC do B)', votos: 3500, isEleito: false } ] },
+        'AVAN': { votos: 8610, candidatos: [ { nome: 'Candidato Principal (AVAN)', votos: 1700, isEleito: false } ] },
+        'PRTB': { votos: 3126, candidatos: [ { nome: 'Candidato Principal (PRTB)', votos: 600, isEleito: false } ] },
+        'REDE': { votos: 1501, candidatos: [ { nome: 'Candidato Principal (REDE)', votos: 300, isEleito: false } ] },
+        'PSTU': { votos: 1083, candidatos: [ { nome: 'Candidato Principal (PSTU)', votos: 200, isEleito: false } ] },
+        'PROS': { votos: 1010, candidatos: [ { nome: 'Candidato Principal (PROS)', votos: 200, isEleito: false } ] },
+        'PV': { votos: 590, candidatos: [ { nome: 'Candidato Principal (PV)', votos: 100, isEleito: false } ] },
+        'PCO': { votos: 0, candidatos: [ ] }
+    } } ] } } };
+    const PARTY_COLORS = { 'PL': '#0ea5e9', 'MDB': '#facc15', 'PT': '#dc2626', 'PODE': '#38bdf8', 'PP': '#0284c7', 'PSD': '#f97316', 'UNIÃO': '#1e3a8a', 'PSDB': '#0c4a6e', 'REPU': '#2563eb', 'NOVO': '#ea580c', 'PTB': '#4b5563', 'PSB': '#ef4444', 'PATRI': '#059669', 'PSOL': '#f59e0b', 'PDT': '#0d9488', 'DC': '#166534', 'SD': '#f97316', 'PSC': '#2563eb', 'CIDA': '#65a30d', 'PC do B': '#ef4444', 'AVAN': '#0ea5e9', 'PRTB': '#0891b2', 'REDE': '#22c55e', 'PSTU': '#dc2626', 'PROS': '#f97316', 'PV': '#22c55e', 'PCO': '#7f1d1d' };
     
     let baseScenario = {};
     let currentSimulatedScenario = {};
@@ -197,6 +249,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         baseScenario = prepareBaseScenario();
         initializeControls();
+        initializeCandidatosTab();
         updateScenario();
     });
 
@@ -208,8 +261,8 @@
             return {
                 nome,
                 votosBase2022: p2022.votos,
-                eleitos2022: p2022.eleitos.sort((a,b) => b.votos - a.votos), // Garante que a lista de eleitos está ordenada
-                customEleitos: null, // Para legendas personalizadas
+                candidatos: p2022.candidatos.sort((a,b) => b.votos - a.votos),
+                customCandidatos: null, // Para legendas personalizadas
                 boost: 0
             };
         });
@@ -283,14 +336,14 @@
             let notaCorte;
             let eleitos;
 
-            if (p.customEleitos) {
-                votosFinais = p.customEleitos.reduce((sum, cand) => sum + cand.votos, 0);
-                eleitos = p.customEleitos;
+            if (p.customCandidatos) {
+                votosFinais = p.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
+                eleitos = p.customCandidatos;
                 const ultimoEleito = eleitos[eleitos.length - 1];
                 notaCorte = ultimoEleito ? ultimoEleito.votos : 0;
             } else {
                 votosFinais = Math.floor(p.votosBase2022 * (1 + p.boost));
-                eleitos = p.eleitos2022;
+                eleitos = p.candidatos.filter(c => c.isEleito);
                 const ultimoEleitoBase = eleitos[eleitos.length - 1];
                 notaCorte = ultimoEleitoBase ? Math.floor(ultimoEleitoBase.votos * (1 + p.boost)) : 0;
             }
@@ -412,7 +465,7 @@
             const item = document.createElement('div');
             item.className = 'p-2 rounded-lg clickable';
             item.setAttribute('onclick', `showPartyModal('${p.nome}')`);
-            const customIcon = p.customEleitos ? '<i class="fa-solid fa-user-pen text-secondary text-xs ml-2"></i>' : '';
+            const customIcon = p.customCandidatos ? '<i class="fa-solid fa-user-pen text-secondary text-xs ml-2"></i>' : '';
             item.innerHTML = `
                 <div class="flex justify-between items-center mb-1">
                     <div class="flex items-center">
@@ -578,8 +631,21 @@
 
         const generateCandidateHtml = (index) => {
             const candidato = partyData.eleitos2022[index];
-            if (!candidato) return '';
-            const votosProjetados = partyData.customEleitos ? candidato.votos : Math.floor(candidato.votos * (1 + partyData.boost));
+            if (!candidato) {
+                return `
+                    <li class="bg-background p-2 rounded-md opacity-70">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-sm">${index + 1}. Nova Liderança</span>
+                            <span class="font-bold text-lg text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</span>
+                        </div>
+                        <div class="text-xs text-text-light flex justify-between items-center mt-1">
+                            <span>Votos Base: N/A</span>
+                            <span>Meta Mínima</span>
+                        </div>
+                    </li>
+                `;
+            }
+            const votosProjetados = partyData.customCandidatos ? candidato.votos : Math.floor(candidato.votos * (1 + partyData.boost));
             const diff = votosProjetados - partyData.notaCorte;
             return `
                 <li class="bg-background p-2 rounded-md">
@@ -599,6 +665,9 @@
 
         const diretasHtml = diretas.length > 0 ? diretas.map(generateCandidateHtml).join('') : '<li class="text-sm text-text-light text-center p-2">Nenhuma cadeira direta conquistada.</li>';
         const sobrasHtml = sobras.length > 0 ? sobras.map(generateCandidateHtml).join('') : '<li class="text-sm text-text-light text-center p-2">Nenhuma cadeira de sobra conquistada.</li>';
+        
+        const ultimoEleitoBase = partyData.eleitos2022 && partyData.eleitos2022.length > 0 ? partyData.eleitos2022[partyData.eleitos2022.length - 1] : null;
+        const ultimoEleitoVotosStr = ultimoEleitoBase ? ultimoEleitoBase.votos.toLocaleString('pt-BR') : 'N/A';
 
         const modalHtml = `
             <div class="p-6">
@@ -617,7 +686,7 @@
                     <div class="bg-background p-4 rounded-lg">
                         <h3 class="font-bold mb-2">Composição dos Votos</h3>
                         <ul class="text-sm space-y-2 font-mono">
-                            <li class="flex justify-between"><span>Base de Votos (2022):</span> <span>${partyData.votosProjetadosBase.toLocaleString('pt-BR')}</span></li>
+                            <li class="flex justify-between"><span>Base de Votos (2022):</span> <span>${(partyData.votosProjetadosBase || 0).toLocaleString('pt-BR')}</span></li>
                             <li class="flex justify-between"><span>Impulso (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li>
                             <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL PROJETADO:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li>
                         </ul>
@@ -625,7 +694,7 @@
                      <div class="bg-background p-4 rounded-lg">
                         <h3 class="font-bold mb-2">Cálculo da Nota de Corte</h3>
                         <ul class="text-sm space-y-2 font-mono">
-                            <li class="flex justify-between"><span>Último Eleito (Base):</span> <span>${partyData.eleitos2022.length > 0 ? partyData.eleitos2022[partyData.eleitos2022.length - 1].votos.toLocaleString('pt-BR') : 'N/A'}</span></li>
+                            <li class="flex justify-between"><span>Último Eleito (Base):</span> <span>${ultimoEleitoVotosStr}</span></li>
                             <li class="flex justify-between"><span>Impulso de Campanha:</span> <span>${(partyData.boost * 100).toFixed(0)}%</span></li>
                             <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>META PROJETADA:</strong> <strong class="text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</strong></li>
                         </ul>
@@ -813,7 +882,7 @@
         if (!partyName) return;
 
         const partyData = baseScenario.partidos.find(p => p.nome === partyName);
-        const candidates = partyData.customEleitos || partyData.eleitos2022;
+        const candidates = partyData.customCandidatos || partyData.candidatos;
         
         let candidatesHtml = candidates.map((cand, index) => `
             <div class="flex items-center gap-2" data-candidate-index="${index}">
@@ -857,7 +926,7 @@
     function saveLegenda(partyName) {
         const partyData = baseScenario.partidos.find(p => p.nome === partyName);
         const rows = document.querySelectorAll('#candidate-list > div');
-        const newEleitos = [];
+        const newCandidatos = [];
         let totalVotes = 0;
         rows.forEach(row => {
             const nameInput = row.children[0];
@@ -865,13 +934,13 @@
             const name = nameInput.value.trim();
             const votes = parseInt(votesInput.value, 10) || 0;
             if (name && votes > 0) {
-                newEleitos.push({ nome: name, votos: votes });
+                newCandidatos.push({ nome: name, votos: votes });
                 totalVotes += votes;
             }
         });
 
-        newEleitos.sort((a,b) => b.votos - a.votos);
-        partyData.customEleitos = newEleitos;
+        newCandidatos.sort((a,b) => b.votos - a.votos);
+        partyData.customCandidatos = newCandidatos;
         partyData.votosBase2022 = totalVotes; // Override base votes with the sum of custom candidates
         
         // Disable boost for this party as it's now manually controlled
@@ -887,7 +956,7 @@
 
     function resetLegenda(partyName) {
         const partyData = baseScenario.partidos.find(p => p.nome === partyName);
-        partyData.customEleitos = null;
+        partyData.customCandidatos = null;
         partyData.votosBase2022 = DADOS_ELEICOES.SC.de.historico[0].partidos[partyName].votos; // Restore original base votes
         
         const boostInput = document.getElementById(`boost-${partyName}`);
@@ -911,16 +980,16 @@
         const fromParty = baseScenario.partidos.find(p => p.nome === fromPartyName);
         
         // Garante que ambos os partidos usem listas customizadas a partir de agora
-        if (!fromParty.customEleitos) fromParty.customEleitos = JSON.parse(JSON.stringify(fromParty.eleitos2022));
-        if (!toParty.customEleitos) toParty.customEleitos = JSON.parse(JSON.stringify(toParty.eleitos2022));
+        if (!fromParty.customCandidatos) fromParty.customCandidatos = JSON.parse(JSON.stringify(fromParty.candidatos));
+        if (!toParty.customCandidatos) toParty.customCandidatos = JSON.parse(JSON.stringify(toParty.candidatos));
 
-        const candidate = fromParty.customEleitos.splice(candidateIndex, 1)[0];
-        toParty.customEleitos.push(candidate);
-        toParty.customEleitos.sort((a, b) => b.votos - a.votos);
+        const candidate = fromParty.customCandidatos.splice(candidateIndex, 1)[0];
+        toParty.customCandidatos.push(candidate);
+        toParty.customCandidatos.sort((a, b) => b.votos - a.votos);
 
         // Recalcula os votos base de ambos os partidos
-        fromParty.votosBase2022 = fromParty.customEleitos.reduce((sum, cand) => sum + cand.votos, 0);
-        toParty.votosBase2022 = toParty.customEleitos.reduce((sum, cand) => sum + cand.votos, 0);
+        fromParty.votosBase2022 = fromParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
+        toParty.votosBase2022 = toParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
         
         // Desabilita o boost para ambos
         const boostInputFrom = document.getElementById(`boost-${fromParty.nome}`);
@@ -929,6 +998,79 @@
         if(boostInputTo) boostInputTo.disabled = true;
 
         loadPartyEditor(); // Recarrega o editor do partido de origem
+    }
+
+    // =================================================================================
+    // LÓGICA DA ABA DE CANDIDATOS
+    // =================================================================================
+    function initializeCandidatosTab() {
+        const container = document.getElementById('candidatos-accordion-container');
+        container.innerHTML = '';
+
+        baseScenario.partidos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(party => {
+            const color = PARTY_COLORS[party.nome] || '#64748b';
+
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'bg-slate-900/50 rounded-lg party-accordion-item';
+            
+            const totalVotosPartido = party.votosBase2022;
+
+            let candidatesHtml = party.candidatos.map(cand => `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 border-t border-border candidate-row" data-name="${cand.nome.toLowerCase()}">
+                    <div class="font-bold">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div>
+                    <div class="text-text-light md:text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong> Votos Totais</div>
+                </div>
+            `).join('');
+
+            accordionItem.innerHTML = `
+                <button class="w-full p-4 text-left font-bold flex justify-between items-center" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div>
+                        <span>${party.nome}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm font-normal text-text-light mr-4">Total da Legenda: <strong class="text-main">${totalVotosPartido.toLocaleString('pt-BR')}</strong></span>
+                        <i class="fa-solid fa-chevron-down transition-transform"></i>
+                    </div>
+                </button>
+                <div class="p-2 hidden">
+                    <div class="space-y-1">${candidatesHtml}</div>
+                </div>
+            `;
+            container.appendChild(accordionItem);
+        });
+
+        const searchInput = document.getElementById('candidato-search');
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.party-accordion-item').forEach(partyItem => {
+                let partyHasVisibleCandidate = false;
+                partyItem.querySelectorAll('.candidate-row').forEach(candidateRow => {
+                    const candidateName = candidateRow.dataset.name;
+                    if (candidateName.includes(searchTerm)) {
+                        candidateRow.style.display = 'grid';
+                        partyHasVisibleCandidate = true;
+                    } else {
+                        candidateRow.style.display = 'none';
+                    }
+                });
+                
+                if (partyHasVisibleCandidate) {
+                    partyItem.style.display = 'block';
+                } else {
+                    partyItem.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    function changeTab(tabName) {
+        ['simulador', 'candidatos'].forEach(tab => {
+            document.getElementById(`content-${tab}`).classList.toggle('hidden', tab !== tabName);
+            const button = document.querySelector(`#main-tabs button[onclick="changeTab('${tab}')"]`);
+            button.classList.toggle('active', tab !== tabName);
+        });
+        window.scrollTo(0, 0);
     }
 
 
