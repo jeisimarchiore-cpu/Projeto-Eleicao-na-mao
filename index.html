@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v7.3 - Base de Dados Completa</title>
+    <title>Sala de Guerra Eleitoral v7.8 - Base de Dados Completa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
@@ -14,13 +14,17 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        'playfair': ['"Playfair Display"', 'serif']
+                    },
                     colors: {
                         'primary': '#2563eb', // blue-600
                         'secondary': '#f97316', // orange-500
                         'background': '#0f172a', // slate-900
                         'card': '#1e293b', // slate-800
-                        'text-main': '#f1f5f9', // slate-100
-                        'text-light': '#cbd5e1', // slate-300
+                        'text-main': '#ffffff', // white
+                        'text-light': '#e2e8f0', // slate-200
+                        'text-neutral': '#d1d5db', // coolGray-300
                         'border': '#334155', // slate-700
                         'success': '#22c55e', // green-500
                         'danger': '#ef4444', // red-500
@@ -35,6 +39,12 @@
             font-family: 'Inter', sans-serif;
             background-color: tailwind.config.theme.extend.colors.background;
             color: tailwind.config.theme.extend.colors['text-main'];
+        }
+        input, select {
+            color: #ffffff;
+        }
+        input::placeholder {
+            color: #94a3b8; /* slate-400 */
         }
         .number-dynamic {
             transition: color 0.4s ease, transform 0.4s ease;
@@ -75,7 +85,44 @@
         }
         .tab-button.active {
             border-bottom-color: #2563eb;
-            color: #2563eb;
+            color: #f1f5f9;
+        }
+        #logo-adjust-canvas {
+            cursor: move;
+            border-radius: 50%;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background-color: #ffffff;
+                color: #000000;
+            }
+            header, aside, #content-candidatos, .no-print {
+                display: none !important;
+            }
+            main, #content-simulador, .lg\:col-span-3 {
+                display: block !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .grid {
+                display: block !important;
+            }
+            .bg-card {
+                background-color: #f3f4f6 !important;
+                border: 1px solid #d1d5db !important;
+                page-break-inside: avoid;
+            }
+            .text-text-main, .text-text-light, .text-text-neutral, .font-bold {
+                color: #000 !important;
+            }
+            .text-primary { color: #2563eb !important; }
+            .text-secondary { color: #f97316 !important; }
+            .text-success { color: #22c55e !important; }
+            .text-danger { color: #ef4444 !important; }
+            .text-warning { color: #eab308 !important; }
         }
     </style>
 </head>
@@ -83,16 +130,28 @@
     <div class="min-h-screen">
         <!-- Cabeçalho -->
         <header class="bg-card/50 backdrop-blur-sm sticky top-0 z-20 border-b border-border">
-            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-                 <h1 class="text-2xl font-bold text-text-main">
-                    <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v7.3</span>
-                </h1>
-                <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
+            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 relative flex justify-center items-center">
+                 <div id="logo-container" class="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center w-28 cursor-pointer group">
+                    <img id="logo-img" src="https://i.imgur.com/uY34Y3A.jpeg" alt="Logo Silmara Miguel" class="h-16 w-16 rounded-full object-cover border-2 border-primary group-hover:opacity-80 transition-opacity">
+                    <input type="file" id="logo-upload" class="hidden" accept="image/*">
+                    <p class="font-playfair font-bold text-sm text-text-main mt-2 text-center">Silmara Miguel</p>
+                </div>
+                <div class="text-center">
+                    <h1 class="text-2xl font-bold text-text-main">
+                        <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v7.8</span>
+                    </h1>
+                    <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
+                </div>
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 no-print">
+                    <button onclick="printReport()" class="bg-primary hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                        <i class="fa-solid fa-print mr-2"></i> Imprimir Relatório
+                    </button>
+                </div>
             </div>
             <!-- Navegação Principal -->
             <nav class="max-w-screen-2xl mx-auto flex justify-center items-center space-x-4 sm:space-x-8" id="main-tabs">
                 <button class="tab-button active font-semibold py-3 px-2 sm:px-4" onclick="changeTab('simulador')"><i class="fa-solid fa-sliders mr-2"></i>Simulador de Cenário</button>
-                <button class="tab-button font-semibold py-3 px-2 sm:px-4" onclick="changeTab('candidatos')"><i class="fa-solid fa-users mr-2"></i>Base de Candidatos 2022</button>
+                <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('candidatos')"><i class="fa-solid fa-users mr-2"></i>Base de Candidatos 2022</button>
             </nav>
         </header>
 
@@ -101,16 +160,47 @@
             <div id="content-simulador">
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     <!-- Painel de Controle -->
-                    <aside class="lg:col-span-1 space-y-6">
+                    <aside class="lg:col-span-1 space-y-6 no-print">
+                        <!-- PAINEL CENÁRIO ATUAL -->
+                        <div class="bg-card p-5 rounded-lg border border-border">
+                            <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-chart-pie mr-2"></i>Cenário Atual</h2>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-background p-3 rounded-lg text-center">
+                                    <p class="text-xs font-semibold text-text-light uppercase truncate">Votos Válidos</p>
+                                    <p id="summary-vv" class="text-xl font-bold text-success">0</p>
+                                </div>
+                                <div class="bg-background p-3 rounded-lg text-center">
+                                    <p class="text-xs font-semibold text-text-light uppercase truncate">Quociente</p>
+                                    <p id="summary-qe" class="text-xl font-bold text-primary">0</p>
+                                </div>
+                                <div class="bg-background p-3 rounded-lg text-center">
+                                    <p class="text-xs font-semibold text-text-light uppercase truncate">Votos Brancos</p>
+                                    <p id="summary-vb" class="text-xl font-bold text-text-neutral">0</p>
+                                </div>
+                                <div class="bg-background p-3 rounded-lg text-center">
+                                    <p class="text-xs font-semibold text-text-light uppercase truncate">Votos Nulos</p>
+                                    <p id="summary-vn" class="text-xl font-bold text-text-neutral">0</p>
+                                </div>
+                                <div class="bg-background p-3 rounded-lg text-center">
+                                    <p class="text-xs font-semibold text-text-light uppercase truncate">Nota Corte</p>
+                                    <p id="summary-nc" class="text-xl font-bold text-warning">0</p>
+                                </div>
+                                <div class="bg-background p-3 rounded-lg text-center">
+                                    <p class="text-xs font-semibold text-text-light uppercase truncate">Em Risco</p>
+                                    <p id="summary-vr" class="text-xl font-bold text-danger">0</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="bg-card p-5 rounded-lg border border-border">
                             <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-sliders mr-2"></i>Painel de Controle do Cenário</h2>
                             <div class="space-y-4">
                                 <div>
                                     <label for="abstention-rate" class="block text-sm font-medium text-text-light mb-1">Taxa de Abstenção</label>
-                                    <input type="range" id="abstention-rate" min="15" max="30" value="20" step="0.5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
+                                    <input type="range" id="abstention-rate" min="15" max="30" value="18.6" step="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
                                     <div class="flex justify-between items-center mt-1">
                                         <span class="text-xs text-text-light">Base 2022: <span id="base-abstention-display" class="font-mono"></span>%</span>
-                                        <span class="text-sm font-mono text-primary"><span id="abstention-value">20.0</span>%</span>
+                                        <span class="text-sm font-mono text-primary"><span id="abstention-value">18.6</span>%</span>
                                     </div>
                                 </div>
                                 <div>
@@ -146,30 +236,10 @@
 
                     <!-- Dashboard Principal -->
                     <section class="lg:col-span-3 space-y-8">
-                        <!-- KPIs -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            <div id="kpi-card-qe" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('qe')">
-                                <p class="text-sm font-semibold text-text-light uppercase">QUOCIENTE ELEITORAL</p>
-                                <p id="kpi-qe" class="text-4xl font-extrabold text-primary number-dynamic">0</p>
-                            </div>
-                            <div id="kpi-card-vv" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('vv')">
-                                <p class="text-sm font-semibold text-text-light uppercase">VOTOS VÁLIDOS</p>
-                                <p id="kpi-votos-validos" class="text-4xl font-extrabold text-success number-dynamic">0</p>
-                            </div>
-                            <div id="kpi-card-nc" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('nc')">
-                                <p class="text-sm font-semibold text-text-light uppercase">NOTA DE CORTE MÉDIA</p>
-                                <p id="kpi-nota-corte-media" class="text-4xl font-extrabold text-warning number-dynamic">0</p>
-                            </div>
-                            <div id="kpi-card-vr" class="bg-card p-5 rounded-lg border border-border text-center clickable" onclick="showKpiModal('vr')">
-                                <p class="text-sm font-semibold text-text-light uppercase">VAGAS EM RISCO</p>
-                                <p id="kpi-vagas-risco" class="text-4xl font-extrabold text-danger number-dynamic">0</p>
-                            </div>
-                        </div>
-
                         <!-- Distribuição de Vagas e Cadeiras em Risco -->
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
                             <div class="bg-card p-6 rounded-lg border border-border">
-                                <h2 class="text-xl font-bold mb-4">Ranking de Oportunidade (por Nota de Corte)</h2>
+                                <h2 class="text-xl font-bold mb-4">Ranking de Oportunidade</h2>
                                 <div id="vagas-dist-container" class="space-y-2"></div>
                             </div>
                             <div class="bg-card p-6 rounded-lg border border-border flex flex-col">
@@ -204,12 +274,33 @@
         </div>
     </div>
 
+    <!-- Modal de Edição de Logo -->
+    <div id="logo-editor-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="absolute inset-0 bg-black/70" onclick="closeLogoEditor()"></div>
+        <div class="bg-card border border-border rounded-lg shadow-2xl w-full max-w-md p-6 relative">
+            <h2 class="text-xl font-bold mb-4">Ajustar Imagem</h2>
+            <div class="flex justify-center mb-4">
+                <canvas id="logo-adjust-canvas" width="250" height="250" class="bg-slate-700"></canvas>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="logo-zoom" class="block text-sm font-medium text-text-light mb-1">Zoom</label>
+                    <input type="range" id="logo-zoom" min="0.1" max="3" value="1" step="0.05" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button onclick="closeLogoEditor()" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600">Cancelar</button>
+                <button onclick="saveLogo()" class="px-4 py-2 rounded-lg bg-primary hover:bg-blue-500 font-bold">Salvar</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
     // =================================================================================
     // DADOS E CONFIGURAÇÕES
     // =================================================================================
-    const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 40, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4124024, abstencao: 0.20, partidos: { 
+    const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 40, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4028852, votos_brancos: 289065, votos_nulos: 153702, abstencao: 0.1862, partidos: { 
         'PL': { votos: 878708, candidatos: [ { nome: 'Ana Campagnolo', votos: 196571, isEleito: true }, { nome: 'Sargento Lima', votos: 71185, isEleito: true }, { nome: 'Mauricio Eskudlark', votos: 65638, isEleito: true }, { nome: 'Jessé Lopes', votos: 55013, isEleito: true }, { nome: 'Carlos Humberto', votos: 46445, isEleito: true }, { nome: 'Ivan Naatz', votos: 45304, isEleito: true }, { nome: 'Berlanda', votos: 41488, isEleito: true }, { nome: 'Marcius Machado', votos: 39749, isEleito: true }, { nome: 'Massocco', votos: 31659, isEleito: true }, { nome: 'Oscar Gutz', votos: 26812, isEleito: true }, { nome: 'Soratto', votos: 25622, isEleito: true }, { nome: 'Maurício Peixer', votos: 22028, isEleito: false }, { nome: 'A Alex Brasil', votos: 20271, isEleito: false }, { nome: 'Jeferson Cardozo Canal Atalaia', votos: 17934, isEleito: false }, { nome: 'Rafael Laske - Mamão', votos: 15730, isEleito: false }, { nome: 'Frigo', votos: 15090, isEleito: false }, { nome: 'Leticia Mattos', votos: 11068, isEleito: false }, { nome: 'Dr. Jorge', votos: 8810, isEleito: false }, { nome: 'Neuri Mantelli', votos: 8484, isEleito: false }, { nome: 'Turibio Torres', votos: 7282, isEleito: false }, { nome: 'Alemãozinho - Claudir Henz', votos: 6893, isEleito: false }, { nome: 'Marcio Cardoso', votos: 5990, isEleito: false }, { nome: 'Roberto Salum', votos: 5082, isEleito: false }, { nome: 'Andresa Ribeiro', votos: 5071, isEleito: false }, { nome: 'A Guerreira Salete Cardoso', votos: 4829, isEleito: false }, { nome: 'Rabuja', votos: 4799, isEleito: false }, { nome: 'Maryanne Mattos', votos: 4420, isEleito: false }, { nome: 'Alex Wehrle Professor', votos: 3999, isEleito: false }, { nome: 'Eloir Dedonatti', votos: 3958, isEleito: false }, { nome: 'Enfermeiro Victor Nascimento', votos: 3700, isEleito: false }, { nome: 'Moacir Bertoldi', votos: 3688, isEleito: false }, { nome: 'Simone Lerner', votos: 2810, isEleito: false }, { nome: 'Leonardo Tatim', votos: 1650, isEleito: false }, { nome: 'Professor Hahne', votos: 1332, isEleito: false }, { nome: 'Odete Enfermeira', votos: 564, isEleito: false }, { nome: 'Engenheira Alessandra Kingeski', votos: 515, isEleito: false }, { nome: 'Betinha Thomaselli', votos: 506, isEleito: false }, { nome: 'Sueli Zincoski', votos: 407, isEleito: false }, { nome: 'Marta Efrayim', votos: 135, isEleito: false }, { nome: 'Silvana', votos: 112, isEleito: false } ] }, 
         'MDB': { votos: 505571, candidatos: [ { nome: 'Antídio Lunelli', votos: 74500, isEleito: true }, { nome: 'Mauro de Nadal', votos: 67065, isEleito: true }, { nome: 'Jerry Comper', votos: 64145, isEleito: true }, { nome: 'Fernando Krelling', votos: 54320, isEleito: true }, { nome: 'Volnei Weber', votos: 45995, isEleito: true }, { nome: 'Tiago Zilli', votos: 33733, isEleito: true }, { nome: 'Emerson Stein', votos: 25063, isEleito: false }, { nome: 'Rosi Maldaner', votos: 20189, isEleito: false }, { nome: 'Dirce Heiderscheidt', votos: 16906, isEleito: false }, { nome: 'Adilson Girardi', votos: 15943, isEleito: false }, { nome: 'Cleiton Fossa', votos: 12364, isEleito: false }, { nome: 'Paulo Basilio', votos: 10561, isEleito: false }, { nome: 'Carelli', votos: 10138, isEleito: false }, { nome: 'Suelen Geremia', votos: 4825, isEleito: false }, { nome: 'Marcelo Fett', votos: 4552, isEleito: false }, { nome: 'Ari Galeski', votos: 4473, isEleito: false }, { nome: 'Guella', votos: 3743, isEleito: false }, { nome: 'Juarez Matos', votos: 3602, isEleito: false }, { nome: 'Flávia Vicente', votos: 2943, isEleito: false }, { nome: 'Professor Toldo', votos: 2027, isEleito: false }, { nome: 'William', votos: 1685, isEleito: false }, { nome: 'Leila Conci', votos: 1502, isEleito: false }, { nome: 'Psicóloga Ronize Ferreira', votos: 1478, isEleito: false }, { nome: 'Mano Cadore', votos: 1359, isEleito: false }, { nome: 'Chico Bento', votos: 1089, isEleito: false }, { nome: 'Micheline', votos: 803, isEleito: false }, { nome: 'Biriba', votos: 553, isEleito: false }, { nome: 'Jairo Santos', votos: 292, isEleito: false }, { nome: 'Franciel Britos', votos: 233, isEleito: false }, { nome: 'Mairi', votos: 110, isEleito: false }, { nome: 'Zélia Grah', votos: 71, isEleito: false }, { nome: 'Keli Cordeiro', votos: 42, isEleito: false } ] }, 
         'PT': { votos: 438030, candidatos: [ { nome: 'Luciane Carminatti', votos: 92478, isEleito: true }, { nome: 'Neodi Saretta', votos: 38729, isEleito: true }, { nome: 'Fabiano da Luz', votos: 34972, isEleito: true }, { nome: 'Padre Pedro', votos: 26803, isEleito: true }, { nome: 'Professora Vanessa da Rosa', votos: 16832, isEleito: false }, { nome: 'Paulo Eccel', votos: 16561, isEleito: false }, { nome: 'Dirceu Dresch', votos: 14370, isEleito: false }, { nome: 'Rodrigo Preis', votos: 12844, isEleito: false }, { nome: 'Luci Choinacki', votos: 12699, isEleito: false }, { nome: 'Jean Volpato', votos: 12499, isEleito: false }, { nome: 'Adriano Pereira', votos: 10988, isEleito: false }, { nome: 'Celso Zuchi', votos: 9159, isEleito: false }, { nome: 'Professor Lino Peres', votos: 8619, isEleito: false }, { nome: 'Rodolfo de Ramos', votos: 8128, isEleito: false }, { nome: 'Marisa Zanoni', votos: 7826, isEleito: false }, { nome: 'Dani Coletivo Juventude', votos: 7752, isEleito: false }, { nome: 'Júlio Bittencourt', votos: 7495, isEleito: false }, { nome: 'Célio Elias', votos: 6938, isEleito: false }, { nome: 'Adriana Rossi', votos: 6188, isEleito: false }, { nome: 'Professor Alessandro', votos: 5404, isEleito: false }, { nome: 'Cléo Comunello', votos: 5171, isEleito: false }, { nome: 'Glauter', votos: 4070, isEleito: false }, { nome: 'Vanda Pinedo Nossa Força e Voz', votos: 3978, isEleito: false }, { nome: 'Matheus Madeira', votos: 3853, isEleito: false }, { nome: 'Professor Raul Ribas', votos: 3822, isEleito: false }, { nome: 'Rodrigo de Oliveira', votos: 3730, isEleito: false }, { nome: 'Claudia Bratti', votos: 3425, isEleito: false }, { nome: 'Tomio', votos: 2396, isEleito: false }, { nome: 'Valmor de Paula', votos: 2311, isEleito: false }, { nome: 'Sérgio', votos: 2279, isEleito: false }, { nome: 'Professor Chico do Sinte', votos: 2257, isEleito: false }, { nome: 'Gislaine Durski', votos: 2237, isEleito: false }, { nome: 'Elvira Manfroi', votos: 2219, isEleito: false }, { nome: 'Rafael Coletivo Feliz de Novo', votos: 1047, isEleito: false }, { nome: 'Cláudio Márcio', votos: 547, isEleito: false } ] }, 
@@ -250,12 +341,14 @@
         baseScenario = prepareBaseScenario();
         initializeControls();
         initializeCandidatosTab();
+        initializeLogoEditor();
         updateScenario();
     });
 
     function prepareBaseScenario() {
         const historico2022 = DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2022);
-        
+        const comparecimentoBase2022 = historico2022.votos_validos + historico2022.votos_brancos + historico2022.votos_nulos;
+
         const partidos = Object.keys(historico2022.partidos).map(nome => {
             const p2022 = historico2022.partidos[nome];
             return {
@@ -269,7 +362,12 @@
 
         return {
             eleitoradoBase2022: historico2022.eleitorado,
-            taxaComparecimentoBase: 1 - historico2022.abstencao,
+            votosValidosBase2022: historico2022.votos_validos,
+            votosBrancosBase2022: historico2022.votos_brancos,
+            votosNulosBase2022: historico2022.votos_nulos,
+            percentualValidosBase: historico2022.votos_validos / comparecimentoBase2022,
+            percentualBrancosBase: historico2022.votos_brancos / comparecimentoBase2022,
+            percentualNulosBase: historico2022.votos_nulos / comparecimentoBase2022,
             partidos
         };
     }
@@ -317,9 +415,11 @@
 
         baseScenario.partidos.forEach(p => {
             const boostInput = document.getElementById(`boost-${p.nome}`);
-            p.boost = boostInput ? parseFloat(boostInput.value) / 100 : 0;
-            const boostValueEl = document.getElementById(`boost-value-${p.nome}`);
-            if(boostValueEl) boostValueEl.textContent = `${(p.boost * 100).toFixed(0)}%`;
+            if (boostInput && !boostInput.disabled) {
+                p.boost = parseFloat(boostInput.value) / 100;
+                const boostValueEl = document.getElementById(`boost-value-${p.nome}`);
+                if(boostValueEl) boostValueEl.textContent = `${(p.boost * 100).toFixed(0)}%`;
+            }
         });
         
         currentSimulatedScenario = calculateSimulatedScenario(abstentionRate, electorateGrowth);
@@ -328,38 +428,47 @@
 
     function calculateSimulatedScenario(abstentionRate, electorateGrowth, allianceParties = []) {
         const eleitoradoProjetado = Math.floor(baseScenario.eleitoradoBase2022 * (1 + electorateGrowth));
-        const votosValidosProjetado = Math.floor(eleitoradoProjetado * (1 - abstentionRate));
+        const comparecimentoProjetado = Math.floor(eleitoradoProjetado * (1 - abstentionRate));
+        
+        const votosValidosProjetado = Math.floor(comparecimentoProjetado * baseScenario.percentualValidosBase);
+        const votosBrancosProjetado = Math.floor(comparecimentoProjetado * baseScenario.percentualBrancosBase);
+        const votosNulosProjetado = Math.floor(comparecimentoProjetado * baseScenario.percentualNulosBase);
+
         const QE = Math.floor(votosValidosProjetado / DADOS_ELEICOES.SC.de.vagas);
 
         let partidosSimulados = baseScenario.partidos.map(p => {
             let votosFinais;
             let notaCorte;
             let eleitos;
+            let votosProjetadosBase;
 
             if (p.customCandidatos) {
-                votosFinais = p.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
-                eleitos = p.customCandidatos;
-                const ultimoEleito = eleitos[eleitos.length - 1];
+                votosProjetadosBase = p.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
+                votosFinais = votosProjetadosBase; // Boost is disabled for custom lists
+                eleitos = p.customCandidatos.slice();
+                const ultimoEleito = eleitos.length > 0 ? eleitos[Math.min(eleitos.length, 40) - 1] : null;
                 notaCorte = ultimoEleito ? ultimoEleito.votos : 0;
             } else {
-                votosFinais = Math.floor(p.votosBase2022 * (1 + p.boost));
+                votosProjetadosBase = p.votosBase2022;
+                votosFinais = Math.floor(votosProjetadosBase * (1 + p.boost));
                 eleitos = p.candidatos.filter(c => c.isEleito);
                 const ultimoEleitoBase = eleitos[eleitos.length - 1];
                 notaCorte = ultimoEleitoBase ? Math.floor(ultimoEleitoBase.votos * (1 + p.boost)) : 0;
             }
             
-            const notaCorteFinal = Math.max(notaCorte, (QE > 0 ? Math.ceil(QE * 0.20) : 0));
+            const notaCorteFinal = Math.max(notaCorte, (QE > 0 ? Math.ceil(QE * 0.10) : 0));
 
-            return { ...p, votos: votosFinais, notaCorte: notaCorteFinal, eleitos2022: eleitos };
+            return { ...p, votos: votosFinais, notaCorte: notaCorteFinal, eleitos2022: eleitos, votosProjetadosBase };
         });
 
         if (allianceParties.length > 1) {
-            const allianceData = { nome: `ALIANÇA (${allianceParties.join('+')})`, votos: 0, notaCorte: 0, boost: 0, eleitos2022: [] };
+            const allianceData = { nome: `ALIANÇA (${allianceParties.join('+')})`, votos: 0, notaCorte: 0, boost: 0, eleitos2022: [], votosProjetadosBase: 0 };
             const remainingParties = [];
             
             partidosSimulados.forEach(p => {
                 if (allianceParties.includes(p.nome)) {
                     allianceData.votos += p.votos;
+                    allianceData.votosProjetadosBase += p.votosProjetadosBase;
                     allianceData.notaCorte = Math.max(allianceData.notaCorte, p.notaCorte);
                     allianceData.eleitos2022.push(...p.eleitos2022);
                 } else {
@@ -370,7 +479,17 @@
             partidosSimulados = [allianceData, ...remainingParties];
         }
 
-        return distributeVagas(partidosSimulados, QE, votosValidosProjetado, eleitoradoProjetado);
+        const distributionResult = distributeVagas(partidosSimulados, QE, votosValidosProjetado, eleitoradoProjetado);
+        
+        return { 
+            ...distributionResult,
+            QE, 
+            totalVotosValidos: votosValidosProjetado,
+            totalVotosBrancos: votosBrancosProjetado,
+            totalVotosNulos: votosNulosProjetado,
+            totalEleitores: eleitoradoProjetado,
+            comparecimentoProjetado: comparecimentoProjetado
+        };
     }
 
     function distributeVagas(partidos, QE, totalVotos, totalEleitores) {
@@ -412,53 +531,33 @@
 
         cenarios.forEach(p => { p.totalVagas = p.vagasDiretas + p.vagasSobras; });
         
-        return { QE, totalVotos, totalEleitores, cenarios, sobrasLog };
+        return { cenarios, sobrasLog };
     }
     
     // =================================================================================
     // FUNÇÕES DE RENDERIZAÇÃO
     // =================================================================================
     function renderAll(simulatedScenario) {
-        const { QE, totalVotos, cenarios, sobrasLog } = simulatedScenario;
+        const { QE, totalVotosValidos, totalVotosBrancos, totalVotosNulos, cenarios, sobrasLog } = simulatedScenario;
 
-        const animateNumber = (el, value) => {
-            if (el.textContent !== value.toLocaleString('pt-BR')) {
-                el.textContent = value.toLocaleString('pt-BR');
-                el.style.transform = 'scale(1.1)';
-                el.style.color = tailwind.config.theme.extend.colors.secondary;
-                setTimeout(() => {
-                    el.style.transform = 'scale(1)';
-                    el.style.color = el.dataset.originalColor || '';
-                }, 200);
-            }
-        };
-        
-        const kpiQE = document.getElementById('kpi-qe');
-        if (!kpiQE.dataset.originalColor) kpiQE.dataset.originalColor = tailwind.config.theme.extend.colors.primary;
-        animateNumber(kpiQE, QE);
-
-        const kpiVotos = document.getElementById('kpi-votos-validos');
-        if (!kpiVotos.dataset.originalColor) kpiVotos.dataset.originalColor = tailwind.config.theme.extend.colors.success;
-        animateNumber(kpiVotos, totalVotos);
-
+        // --- Update summary panel ---
+        document.getElementById('summary-vv').textContent = totalVotosValidos.toLocaleString('pt-BR');
+        document.getElementById('summary-vb').textContent = totalVotosBrancos.toLocaleString('pt-BR');
+        document.getElementById('summary-vn').textContent = totalVotosNulos.toLocaleString('pt-BR');
+        document.getElementById('summary-qe').textContent = QE.toLocaleString('pt-BR');
         const partidosComVaga = cenarios.filter(p => p.totalVagas > 0);
-        const notaCorteMedia = partidosComVaga.length > 0 ? partidosComVaga.reduce((acc, p) => acc + p.notaCorte, 0) / partidosComVaga.length : 0;
-        const kpiNotaCorte = document.getElementById('kpi-nota-corte-media');
-        if (!kpiNotaCorte.dataset.originalColor) kpiNotaCorte.dataset.originalColor = tailwind.config.theme.extend.colors.warning;
-        animateNumber(kpiNotaCorte, Math.ceil(notaCorteMedia) || 0);
-
-        const kpiRisco = document.getElementById('kpi-vagas-risco');
-        if (!kpiRisco.dataset.originalColor) kpiRisco.dataset.originalColor = tailwind.config.theme.extend.colors.danger;
-        animateNumber(kpiRisco, sobrasLog.length);
+        const notaCorteMedia = partidosComVaga.length > 0 ? Math.ceil(partidosComVaga.reduce((acc, p) => acc + p.notaCorte, 0) / partidosComVaga.length) : 0;
+        document.getElementById('summary-nc').textContent = (notaCorteMedia || 0).toLocaleString('pt-BR');
+        document.getElementById('summary-vr').textContent = sobrasLog.length.toLocaleString('pt-BR');
 
         renderVagasDist(cenarios);
-        renderRisk(sobrasLog.reverse());
+        renderRisk(sobrasLog.slice().reverse());
     }
 
     function renderVagasDist(cenarios) {
         const container = document.getElementById('vagas-dist-container');
         container.innerHTML = '';
-        const sorted = [...cenarios].filter(p => p.totalVagas > 0).sort((a, b) => a.notaCorte - b.notaCorte);
+        const sorted = [...cenarios].filter(p => p.totalVagas > 0).sort((a, b) => b.totalVagas - a.totalVagas);
 
         sorted.forEach(p => {
             const color = PARTY_COLORS[p.nome] || '#64748b';
@@ -475,11 +574,12 @@
                     </div>
                     <span class="font-bold text-lg">${p.totalVagas} <span class="text-sm font-normal text-text-light">vaga(s)</span></span>
                 </div>
-                <div class="w-full bg-slate-700 rounded-full h-4">
+                <div class="w-full bg-slate-700 rounded-full h-4 overflow-hidden">
                     <div class="bg-primary h-4 rounded-full party-bar" style="width: ${p.totalVagas > 0 ? (p.vagasDiretas / p.totalVagas * 100) : 0}%" title="Vagas Diretas: ${p.vagasDiretas}"></div>
                 </div>
-                <div class="text-xs text-text-light mt-1">
-                    ${p.vagasDiretas} direta(s) / ${p.vagasSobras} sobra(s) | NC: <span class="font-bold text-warning">${p.notaCorte.toLocaleString('pt-BR')}</span>
+                <div class="text-xs text-text-light mt-1 flex justify-between">
+                    <span>${p.vagasDiretas} direta(s) / ${p.vagasSobras} sobra(s)</span>
+                    <span>NC: <span class="font-bold text-warning">${p.notaCorte.toLocaleString('pt-BR')}</span></span>
                 </div>
             `;
             container.appendChild(item);
@@ -495,7 +595,7 @@
         }
 
         riskLog.forEach((log, index) => {
-            const diff = Math.ceil(log.mediaVencedor - log.mediaPerdedor);
+            const diff = log.perdedor ? Math.ceil(log.mediaVencedor - log.mediaPerdedor) : 0;
             const item = document.createElement('div');
             item.className = 'bg-slate-900/50 p-3 rounded-lg risk-card gain clickable';
             item.setAttribute('onclick', `showRiskModal(${index})`);
@@ -507,11 +607,11 @@
                 <div class="mt-2 space-y-2">
                     <div class="flex items-center justify-between text-sm">
                         <span class="text-success"><i class="fa-solid fa-circle-check mr-2"></i>GANHANDO: <strong>${log.vencedor}</strong></span>
-                        <span class="font-mono">${Math.ceil(log.mediaVencedor).toLocaleString('pt-BR')}</span>
+                        <span class="font-mono text-text-main">${Math.ceil(log.mediaVencedor).toLocaleString('pt-BR')}</span>
                     </div>
                     <div class="flex items-center justify-between text-sm">
                         <span class="text-text-light"><i class="fa-solid fa-circle-radiation mr-2"></i>AMEAÇANDO: <strong>${log.perdedor || 'N/A'}</strong></span>
-                         <span class="font-mono">${log.perdedor ? Math.ceil(log.mediaPerdedor).toLocaleString('pt-BR') : '-'}</span>
+                         <span class="font-mono text-text-main">${log.perdedor ? Math.ceil(log.mediaPerdedor).toLocaleString('pt-BR') : '-'}</span>
                     </div>
                 </div>
                 <div class="mt-2 pt-2 border-t border-border/50 text-center text-xs text-secondary">
@@ -557,69 +657,6 @@
         }, 300);
     }
     
-    function showKpiModal(kpi) {
-        const { QE, totalVotos, totalEleitores, cenarios } = currentSimulatedScenario;
-        let title, content;
-        
-        switch(kpi) {
-            case 'qe':
-                title = 'Quociente Eleitoral (QE)';
-                content = `
-                    <p>O QE é o "preço" de uma vaga direta. É o primeiro número que um partido precisa superar.</p>
-                    <div class="mt-4 bg-background p-4 rounded-lg font-mono text-sm">
-                        <p>Votos Válidos: ${totalVotos.toLocaleString('pt-BR')}</p>
-                        <p>Vagas na ALESC: ÷ ${DADOS_ELEICOES.SC.de.vagas}</p>
-                        <hr class="border-border my-2">
-                        <p class="text-lg text-primary">QE = ${QE.toLocaleString('pt-BR')}</p>
-                    </div>
-                `;
-                break;
-            case 'vv':
-                title = 'Votos Válidos';
-                content = `
-                    <p>Estimativa do total de votos que serão considerados na eleição, desconsiderando brancos e nulos.</p>
-                     <div class="mt-4 bg-background p-4 rounded-lg font-mono text-sm">
-                        <p>Eleitorado Projetado: ${totalEleitores.toLocaleString('pt-BR')}</p>
-                        <p>Taxa de Comparecimento: × ${(100 - parseFloat(document.getElementById('abstention-rate').value)).toFixed(1)}%</p>
-                        <hr class="border-border my-2">
-                        <p class="text-lg text-success">Votos Válidos = ${totalVotos.toLocaleString('pt-BR')}</p>
-                    </div>
-                `;
-                break;
-            case 'nc':
-                const partidosComVaga = cenarios.filter(p => p.totalVagas > 0);
-                const notaCorteMedia = partidosComVaga.length > 0 ? Math.ceil(partidosComVaga.reduce((acc, p) => acc + p.notaCorte, 0) / partidosComVaga.length) : 0;
-                title = 'Nota de Corte Média';
-                content = `
-                    <p>A "Nota de Corte" é a votação mínima que um candidato precisa para se eleger em seu partido. Este KPI mostra a média das notas de corte de todos os partidos que elegeram alguém no cenário atual.</p>
-                    <p class="mt-2 text-sm text-text-light">É um bom termômetro da "dificuldade" geral da eleição.</p>
-                    <div class="mt-4 bg-background p-4 rounded-lg text-center">
-                        <p class="text-4xl font-bold text-warning">${notaCorteMedia.toLocaleString('pt-BR')}</p>
-                        <p class="text-text-light">Média de Votos</p>
-                    </div>
-                `;
-                break;
-            case 'vr':
-                title = 'Vagas em Risco';
-                content = `
-                    <p>São as vagas distribuídas pelas "sobras", ou seja, pela média de votos. Elas não são garantidas pelo Quociente Eleitoral e representam as disputas mais acirradas da eleição.</p>
-                    <p class="mt-2 text-sm text-text-light">Pequenas variações na votação dos partidos podem fazer essas cadeiras trocarem de mãos. É aqui que a estratégia de campanha faz a diferença.</p>
-                `;
-                break;
-        }
-        
-        const modalHtml = `
-            <div class="p-6">
-                <div class="flex justify-between items-start">
-                    <h2 class="text-xl font-bold text-secondary mb-4">${title}</h2>
-                    <button onclick="closeModal()" class="text-text-light hover:text-text-main">&times;</button>
-                </div>
-                <div class="text-text-light">${content}</div>
-            </div>
-        `;
-        showModal(modalHtml);
-    }
-
     function showPartyModal(partyName) {
         const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
         if (!partyData) return;
@@ -670,13 +707,13 @@
         const ultimoEleitoVotosStr = ultimoEleitoBase ? ultimoEleitoBase.votos.toLocaleString('pt-BR') : 'N/A';
 
         const modalHtml = `
-            <div class="p-6">
+            <div class="p-6 text-text-light">
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex items-center">
                         <div class="w-8 h-8 rounded-full mr-3" style="background-color: ${color}"></div>
                         <div>
-                            <h2 class="text-2xl font-bold">${partyName}</h2>
-                            <p class="text-text-light">Dossiê do Partido no Cenário Atual</p>
+                            <h2 class="text-2xl font-bold text-text-main">${partyName}</h2>
+                            <p>Dossiê do Partido no Cenário Atual</p>
                         </div>
                     </div>
                     <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
@@ -684,15 +721,15 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div class="bg-background p-4 rounded-lg">
-                        <h3 class="font-bold mb-2">Composição dos Votos</h3>
+                        <h3 class="font-bold mb-2 text-text-main">Composição dos Votos</h3>
                         <ul class="text-sm space-y-2 font-mono">
-                            <li class="flex justify-between"><span>Base de Votos (2022):</span> <span>${(partyData.votosProjetadosBase || 0).toLocaleString('pt-BR')}</span></li>
+                            <li class="flex justify-between"><span>Base de Votos (2022):</span> <span>${(partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li>
                             <li class="flex justify-between"><span>Impulso (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li>
                             <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL PROJETADO:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li>
                         </ul>
                     </div>
                      <div class="bg-background p-4 rounded-lg">
-                        <h3 class="font-bold mb-2">Cálculo da Nota de Corte</h3>
+                        <h3 class="font-bold mb-2 text-text-main">Cálculo da Nota de Corte</h3>
                         <ul class="text-sm space-y-2 font-mono">
                             <li class="flex justify-between"><span>Último Eleito (Base):</span> <span>${ultimoEleitoVotosStr}</span></li>
                             <li class="flex justify-between"><span>Impulso de Campanha:</span> <span>${(partyData.boost * 100).toFixed(0)}%</span></li>
@@ -703,11 +740,11 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-background p-4 rounded-lg">
-                        <h3 class="font-bold mb-2"><i class="fa-solid fa-bolt text-primary mr-1"></i>Cadeiras Diretas (${diretas.length})</h3>
+                        <h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-bolt text-primary mr-1"></i>Cadeiras Diretas (${diretas.length})</h3>
                         <ul class="text-sm space-y-2">${diretasHtml}</ul>
                     </div>
                     <div class="bg-background p-4 rounded-lg">
-                        <h3 class="font-bold mb-2"><i class="fa-solid fa-shuffle text-warning mr-1"></i>Cadeiras de Sobra (${sobras.length})</h3>
+                        <h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-shuffle text-warning mr-1"></i>Cadeiras de Sobra (${sobras.length})</h3>
                         <ul class="text-sm space-y-2">${sobrasHtml}</ul>
                     </div>
                 </div>
@@ -721,7 +758,7 @@
         if (!log) return;
 
         const { vencedor, perdedor, mediaVencedor, mediaPerdedor, vaga } = log;
-        const diff = Math.ceil(mediaVencedor - mediaPerdedor);
+        const diff = perdedor ? Math.ceil(mediaVencedor - mediaPerdedor) : 0;
         
         const vencedorData = currentSimulatedScenario.cenarios.find(p => p.nome === vencedor);
         const perdedorData = currentSimulatedScenario.cenarios.find(p => p.nome === perdedor);
@@ -732,16 +769,16 @@
             const boostNecessario = (perdedorData.votos > 0) ? (votosNecessarios / perdedorData.votos) * 100 : 0;
             analise = `
                 <h3 class="font-bold mt-4 mb-2 text-secondary">Análise de Virada</h3>
-                <p class="text-sm text-text-light">Para o <strong>${perdedor}</strong> tomar esta vaga, precisaria de um adicional de <strong>${votosNecessarios.toLocaleString('pt-BR')}</strong> votos, o que equivale a um "Impulso de Campanha" de aproximadamente <strong>+${boostNecessario.toFixed(1)}%</strong>.</p>
+                <p class="text-sm">Para o <strong>${perdedor}</strong> tomar esta vaga, precisaria de um adicional de <strong>${votosNecessarios.toLocaleString('pt-BR')}</strong> votos, o que equivale a um "Impulso de Campanha" de aproximadamente <strong>+${boostNecessario.toFixed(1)}%</strong>.</p>
             `;
         }
 
         const modalHtml = `
-             <div class="p-6">
+             <div class="p-6 text-text-light">
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <h2 class="text-2xl font-bold text-danger">Análise Tática: Vaga #${vaga}</h2>
-                        <p class="text-text-light">Disputa por uma cadeira de sobra.</p>
+                        <p>Disputa por uma cadeira de sobra.</p>
                     </div>
                     <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
                 </div>
@@ -853,17 +890,17 @@
     function openLegendaEditor() {
         let optionsHtml = baseScenario.partidos.map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
         const modalHtml = `
-            <div class="p-6">
+            <div class="p-6 text-text-light">
                  <div class="flex justify-between items-start mb-4">
                     <div>
                         <h2 class="text-2xl font-bold text-secondary">Editor de Legendas</h2>
-                        <p class="text-text-light">Selecione um partido para editar sua lista de candidatos.</p>
+                        <p>Selecione um partido para editar sua lista de candidatos.</p>
                     </div>
                     <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
                 </div>
                 <div class="flex items-end gap-4">
                     <div class="flex-grow">
-                        <label for="legenda-party-select" class="text-sm font-medium text-text-light">Partido</label>
+                        <label for="legenda-party-select" class="text-sm font-medium">Partido</label>
                         <select id="legenda-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1">
                             <option value="">Selecione...</option>
                             ${optionsHtml}
@@ -1018,13 +1055,13 @@
 
             let candidatesHtml = party.candidatos.map(cand => `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 border-t border-border candidate-row" data-name="${cand.nome.toLowerCase()}">
-                    <div class="font-bold">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div>
+                    <div class="font-bold text-text-main">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div>
                     <div class="text-text-light md:text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong> Votos Totais</div>
                 </div>
             `).join('');
 
             accordionItem.innerHTML = `
-                <button class="w-full p-4 text-left font-bold flex justify-between items-center" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                <button class="w-full p-4 text-left font-bold flex justify-between items-center text-text-main" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
                     <div class="flex items-center">
                         <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div>
                         <span>${party.nome}</span>
@@ -1067,14 +1104,142 @@
     }
 
     function changeTab(tabName) {
-        ['simulador', 'candidatos'].forEach(tab => {
-            document.getElementById(`content-${tab}`).classList.toggle('hidden', tab !== tabName);
-            const button = document.querySelector(`#main-tabs button[onclick="changeTab('${tab}')"]`);
-            button.classList.toggle('active', tab !== tabName);
+        document.getElementById('content-simulador').classList.toggle('hidden', tabName !== 'simulador');
+        document.getElementById('content-candidatos').classList.toggle('hidden', tabName !== 'candidatos');
+        
+        document.querySelectorAll('#main-tabs button').forEach(button => {
+            button.classList.remove('active');
+            button.classList.add('text-text-light');
         });
+        
+        const activeButton = document.querySelector(`#main-tabs button[onclick="changeTab('${tabName}')"]`);
+        activeButton.classList.add('active');
+        activeButton.classList.remove('text-text-light');
+
         window.scrollTo(0, 0);
     }
 
+    // =================================================================================
+    // LÓGICA DO EDITOR DE LOGO E IMPRESSÃO
+    // =================================================================================
+    let logoEditorState = {
+        image: null,
+        scale: 1,
+        offsetX: 0,
+        offsetY: 0,
+        isDragging: false,
+        lastX: 0,
+        lastY: 0
+    };
+
+    function initializeLogoEditor() {
+        const logoContainer = document.getElementById('logo-container');
+        const logoUpload = document.getElementById('logo-upload');
+        logoContainer.addEventListener('click', () => logoUpload.click());
+        logoUpload.addEventListener('change', handleLogoFileSelect);
+
+        const savedLogo = localStorage.getItem('savedLogo');
+        if (savedLogo) {
+            document.getElementById('logo-img').src = savedLogo;
+        }
+
+        const canvas = document.getElementById('logo-adjust-canvas');
+        canvas.addEventListener('mousedown', (e) => {
+            logoEditorState.isDragging = true;
+            logoEditorState.lastX = e.clientX;
+            logoEditorState.lastY = e.clientY;
+        });
+        canvas.addEventListener('mouseup', () => logoEditorState.isDragging = false);
+        canvas.addEventListener('mouseleave', () => logoEditorState.isDragging = false);
+        canvas.addEventListener('mousemove', (e) => {
+            if (!logoEditorState.isDragging || !logoEditorState.image) return;
+            const dx = e.clientX - logoEditorState.lastX;
+            const dy = e.clientY - logoEditorState.lastY;
+            logoEditorState.lastX = e.clientX;
+            logoEditorState.lastY = e.clientY;
+            logoEditorState.offsetX += dx / logoEditorState.scale;
+            logoEditorState.offsetY += dy / logoEditorState.scale;
+            drawLogoOnCanvas();
+        });
+
+        document.getElementById('logo-zoom').addEventListener('input', (e) => {
+            logoEditorState.scale = parseFloat(e.target.value);
+            drawLogoOnCanvas();
+        });
+    }
+
+    function handleLogoFileSelect(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    logoEditorState.image = img;
+                    openLogoEditor();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function openLogoEditor() {
+        document.getElementById('logo-editor-modal').classList.remove('hidden');
+        logoEditorState.scale = 1;
+        logoEditorState.offsetX = 0;
+        logoEditorState.offsetY = 0;
+        document.getElementById('logo-zoom').value = 1;
+        drawLogoOnCanvas();
+    }
+
+    function closeLogoEditor() {
+        document.getElementById('logo-editor-modal').classList.add('hidden');
+        logoEditorState.image = null;
+    }
+
+    function drawLogoOnCanvas() {
+        const canvas = document.getElementById('logo-adjust-canvas');
+        const ctx = canvas.getContext('2d');
+        const { image, scale, offsetX, offsetY } = logoEditorState;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (!image) return;
+
+        ctx.save();
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        const canvasCenterX = canvas.width / 2;
+        const canvasCenterY = canvas.height / 2;
+        
+        ctx.translate(canvasCenterX, canvasCenterY);
+        ctx.scale(scale, scale);
+        
+        ctx.drawImage(image, -image.width / 2 + offsetX, -image.height / 2 + offsetY);
+        
+        ctx.restore();
+
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.beginPath();
+        ctx.arc(canvasCenterX, canvasCenterY, canvas.width / 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function saveLogo() {
+        const canvas = document.getElementById('logo-adjust-canvas');
+        const dataUrl = canvas.toDataURL('image/png');
+        document.getElementById('logo-img').src = dataUrl;
+        localStorage.setItem('savedLogo', dataUrl);
+        closeLogoEditor();
+    }
+    
+    function printReport() {
+        window.print();
+    }
 
     </script>
 </body>
