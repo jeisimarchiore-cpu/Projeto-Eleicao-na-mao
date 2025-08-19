@@ -87,10 +87,6 @@
             border-bottom-color: #2563eb;
             color: #f1f5f9;
         }
-        #logo-adjust-canvas {
-            cursor: move;
-            border-radius: 50%;
-        }
 
         /* Print Styles */
         @media print {
@@ -131,9 +127,10 @@
         <!-- Cabeçalho -->
         <header class="bg-card/50 backdrop-blur-sm sticky top-0 z-20 border-b border-border">
             <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 relative flex justify-center items-center">
-                 <div id="logo-container" class="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center w-28 cursor-pointer group">
-                    <img id="logo-img" src="https://i.imgur.com/uY34Y3A.jpeg" alt="Logo Silmara Miguel" class="h-16 w-16 rounded-full object-cover border-2 border-primary group-hover:opacity-80 transition-opacity">
-                    <input type="file" id="logo-upload" class="hidden" accept="image/*">
+                 <div id="logo-container" class="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center w-28">
+                    <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                        <span class="font-playfair font-bold text-3xl text-white">SM</span>
+                    </div>
                     <p class="font-playfair font-bold text-sm text-text-main mt-2 text-center">Silmara Miguel</p>
                 </div>
                 <div class="text-center">
@@ -274,28 +271,6 @@
         </div>
     </div>
 
-    <!-- Modal de Edição de Logo -->
-    <div id="logo-editor-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden no-print">
-        <div class="absolute inset-0 bg-black/70" onclick="closeLogoEditor()"></div>
-        <div class="bg-card border border-border rounded-lg shadow-2xl w-full max-w-md p-6 relative">
-            <h2 class="text-xl font-bold mb-4">Ajustar Imagem</h2>
-            <div class="flex justify-center mb-4">
-                <canvas id="logo-adjust-canvas" width="250" height="250" class="bg-slate-700"></canvas>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label for="logo-zoom" class="block text-sm font-medium text-text-light mb-1">Zoom</label>
-                    <input type="range" id="logo-zoom" min="0.1" max="3" value="1" step="0.05" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
-                </div>
-            </div>
-            <div class="mt-6 flex justify-end space-x-3">
-                <button onclick="closeLogoEditor()" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600">Cancelar</button>
-                <button onclick="saveLogo()" class="px-4 py-2 rounded-lg bg-primary hover:bg-blue-500 font-bold">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-
     <script>
     // =================================================================================
     // DADOS E CONFIGURAÇÕES
@@ -341,7 +316,6 @@
         baseScenario = prepareBaseScenario();
         initializeControls();
         initializeCandidatosTab();
-        initializeLogoEditor();
         updateScenario();
     });
 
@@ -1120,125 +1094,99 @@
     }
 
     // =================================================================================
-    // LÓGICA DO EDITOR DE LOGO E IMPRESSÃO
+    // LÓGICA DE IMPRESSÃO
     // =================================================================================
-    let logoEditorState = {
-        image: null,
-        scale: 1,
-        offsetX: 0,
-        offsetY: 0,
-        isDragging: false,
-        lastX: 0,
-        lastY: 0
-    };
-
-    function initializeLogoEditor() {
-        const logoContainer = document.getElementById('logo-container');
-        const logoUpload = document.getElementById('logo-upload');
-        logoContainer.addEventListener('click', () => logoUpload.click());
-        logoUpload.addEventListener('change', handleLogoFileSelect);
-
-        const savedLogo = localStorage.getItem('savedLogo');
-        if (savedLogo) {
-            document.getElementById('logo-img').src = savedLogo;
-        }
-
-        const canvas = document.getElementById('logo-adjust-canvas');
-        canvas.addEventListener('mousedown', (e) => {
-            logoEditorState.isDragging = true;
-            logoEditorState.lastX = e.clientX;
-            logoEditorState.lastY = e.clientY;
-        });
-        canvas.addEventListener('mouseup', () => logoEditorState.isDragging = false);
-        canvas.addEventListener('mouseleave', () => logoEditorState.isDragging = false);
-        canvas.addEventListener('mousemove', (e) => {
-            if (!logoEditorState.isDragging || !logoEditorState.image) return;
-            const dx = e.clientX - logoEditorState.lastX;
-            const dy = e.clientY - logoEditorState.lastY;
-            logoEditorState.lastX = e.clientX;
-            logoEditorState.lastY = e.clientY;
-            logoEditorState.offsetX += dx / logoEditorState.scale;
-            logoEditorState.offsetY += dy / logoEditorState.scale;
-            drawLogoOnCanvas();
-        });
-
-        document.getElementById('logo-zoom').addEventListener('input', (e) => {
-            logoEditorState.scale = parseFloat(e.target.value);
-            drawLogoOnCanvas();
-        });
-    }
-
-    function handleLogoFileSelect(event) {
-        const file = event.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    logoEditorState.image = img;
-                    openLogoEditor();
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function openLogoEditor() {
-        document.getElementById('logo-editor-modal').classList.remove('hidden');
-        logoEditorState.scale = 1;
-        logoEditorState.offsetX = 0;
-        logoEditorState.offsetY = 0;
-        document.getElementById('logo-zoom').value = 1;
-        drawLogoOnCanvas();
-    }
-
-    function closeLogoEditor() {
-        document.getElementById('logo-editor-modal').classList.add('hidden');
-        logoEditorState.image = null;
-    }
-
-    function drawLogoOnCanvas() {
-        const canvas = document.getElementById('logo-adjust-canvas');
-        const ctx = canvas.getContext('2d');
-        const { image, scale, offsetX, offsetY } = logoEditorState;
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        if (!image) return;
-
-        ctx.save();
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        const canvasCenterX = canvas.width / 2;
-        const canvasCenterY = canvas.height / 2;
-        
-        ctx.translate(canvasCenterX, canvasCenterY);
-        ctx.scale(scale, scale);
-        
-        ctx.drawImage(image, -image.width / 2 + offsetX, -image.height / 2 + offsetY);
-        
-        ctx.restore();
-
-        ctx.globalCompositeOperation = 'destination-in';
-        ctx.beginPath();
-        ctx.arc(canvasCenterX, canvasCenterY, canvas.width / 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.globalCompositeOperation = 'source-over';
-    }
-
-    function saveLogo() {
-        const canvas = document.getElementById('logo-adjust-canvas');
-        const dataUrl = canvas.toDataURL('image/png');
-        document.getElementById('logo-img').src = dataUrl;
-        localStorage.setItem('savedLogo', dataUrl);
-        closeLogoEditor();
-    }
     
+    // Roteador de Impressão
     function printReport() {
-        window.print();
+        const isCandidatosTabActive = !document.getElementById('content-candidatos').classList.contains('hidden');
+        if (isCandidatosTabActive) {
+            printCandidatosReport();
+        } else {
+            printSimuladorReport();
+        }
+    }
+
+    function getLogoSvgDataUrl() {
+        const svgLogo = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect width="80" height="80" rx="8" ry="8" fill="url(#grad1)" />
+            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Playfair Display, serif" font-size="36" font-weight="bold" fill="white">SM</text>
+        </svg>`;
+        return 'data:image/svg+xml;base64,' + btoa(svgLogo);
+    }
+
+    function printSimuladorReport() {
+        const { QE, totalVotosValidos, totalVotosBrancos, totalVotosNulos, cenarios, sobrasLog, totalEleitores } = currentSimulatedScenario;
+        const logoSrc = getLogoSvgDataUrl();
+        const candidateName = document.querySelector('#logo-container p').textContent;
+        const currentDate = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const abstentionRate = document.getElementById('abstention-rate').value;
+        const electorateGrowth = document.getElementById('electorate-growth').value;
+        const customParties = baseScenario.partidos.filter(p => p.customCandidatos).map(p => p.nome).join(', ') || 'Nenhuma';
+
+        let reportHtml = `
+            <!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Simulação Eleitoral</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet"><style>body{font-family:'Inter',sans-serif;background-color:#fff;color:#0f172a;margin:0;padding:0}.page{width:210mm;min-height:297mm;padding:20mm;margin:10mm auto;border:1px #d3d3d3 solid;border-radius:5px;background:#fff;box-shadow:0 0 5px rgba(0,0,0,.1);page-break-after:always}.report-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #334155;padding-bottom:1rem}.report-header img{max-width:80px;max-height:80px;border-radius:8px}.report-title h1{font-size:1.8rem;font-weight:700;margin:0;color:#1e293b}.report-title p{font-size:.9rem;margin:0;color:#475569}.section-title{font-size:1.5rem;font-weight:600;color:#1e3a8a;border-bottom:1px solid #94a3b8;padding-bottom:.5rem;margin-top:2rem;margin-bottom:1rem}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}.summary-card{background-color:#f1f5f9;border-radius:8px;padding:1rem;text-align:center;border-left:5px solid #2563eb}.summary-card p{margin:0;font-size:.8rem;color:#475569;text-transform:uppercase}.summary-card span{display:block;font-size:1.75rem;font-weight:700;color:#1e293b}.custom-table{width:100%;border-collapse:collapse;margin-top:1rem}.custom-table th,.custom-table td{border:1px solid #cbd5e1;padding:.75rem;text-align:left}.custom-table th{background-color:#e2e8f0;font-weight:600}.custom-table tr:nth-child(even){background-color:#f8fafc}.risk-card-print{border:1px solid #cbd5e1;border-left:5px solid #ef4444;border-radius:8px;padding:1rem;margin-bottom:1rem;page-break-inside:avoid}.footer{text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid #cbd5e1;font-size:.8rem;color:#64748b}@media print{html,body{width:210mm;height:297mm;margin:0;padding:0}.page{margin:0;border:initial;border-radius:initial;width:initial;min-height:initial;box-shadow:initial;background:initial;page-break-after:always}}<\/style><\/head><body><div class="page"><header class="report-header"><div class="report-title"><h1>Relatório de Simulação Eleitoral</h1><p>Cenário para as Eleições de 2026 em Santa Catarina</p></div><div class="text-right"><img src="${logoSrc}" alt="Logo"><p class="font-bold mt-2">${candidateName}</p></div></header><main><h2 class="section-title"><i class="fa-solid fa-sliders mr-2"></i>Parâmetros da Simulação</h2><div class="summary-grid"><div class="summary-card" style="border-color:#f97316"><p>Taxa de Abstenção</p><span>${abstentionRate}%</span></div><div class="summary-card" style="border-color:#f97316"><p>Cresc. do Eleitorado</p><span>${electorateGrowth}%</span></div><div class="summary-card" style="border-color:#f97316"><p>Legendas Editadas</p><span class="text-base truncate" title="${customParties}">${customParties}</span></div></div><h2 class="section-title"><i class="fa-solid fa-chart-pie mr-2"></i>Resumo do Cenário</h2><div class="summary-grid"><div class="summary-card"><p>Votos Válidos</p><span>${totalVotosValidos.toLocaleString('pt-BR')}</span></div><div class="summary-card"><p>Quociente Eleitoral</p><span>${QE.toLocaleString('pt-BR')}</span></div><div class="summary-card"><p>Eleitorado Projetado</p><span>${totalEleitores.toLocaleString('pt-BR')}</span></div><div class="summary-card" style="border-color:#64748b"><p>Votos Brancos</p><span>${totalVotosBrancos.toLocaleString('pt-BR')}</span></div><div class="summary-card" style="border-color:#64748b"><p>Votos Nulos</p><span>${totalVotosNulos.toLocaleString('pt-BR')}</span></div><div class="summary-card" style="border-color:#eab308"><p>Cadeiras em Risco</p><span>${sobrasLog.length}</span></div></div><h2 class="section-title"><i class="fa-solid fa-ranking-star mr-2"></i>Ranking de Oportunidade</h2><table class="custom-table"><thead><tr><th>Partido</th><th>Votos Totais</th><th>Vagas Diretas</th><th>Vagas de Sobra</th><th>Total de Vagas</th><th>Nota de Corte</th></tr></thead><tbody>${cenarios.filter(p=>p.totalVagas>0).sort((a,b)=>b.totalVagas-a.totalVagas).map(p=>`<tr><td>${p.nome}</td><td>${p.votos.toLocaleString('pt-BR')}</td><td>${p.vagasDiretas}</td><td>${p.vagasSobras}</td><td class="font-bold">${p.totalVagas}</td><td>${p.notaCorte.toLocaleString('pt-BR')}</td></tr>`).join('')}</tbody></table><h2 class="section-title"><i class="fa-solid fa-fire-flame-curved mr-2"></i>Análise de Cadeiras em Risco</h2><div>${sobrasLog.slice().reverse().map(log=>`<div class="risk-card-print"><h3 class="font-bold text-lg mb-2">Disputa pela Vaga #${log.vaga}</h3><div class="grid grid-cols-2 gap-4"><div><p class="text-sm text-green-700 font-semibold">GANHANDO</p><p class="font-bold text-xl">${log.vencedor}</p><p class="text-sm">Média: ${Math.ceil(log.mediaVencedor).toLocaleString('pt-BR')}</p></div><div><p class="text-sm text-gray-600 font-semibold">AMEAÇANDO</p><p class="font-bold text-xl">${log.perdedor||"N/A"}</p><p class="text-sm">Média: ${log.perdedor?Math.ceil(log.mediaPerdedor).toLocaleString('pt-BR'):"-"}</p></div></div><div class="mt-3 pt-3 border-t text-center"><p class="text-sm text-orange-600">Diferença de Média: <strong class="text-lg">${(log.perdedor?Math.ceil(log.mediaVencedor-log.mediaPerdedor):0).toLocaleString('pt-BR')} votos</strong></p></div></div>`).join('')}${sobrasLog.length===0?'<p>Nenhuma vaga de sobra foi disputada neste cenário.</p>':''}</div></main><footer class="footer">Relatório gerado pela Sala de Guerra Eleitoral v7.8 em ${currentDate} às ${currentTime}.</footer></div></body></html>`;
+        
+        const reportWindow = window.open('', '_blank');
+        reportWindow.document.write(reportHtml);
+        reportWindow.document.close();
+        reportWindow.focus(); 
+        setTimeout(() => { reportWindow.print(); reportWindow.close(); }, 500);
+    }
+
+    function printCandidatosReport() {
+        const logoSrc = getLogoSvgDataUrl();
+        const candidateName = document.querySelector('#logo-container p').textContent;
+        const currentDate = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+        const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        let partiesHtml = baseScenario.partidos.sort((a, b) => a.nome.localeCompare(b.nome)).map(party => {
+            let candidatesHtml = party.candidatos.map(cand => `
+                <tr>
+                    <td>${cand.nome}</td>
+                    <td>${cand.votos.toLocaleString('pt-BR')}</td>
+                    <td style="color: ${cand.isEleito ? '#22c55e' : '#ef4444'};">${cand.isEleito ? 'Eleito' : 'Não Eleito'}</td>
+                </tr>
+            `).join('');
+
+            return `
+                <div style="page-break-inside: avoid; margin-top: 2rem;">
+                    <h2 class="section-title" style="margin-top: 0;">
+                        <i class="fa-solid fa-flag mr-2"></i>
+                        ${party.nome} - <span style="font-weight: 400;">Total da Legenda: ${party.votosBase2022.toLocaleString('pt-BR')}</span>
+                    </h2>
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Candidato</th>
+                                <th>Votos em 2022</th>
+                                <th>Resultado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${candidatesHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }).join('');
+
+        let reportHtml = `
+            <!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório da Base de Candidatos 2022</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet"><style>body{font-family:'Inter',sans-serif;background-color:#fff;color:#0f172a;margin:0;padding:0}.page{width:210mm;min-height:297mm;padding:20mm;margin:10mm auto;border:1px #d3d3d3 solid;border-radius:5px;background:#fff;box-shadow:0 0 5px rgba(0,0,0,.1);page-break-after:always}.report-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #334155;padding-bottom:1rem}.report-header img{max-width:80px;max-height:80px;border-radius:8px}.report-title h1{font-size:1.8rem;font-weight:700;margin:0;color:#1e293b}.report-title p{font-size:.9rem;margin:0;color:#475569}.section-title{font-size:1.5rem;font-weight:600;color:#1e3a8a;border-bottom:1px solid #94a3b8;padding-bottom:.5rem;margin-top:2rem;margin-bottom:1rem}.custom-table{width:100%;border-collapse:collapse;margin-top:1rem}.custom-table th,.custom-table td{border:1px solid #cbd5e1;padding:.75rem;text-align:left;font-size:0.9rem}.custom-table th{background-color:#e2e8f0;font-weight:600}.custom-table tr:nth-child(even){background-color:#f8fafc}.footer{text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid #cbd5e1;font-size:.8rem;color:#64748b}@media print{html,body{width:210mm;height:297mm;margin:0;padding:0}.page{margin:0;border:initial;border-radius:initial;width:initial;min-height:initial;box-shadow:initial;background:initial;page-break-after:always}}<\/style><\/head><body><div class="page"><header class="report-header"><div class="report-title"><h1>Relatório da Base de Candidatos</h1><p>Dados completos das Eleições de 2022 em Santa Catarina</p></div><div class="text-right"><img src="${logoSrc}" alt="Logo"><p class="font-bold mt-2">${candidateName}</p></div></header><main>${partiesHtml}</main><footer class="footer">Relatório gerado pela Sala de Guerra Eleitoral v7.8 em ${currentDate} às ${currentTime}.</footer></div></body></html>`;
+
+        const reportWindow = window.open('', '_blank');
+        reportWindow.document.write(reportHtml);
+        reportWindow.document.close();
+        reportWindow.focus();
+        setTimeout(() => { reportWindow.print(); reportWindow.close(); }, 500);
     }
 
     </script>
