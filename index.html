@@ -148,7 +148,8 @@
             <!-- Navegação Principal -->
             <nav class="max-w-screen-2xl mx-auto flex justify-center items-center space-x-4 sm:space-x-8" id="main-tabs">
                 <button class="tab-button active font-semibold py-3 px-2 sm:px-4" onclick="changeTab('simulador')"><i class="fa-solid fa-sliders mr-2"></i>Simulador de Cenário</button>
-                <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('candidatos')"><i class="fa-solid fa-users mr-2"></i>Base de Candidatos 2022</button>
+                <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('candidatos')"><i class="fa-solid fa-users mr-2"></i>Base de Candidatos</button>
+                <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('analise')"><i class="fa-solid fa-brain mr-2"></i>Análise Estratégica</button>
             </nav>
         </header>
 
@@ -260,6 +261,34 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ABA: ANÁLISE ESTRATÉGICA -->
+            <div id="content-analise" class="hidden">
+                <div class="space-y-8">
+                    <div class="bg-card p-6 rounded-lg border border-border">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold">Análise de Puxadores de Voto (Base 2022)</h2>
+                                <p class="text-text-light mt-1">Identifica a concentração de votos nos principais candidatos de cada partido.</p>
+                            </div>
+                            <button onclick="resetAllData()" class="bg-danger hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm">
+                                <i class="fa-solid fa-undo mr-2"></i> Restaurar Dados Originais
+                            </button>
+                        </div>
+                        <div id="analise-puxadores-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <!-- Cards de análise de puxadores serão gerados aqui -->
+                        </div>
+                    </div>
+                    <div class="bg-card p-6 rounded-lg border border-border">
+                        <h2 class="text-2xl font-bold mb-4">Análise de Eficiência de Votos (Base 2022)</h2>
+                        <p class="text-text-light mb-6">Calcula o "custo" de cada cadeira conquistada pelo partido (Total de Votos / Cadeiras Eleitas). Partidos com menor custo foram mais eficientes em converter votos em representação.</p>
+                        <div id="analise-eficiencia-container" class="space-y-4">
+                            <!-- Análise de eficiência será gerada aqui -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -316,11 +345,13 @@
         baseScenario = prepareBaseScenario();
         initializeControls();
         initializeCandidatosTab();
+        initializeAnaliseTab();
         updateScenario();
     });
 
     function prepareBaseScenario() {
-        const historico2022 = DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2022);
+        // Deep copy to avoid modifying the original DADOS_ELEICOES object
+        const historico2022 = JSON.parse(JSON.stringify(DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2022)));
         const comparecimentoBase2022 = historico2022.votos_validos + historico2022.votos_brancos + historico2022.votos_nulos;
 
         const partidos = Object.keys(historico2022.partidos).map(nome => {
@@ -350,6 +381,8 @@
     function initializeControls() {
         const boostContainer = document.getElementById('party-boost-container');
         const allianceContainer = document.getElementById('alliance-party-container');
+        boostContainer.innerHTML = '';
+        allianceContainer.innerHTML = '';
         
         // Popula os dados base de 2022
         document.getElementById('base-abstention-display').textContent = (DADOS_ELEICOES.SC.de.historico[0].abstencao * 100).toFixed(1);
@@ -1129,6 +1162,7 @@
     function changeTab(tabName) {
         document.getElementById('content-simulador').classList.toggle('hidden', tabName !== 'simulador');
         document.getElementById('content-candidatos').classList.toggle('hidden', tabName !== 'candidatos');
+        document.getElementById('content-analise').classList.toggle('hidden', tabName !== 'analise');
         
         document.querySelectorAll('#main-tabs button').forEach(button => {
             button.classList.remove('active');
@@ -1141,6 +1175,198 @@
 
         window.scrollTo(0, 0);
     }
+    
+    // =================================================================================
+    // LÓGICA DA ABA DE ANÁLISE
+    // =================================================================================
+    function initializeAnaliseTab() {
+        initializePuxadoresAnalise();
+        initializeEficienciaAnalise();
+    }
+
+    function initializePuxadoresAnalise() {
+        const container = document.getElementById('analise-puxadores-container');
+        container.innerHTML = '';
+
+        baseScenario.partidos
+            .filter(p => p.votosBase2022 > 0)
+            .sort((a, b) => b.votosBase2022 - a.votosBase2022)
+            .forEach(party => {
+                const top3 = party.candidatos.slice(0, 3);
+                const top3Votes = top3.reduce((sum, cand) => sum + cand.votos, 0);
+                const percentage = (top3Votes / party.votosBase2022 * 100).toFixed(1);
+                
+                let diagnosis = '';
+                let diagnosisColor = '';
+                if (percentage >= 60) {
+                    diagnosis = 'Alta dependência dos puxadores de voto.';
+                    diagnosisColor = 'text-danger';
+                } else if (percentage >= 40) {
+                    diagnosis = 'Concentração moderada nos principais nomes.';
+                    diagnosisColor = 'text-warning';
+                } else {
+                    diagnosis = 'Votação bem distribuída entre os candidatos.';
+                    diagnosisColor = 'text-success';
+                }
+
+                const card = document.createElement('div');
+                card.className = 'bg-slate-900/50 p-4 rounded-lg border border-border flex flex-col';
+                card.innerHTML = `
+                    <div class="flex items-center mb-3">
+                        <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div>
+                        <h3 class="font-bold text-lg text-text-main">${party.nome}</h3>
+                    </div>
+                    <ul class="text-sm space-y-2 flex-grow">
+                        ${top3.map((cand, i) => `
+                            <li class="flex justify-between items-center">
+                                <span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span>
+                                <div class="flex items-center">
+                                    <span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span>
+                                    <a href="#" onclick="openTransferModal('${party.nome}', '${cand.nome.replace(/'/g, "\\'")}')" class="text-secondary hover:text-orange-400" title="Transferir Candidato"><i class="fa-solid fa-right-left"></i></a>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-border">
+                        <div class="flex justify-between text-sm font-bold mb-1">
+                            <span>Concentração nos Top 3</span>
+                            <span class="${diagnosisColor}">${percentage}%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5">
+                            <div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                        </div>
+                        <p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+    }
+
+    function initializeEficienciaAnalise() {
+        const container = document.getElementById('analise-eficiencia-container');
+        container.innerHTML = '';
+
+        const partidosComEleitos = baseScenario.partidos.map(party => {
+            const eleitos = party.candidatos.filter(c => c.isEleito).length;
+            if (eleitos > 0) {
+                return {
+                    nome: party.nome,
+                    custoPorCadeira: party.votosBase2022 / eleitos,
+                    totalVotos: party.votosBase2022,
+                    totalEleitos: eleitos
+                };
+            }
+            return null;
+        }).filter(p => p !== null);
+
+        partidosComEleitos.sort((a, b) => a.custoPorCadeira - b.custoPorCadeira);
+        
+        const maxCost = Math.max(...partidosComEleitos.map(p => p.custoPorCadeira));
+
+        partidosComEleitos.forEach(party => {
+            const barWidth = (party.custoPorCadeira / maxCost * 100);
+            const item = document.createElement('div');
+            item.className = 'bg-slate-900/50 p-3 rounded-lg';
+            item.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center">
+                    <div class="flex items-center mb-2 sm:mb-0">
+                        <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div>
+                        <span class="font-bold">${party.nome}</span>
+                    </div>
+                    <div class="text-sm text-text-light">
+                        ${party.totalEleitos} eleito(s) com ${party.totalVotos.toLocaleString('pt-BR')} votos
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <div class="flex justify-between items-center text-xs text-text-light mb-1">
+                        <span>Custo por Cadeira</span>
+                        <span class="font-bold text-lg text-primary">${Math.round(party.custoPorCadeira).toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div class="w-full bg-slate-700 rounded-full h-4">
+                        <div class="bg-primary h-4 rounded-full" style="width: ${barWidth}%"></div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function openTransferModal(sourcePartyName, candidateName) {
+        const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
+        const candidate = sourceParty.candidatos.find(c => c.nome === candidateName);
+        
+        let optionsHtml = baseScenario.partidos
+            .filter(p => p.nome !== sourcePartyName)
+            .map(p => `<option value="${p.nome}">${p.nome}</option>`)
+            .join('');
+
+        const modalHtml = `
+            <div class="p-6 text-text-light">
+                 <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-secondary">Transferir Candidato</h2>
+                        <p>Simular a mudança de partido de <strong>${candidate.nome}</strong>.</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
+                </div>
+                <div class="space-y-4">
+                    <p>De: <strong class="font-mono">${sourcePartyName}</strong></p>
+                    <div>
+                        <label for="transfer-party-select" class="text-sm font-medium">Para:</label>
+                        <select id="transfer-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1">
+                            <option value="">Selecione o partido de destino...</option>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="executeTransfer('${sourcePartyName}', '${candidate.nome.replace(/'/g, "\\'")}')">Confirmar Transferência</button>
+                </div>
+            </div>
+        `;
+        showModal(modalHtml);
+    }
+
+    function executeTransfer(sourcePartyName, candidateName) {
+        const destinationPartyName = document.getElementById('transfer-party-select').value;
+        if (!destinationPartyName) {
+            alert("Por favor, selecione um partido de destino.");
+            return;
+        }
+
+        const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
+        const destParty = baseScenario.partidos.find(p => p.nome === destinationPartyName);
+
+        const candidateIndex = sourceParty.candidatos.findIndex(c => c.nome === candidateName);
+        if (candidateIndex === -1) return; // Candidate not found
+
+        // Remove candidate from source and add to destination
+        const [candidateToMove] = sourceParty.candidatos.splice(candidateIndex, 1);
+        destParty.candidatos.push(candidateToMove);
+        destParty.candidatos.sort((a,b) => b.votos - a.votos);
+
+
+        // Recalculate base votes for both parties
+        sourceParty.votosBase2022 = sourceParty.candidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
+        destParty.votosBase2022 = destParty.candidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
+
+        // Re-render tabs and update simulation
+        closeModal();
+        initializeCandidatosTab();
+        initializeAnaliseTab();
+        updateScenario();
+    }
+    
+    function resetAllData() {
+        if (confirm("Você tem certeza que deseja restaurar todos os dados para o padrão de 2022? Todas as transferências e simulações de crescimento serão perdidas.")) {
+            baseScenario = prepareBaseScenario();
+            initializeControls();
+            initializeCandidatosTab();
+            initializeAnaliseTab();
+            updateScenario();
+        }
+    }
+
 
     // =================================================================================
     // LÓGICA DE IMPRESSÃO
