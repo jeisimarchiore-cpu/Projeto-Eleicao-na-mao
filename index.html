@@ -325,10 +325,11 @@
 
         const partidos = Object.keys(historico2022.partidos).map(nome => {
             const p2022 = historico2022.partidos[nome];
+            const candidatos = p2022.candidatos.map(c => ({ ...c, growth: 0 })).sort((a,b) => b.votos - a.votos);
             return {
                 nome,
                 votosBase2022: p2022.votos,
-                candidatos: p2022.candidatos.sort((a,b) => b.votos - a.votos),
+                candidatos: candidatos,
                 customCandidatos: null, // Para legendas personalizadas
                 boost: 0
             };
@@ -423,7 +424,11 @@
                 const ultimoEleito = eleitos.length > 0 ? eleitos[Math.min(eleitos.length, 40) - 1] : null;
                 notaCorte = ultimoEleito ? ultimoEleito.votos : 0;
             } else {
-                votosProjetadosBase = p.votosBase2022;
+                // Recalculate base votes from individual candidate growths
+                votosProjetadosBase = p.candidatos.reduce((sum, cand) => {
+                    return sum + Math.floor(cand.votos * (1 + (cand.growth || 0)));
+                }, 0);
+                
                 votosFinais = Math.floor(votosProjetadosBase * (1 + p.boost));
                 eleitos = p.candidatos.filter(c => c.isEleito);
                 const ultimoEleitoBase = eleitos[eleitos.length - 1];
@@ -1023,14 +1028,26 @@
 
             const accordionItem = document.createElement('div');
             accordionItem.className = 'bg-slate-900/50 rounded-lg party-accordion-item';
+            accordionItem.dataset.partyName = party.nome;
             
-            const totalVotosPartido = party.votosBase2022;
+            const totalVotosPartido = party.candidatos.reduce((sum, cand) => sum + cand.votos, 0);
             const totalCandidatos = party.candidatos.length;
 
-            let candidatesHtml = party.candidatos.map(cand => `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 border-t border-border candidate-row" data-name="${cand.nome.toLowerCase()}">
-                    <div class="font-bold text-text-main">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div>
-                    <div class="text-text-light md:text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong> Votos Totais</div>
+            let candidatesHtml = party.candidatos.map((cand, index) => `
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 border-t border-border candidate-row items-center" data-name="${cand.nome.toLowerCase()}">
+                    <div class="font-bold text-text-main col-span-2">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div>
+                    <div class="flex items-center gap-2 justify-end md:justify-start">
+                        <input 
+                            type="number" 
+                            value="${cand.growth * 100}" 
+                            oninput="updateCandidateGrowth('${party.nome}', ${index}, this.value)"
+                            class="w-20 bg-slate-900 p-1 rounded-lg border border-border text-right"
+                            placeholder="0"
+                        >
+                        <span class="text-sm text-text-light">%</span>
+                    </div>
+                    <div class="text-text-light text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Base</span></div>
+                    <div class="text-text-light text-right"><strong class="text-primary" id="proj-votos-${party.nome.replace(/\s/g, '')}-${index}">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Proj.</span></div>
                 </div>
             `).join('');
 
@@ -1042,7 +1059,7 @@
                     </div>
                     <div class="flex items-center">
                         <span class="text-sm font-normal text-text-light mr-4">${totalCandidatos} candidato(s)</span>
-                        <span class="text-sm font-normal text-text-light mr-4">Total da Legenda: <strong class="text-main">${totalVotosPartido.toLocaleString('pt-BR')}</strong></span>
+                        <span class="text-sm font-normal text-text-light mr-4">Total da Legenda: <strong class="text-main" id="total-legenda-${party.nome}">${totalVotosPartido.toLocaleString('pt-BR')}</strong></span>
                         <i class="fa-solid fa-chevron-down transition-transform"></i>
                     </div>
                 </button>
@@ -1076,6 +1093,38 @@
             });
         });
     }
+
+    function updateCandidateGrowth(partyName, candidateIndex, growthValue) {
+        const party = baseScenario.partidos.find(p => p.nome === partyName);
+        if (!party) return;
+
+        const candidate = party.candidatos[candidateIndex];
+        candidate.growth = parseFloat(growthValue) / 100 || 0;
+
+        // Calcula e atualiza a projeção individual
+        const projectedVotes = Math.floor(candidate.votos * (1 + candidate.growth));
+        const projectedVotesEl = document.getElementById(`proj-votos-${party.nome.replace(/\s/g, '')}-${candidateIndex}`);
+        if (projectedVotesEl) {
+            projectedVotesEl.textContent = projectedVotes.toLocaleString('pt-BR');
+        }
+
+        // Recalcula o total de votos base do partido com base no crescimento individual
+        const newPartyTotal = party.candidatos.reduce((sum, cand) => {
+            return sum + Math.floor(cand.votos * (1 + (cand.growth || 0)));
+        }, 0);
+
+        party.votosBase2022 = newPartyTotal;
+
+        // Atualiza o display do total da legenda no accordion para feedback imediato
+        const totalLegendaEl = document.getElementById(`total-legenda-${party.nome}`);
+        if (totalLegendaEl) {
+            totalLegendaEl.textContent = newPartyTotal.toLocaleString('pt-BR');
+        }
+
+        // Dispara a simulação completa
+        updateScenario();
+    }
+
 
     function changeTab(tabName) {
         document.getElementById('content-simulador').classList.toggle('hidden', tabName !== 'simulador');
