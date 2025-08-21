@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v7.8 - Base de Dados Completa</title>
+    <title>Sala de Guerra Eleitoral v7.9 - Análise com Mapa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
     <script>
+        // Tailwind CSS configuration for a professional, modern look.
         tailwind.config = {
             theme: {
                 extend: {
@@ -35,6 +37,7 @@
         }
     </script>
     <style>
+        /* Custom styles for a polished 'war room' feel */
         body {
             font-family: 'Inter', sans-serif;
             background-color: tailwind.config.theme.extend.colors.background;
@@ -45,9 +48,6 @@
         }
         input::placeholder {
             color: #94a3b8; /* slate-400 */
-        }
-        .number-dynamic {
-            transition: color 0.4s ease, transform 0.4s ease;
         }
         .party-bar {
             transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
@@ -60,12 +60,8 @@
         .clickable:hover { background-color: #334155; }
         
         /* Modal Styles */
-        .modal-overlay {
-            transition: opacity 0.3s ease;
-        }
-        .modal-content {
-            transition: transform 0.3s ease;
-        }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s ease; }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
@@ -87,44 +83,41 @@
             border-bottom-color: #2563eb;
             color: #f1f5f9;
         }
-
-        /* Print Styles */
-        @media print {
-            body {
-                background-color: #ffffff;
-                color: #000000;
-            }
-            header, aside, #content-candidatos, .no-print {
-                display: none !important;
-            }
-            main, #content-simulador, .lg\:col-span-3 {
-                display: block !important;
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .grid {
-                display: block !important;
-            }
-            .bg-card {
-                background-color: #f3f4f6 !important;
-                border: 1px solid #d1d5db !important;
-                page-break-inside: avoid;
-            }
-            .text-text-main, .text-text-light, .text-text-neutral, .font-bold {
-                color: #000 !important;
-            }
-            .text-primary { color: #2563eb !important; }
-            .text-secondary { color: #f97316 !important; }
-            .text-success { color: #22c55e !important; }
-            .text-danger { color: #ef4444 !important; }
-            .text-warning { color: #eab308 !important; }
+        
+        /* Map Styles */
+        #map-container {
+            position: relative;
+            background-color: #1e293b;
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+        }
+        .municipio {
+            stroke: #475569;
+            stroke-width: 0.5px;
+            transition: fill 0.3s ease, stroke 0.3s ease;
+        }
+        .municipio.highlight {
+            stroke: #f1f5f9;
+            stroke-width: 1.5px;
+        }
+        #map-tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 8px;
+            font-size: 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            color: #e2e8f0;
         }
     </style>
 </head>
 <body class="antialiased">
     <div class="min-h-screen">
-        <!-- Cabeçalho -->
+        <!-- Header Section -->
         <header class="bg-card/50 backdrop-blur-sm sticky top-0 z-20 border-b border-border">
             <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 relative flex justify-center items-center">
                  <div id="logo-container" class="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center w-28">
@@ -135,31 +128,27 @@
                 </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v7.8</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v7.9</span>
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
                 </div>
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 no-print">
-                    <button onclick="printReport()" class="bg-primary hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg flex items-center">
-                        <i class="fa-solid fa-print mr-2"></i> Imprimir Relatório
-                    </button>
-                </div>
             </div>
-            <!-- Navegação Principal -->
+            <!-- Main Navigation Tabs -->
             <nav class="max-w-screen-2xl mx-auto flex justify-center items-center space-x-4 sm:space-x-8" id="main-tabs">
                 <button class="tab-button active font-semibold py-3 px-2 sm:px-4" onclick="changeTab('simulador')"><i class="fa-solid fa-sliders mr-2"></i>Simulador de Cenário</button>
                 <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('candidatos')"><i class="fa-solid fa-users mr-2"></i>Base de Candidatos</button>
                 <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('analise')"><i class="fa-solid fa-brain mr-2"></i>Análise Estratégica</button>
+                <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('eleitos2024')"><i class="fa-solid fa-map-location-dot mr-2"></i>Regiões CIADESCP</button>
             </nav>
         </header>
 
         <main class="max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8">
-            <!-- ABA: SIMULADOR -->
+            <!-- TAB: SIMULATOR -->
             <div id="content-simulador">
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    <!-- Painel de Controle -->
+                    <!-- Control Panel Sidebar -->
                     <aside class="lg:col-span-1 space-y-6 no-print">
-                        <!-- PAINEL CENÁRIO ATUAL -->
+                        <!-- CURRENT SCENARIO SUMMARY -->
                         <div class="bg-card p-5 rounded-lg border border-border">
                             <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-chart-pie mr-2"></i>Cenário Atual</h2>
                             <div class="grid grid-cols-2 gap-3">
@@ -190,6 +179,7 @@
                             </div>
                         </div>
 
+                        <!-- SCENARIO CONTROLS -->
                         <div class="bg-card p-5 rounded-lg border border-border">
                             <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-sliders mr-2"></i>Painel de Controle do Cenário</h2>
                             <div class="space-y-4">
@@ -211,10 +201,12 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- CAMPAIGN BOOST CONTROLS -->
                         <div class="bg-card p-5 rounded-lg border border-border">
                             <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-chart-line mr-2"></i>Impulso de Campanha</h2>
                             <div id="party-boost-container" class="space-y-3 max-h-60 overflow-y-auto pr-2"></div>
                         </div>
+                        <!-- ALLIANCE SIMULATOR -->
                         <div class="bg-card p-5 rounded-lg border border-border">
                             <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-handshake mr-2"></i>Simulador de Alianças</h2>
                             <p class="text-xs text-text-light mb-3">Selecione 2 ou mais partidos para analisar uma possível coligação.</p>
@@ -223,6 +215,7 @@
                                 Analisar Aliança
                             </button>
                         </div>
+                        <!-- CUSTOM LIST EDITOR -->
                         <div class="bg-card p-5 rounded-lg border border-border">
                             <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-user-pen mr-2"></i>Editor de Legendas</h2>
                             <p class="text-xs text-text-light mb-3">Crie legendas personalizadas para testar cenários específicos.</p>
@@ -232,9 +225,9 @@
                         </div>
                     </aside>
 
-                    <!-- Dashboard Principal -->
+                    <!-- Main Dashboard -->
                     <section class="lg:col-span-3 space-y-8">
-                        <!-- Distribuição de Vagas e Cadeiras em Risco -->
+                        <!-- Seat Distribution and At-Risk Chairs -->
                         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
                             <div class="bg-card p-6 rounded-lg border border-border">
                                 <h2 class="text-xl font-bold mb-4">Ranking de Oportunidade</h2>
@@ -249,7 +242,7 @@
                 </div>
             </div>
             
-            <!-- ABA: BASE DE CANDIDATOS -->
+            <!-- TAB: CANDIDATE DATABASE -->
             <div id="content-candidatos" class="hidden">
                  <div class="bg-card p-6 rounded-lg border border-border">
                     <h2 class="text-2xl font-bold mb-4">Base de Candidatos (Eleições 2022)</h2>
@@ -257,12 +250,12 @@
                         <input type="text" id="candidato-search" placeholder="Pesquisar por nome do candidato..." class="w-full p-3 bg-slate-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                     </div>
                     <div id="candidatos-accordion-container" class="space-y-2">
-                        <!-- Accordion será gerado aqui -->
+                        <!-- Accordion will be generated here -->
                     </div>
                 </div>
             </div>
 
-            <!-- ABA: ANÁLISE ESTRATÉGICA -->
+            <!-- TAB: STRATEGIC ANALYSIS -->
             <div id="content-analise" class="hidden">
                 <div class="space-y-8">
                     <div class="bg-card p-6 rounded-lg border border-border">
@@ -276,15 +269,45 @@
                             </button>
                         </div>
                         <div id="analise-puxadores-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                            <!-- Cards de análise de puxadores serão gerados aqui -->
+                            <!-- Vote puller analysis cards will be generated here -->
                         </div>
                     </div>
                     <div class="bg-card p-6 rounded-lg border border-border">
                         <h2 class="text-2xl font-bold mb-4">Análise de Eficiência de Votos (Base 2022)</h2>
                         <p class="text-text-light mb-6">Calcula o "custo" de cada cadeira conquistada pelo partido (Total de Votos / Cadeiras Eleitas). Partidos com menor custo foram mais eficientes em converter votos em representação.</p>
                         <div id="analise-eficiencia-container" class="space-y-4">
-                            <!-- Análise de eficiência será gerada aqui -->
+                            <!-- Efficiency analysis will be generated here -->
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB: ELECTED IN 2024 -->
+            <div id="content-eleitos2024" class="hidden">
+                <div class="bg-card p-6 rounded-lg border border-border">
+                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold">Relatório de Eleitos 2024</h2>
+                            <p class="text-text-light mt-1">Dados dos candidatos eleitos, organizados por região e mapa interativo.</p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <label for="region-select" class="text-sm font-medium text-text-light mr-2">Filtrar por Região:</label>
+                            <select id="region-select" class="bg-slate-700 p-2 rounded-lg border border-border" onchange="filterEleitosByRegion(this.value)">
+                                <!-- Options will be populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Interactive Map -->
+                    <div id="map-container" class="w-full aspect-video mb-8">
+                        <div id="map-tooltip"></div>
+                    </div>
+
+                    <!-- 2024 Elected Summary Panel -->
+                    <div id="eleitos-2024-summary" class="mb-8"></div>
+
+                    <div id="eleitos-2024-container">
+                        <!-- Tables of elected candidates will be generated here -->
                     </div>
                 </div>
             </div>
@@ -292,17 +315,17 @@
         </main>
     </div>
 
-    <!-- Modal Genérico -->
+    <!-- Generic Modal for pop-ups -->
     <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
         <div id="modal-overlay" class="absolute inset-0 bg-black/70 modal-overlay" onclick="closeModal()"></div>
         <div id="modal-content" class="bg-card border border-border rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative modal-content">
-            <!-- Conteúdo do Modal será injetado aqui -->
+            <!-- Modal content will be injected here -->
         </div>
     </div>
 
     <script>
     // =================================================================================
-    // DADOS E CONFIGURAÇÕES
+    // DATA AND CONFIGURATIONS
     // =================================================================================
     const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 40, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4028852, votos_brancos: 289065, votos_nulos: 153702, abstencao: 0.1862, partidos: { 
         'PL': { votos: 878708, candidatos: [ { nome: 'Ana Campagnolo', votos: 196571, isEleito: true }, { nome: 'Sargento Lima', votos: 71185, isEleito: true }, { nome: 'Mauricio Eskudlark', votos: 65638, isEleito: true }, { nome: 'Jessé Lopes', votos: 55013, isEleito: true }, { nome: 'Carlos Humberto', votos: 46445, isEleito: true }, { nome: 'Ivan Naatz', votos: 45304, isEleito: true }, { nome: 'Berlanda', votos: 41488, isEleito: true }, { nome: 'Marcius Machado', votos: 39749, isEleito: true }, { nome: 'Massocco', votos: 31659, isEleito: true }, { nome: 'Oscar Gutz', votos: 26812, isEleito: true }, { nome: 'Soratto', votos: 25622, isEleito: true }, { nome: 'Maurício Peixer', votos: 22028, isEleito: false }, { nome: 'A Alex Brasil', votos: 20271, isEleito: false }, { nome: 'Jeferson Cardozo Canal Atalaia', votos: 17934, isEleito: false }, { nome: 'Rafael Laske - Mamão', votos: 15730, isEleito: false }, { nome: 'Frigo', votos: 15090, isEleito: false }, { nome: 'Leticia Mattos', votos: 11068, isEleito: false }, { nome: 'Dr. Jorge', votos: 8810, isEleito: false }, { nome: 'Neuri Mantelli', votos: 8484, isEleito: false }, { nome: 'Turibio Torres', votos: 7282, isEleito: false }, { nome: 'Alemãozinho - Claudir Henz', votos: 6893, isEleito: false }, { nome: 'Marcio Cardoso', votos: 5990, isEleito: false }, { nome: 'Roberto Salum', votos: 5082, isEleito: false }, { nome: 'Andresa Ribeiro', votos: 5071, isEleito: false }, { nome: 'A Guerreira Salete Cardoso', votos: 4829, isEleito: false }, { nome: 'Rabuja', votos: 4799, isEleito: false }, { nome: 'Maryanne Mattos', votos: 4420, isEleito: false }, { nome: 'Alex Wehrle Professor', votos: 3999, isEleito: false }, { nome: 'Eloir Dedonatti', votos: 3958, isEleito: false }, { nome: 'Enfermeiro Victor Nascimento', votos: 3700, isEleito: false }, { nome: 'Moacir Bertoldi', votos: 3688, isEleito: false }, { nome: 'Simone Lerner', votos: 2810, isEleito: false }, { nome: 'Leonardo Tatim', votos: 1650, isEleito: false }, { nome: 'Professor Hahne', votos: 1332, isEleito: false }, { nome: 'Odete Enfermeira', votos: 564, isEleito: false }, { nome: 'Engenheira Alessandra Kingeski', votos: 515, isEleito: false }, { nome: 'Betinha Thomaselli', votos: 506, isEleito: false }, { nome: 'Sueli Zincoski', votos: 407, isEleito: false }, { nome: 'Marta Efrayim', votos: 135, isEleito: false }, { nome: 'Silvana', votos: 112, isEleito: false } ] }, 
@@ -333,22 +356,27 @@
         'PV': { votos: 590, candidatos: [ { nome: 'Márcia Hasse', votos: 86, isEleito: false }, { nome: 'Frank Lôbo', votos: 63, isEleito: false } ] },
         'PCO': { votos: 0, candidatos: [ { nome: 'Arthur Cesconetto Souza', votos: 155, isEleito: false } ] }
     } } ] } } };
-    const PARTY_COLORS = { 'PL': '#0ea5e9', 'MDB': '#facc15', 'PT': '#dc2626', 'PODE': '#38bdf8', 'PP': '#0284c7', 'PSD': '#f97316', 'UNIÃO': '#1e3a8a', 'PSDB': '#0c4a6e', 'REPU': '#2563eb', 'NOVO': '#ea580c', 'PTB': '#4b5563', 'PSB': '#ef4444', 'PATRI': '#059669', 'PSOL': '#f59e0b', 'PDT': '#0d9488', 'DC': '#166534', 'SD': '#f97316', 'PSC': '#2563eb', 'CIDA': '#65a30d', 'PC do B': '#ef4444', 'AVAN': '#0ea5e9', 'PRTB': '#0891b2', 'REDE': '#22c55e', 'PSTU': '#dc2626', 'PROS': '#f97316', 'PV': '#22c55e', 'PCO': '#7f1d1d' };
+    const PARTY_COLORS = { 'PL': '#0ea5e9', 'MDB': '#facc15', 'PT': '#dc2626', 'PODE': '#38bdf8', 'PP': '#0284c7', 'PSD': '#f97316', 'UNIÃO': '#1e3a8a', 'PSDB': '#0c4a6e', 'REPU': '#2563eb', 'NOVO': '#ea580c', 'PTB': '#4b5563', 'PSB': '#ef4444', 'PATRI': '#059669', 'PSOL': '#f59e0b', 'PDT': '#0d9488', 'DC': '#166534', 'SD': '#f97316', 'PSC': '#2563eb', 'CIDA': '#65a30d', 'PC do B': '#ef4444', 'AVAN': '#0ea5e9', 'PRTB': '#0891b2', 'REDE': '#22c55e', 'PSTU': '#dc2626', 'PROS': '#f97316', 'PV': '#22c55e', 'PCO': '#7f1d1d', 'PRD': '#5a2d82', 'PMB': '#f4a460', 'PODEMO': '#00ced1' };
     
     let baseScenario = {};
     let currentSimulatedScenario = {};
 
     // =================================================================================
-    // LÓGICA PRINCIPAL
+    // MAIN LOGIC
     // =================================================================================
     document.addEventListener('DOMContentLoaded', () => {
         baseScenario = prepareBaseScenario();
         initializeControls();
         initializeCandidatosTab();
         initializeAnaliseTab();
+        initializeEleitos2024Tab();
         updateScenario();
     });
 
+    /**
+     * Prepares the initial scenario data from the raw 2022 election results.
+     * This function creates a clean, workable data structure for the simulator.
+     */
     function prepareBaseScenario() {
         // Deep copy to avoid modifying the original DADOS_ELEICOES object
         const historico2022 = JSON.parse(JSON.stringify(DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2022)));
@@ -361,7 +389,7 @@
                 nome,
                 votosBase2022: p2022.votos,
                 candidatos: candidatos,
-                customCandidatos: null, // Para legendas personalizadas
+                customCandidatos: null, // For custom candidate lists
                 boost: 0
             };
         });
@@ -378,13 +406,16 @@
         };
     }
     
+    /**
+     * Initializes all the interactive controls in the sidebar (boost sliders, alliance checkboxes).
+     */
     function initializeControls() {
         const boostContainer = document.getElementById('party-boost-container');
         const allianceContainer = document.getElementById('alliance-party-container');
         boostContainer.innerHTML = '';
         allianceContainer.innerHTML = '';
         
-        // Popula os dados base de 2022
+        // Populate the base 2022 data displays
         document.getElementById('base-abstention-display').textContent = (DADOS_ELEICOES.SC.de.historico[0].abstencao * 100).toFixed(1);
         document.getElementById('base-electorate-display').textContent = DADOS_ELEICOES.SC.de.historico[0].eleitorado.toLocaleString('pt-BR');
 
@@ -415,6 +446,10 @@
         });
     }
 
+    /**
+     * Main trigger function. Called whenever a control is changed.
+     * It reads all control values, calculates the new scenario, and calls rendering functions.
+     */
     function updateScenario() {
         const abstentionRate = parseFloat(document.getElementById('abstention-rate').value) / 100;
         const electorateGrowth = parseFloat(document.getElementById('electorate-growth').value) / 100;
@@ -434,6 +469,13 @@
         renderAll(currentSimulatedScenario);
     }
 
+    /**
+     * The core calculation engine of the simulator.
+     * @param {number} abstentionRate - The simulated abstention rate (e.g., 0.186).
+     * @param {number} electorateGrowth - The simulated electorate growth (e.g., 0.05).
+     * @param {string[]} [allianceParties=[]] - An array of party names to be treated as a single alliance.
+     * @returns {object} The complete simulated scenario object.
+     */
     function calculateSimulatedScenario(abstentionRate, electorateGrowth, allianceParties = []) {
         const eleitoradoProjetado = Math.floor(baseScenario.eleitoradoBase2022 * (1 + electorateGrowth));
         const comparecimentoProjetado = Math.floor(eleitoradoProjetado * (1 - abstentionRate));
@@ -452,12 +494,11 @@
 
             if (p.customCandidatos) {
                 votosProjetadosBase = p.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
-                votosFinais = votosProjetadosBase; // Boost is disabled for custom lists
+                votosFinais = votosProjetadosBase;
                 eleitos = p.customCandidatos.slice();
                 const ultimoEleito = eleitos.length > 0 ? eleitos[Math.min(eleitos.length, 40) - 1] : null;
                 notaCorte = ultimoEleito ? ultimoEleito.votos : 0;
             } else {
-                // Recalculate base votes from individual candidate growths
                 votosProjetadosBase = p.candidatos.reduce((sum, cand) => {
                     return sum + Math.floor(cand.votos * (1 + (cand.growth || 0)));
                 }, 0);
@@ -491,7 +532,7 @@
             partidosSimulados = [allianceData, ...remainingParties];
         }
 
-        const distributionResult = distributeVagas(partidosSimulados, QE, votosValidosProjetado, eleitoradoProjetado);
+        const distributionResult = distributeVagas(partidosSimulados, QE);
         
         return { 
             ...distributionResult,
@@ -500,11 +541,10 @@
             totalVotosBrancos: votosBrancosProjetado,
             totalVotosNulos: votosNulosProjetado,
             totalEleitores: eleitoradoProjetado,
-            comparecimentoProjetado: comparecimentoProjetado
         };
     }
 
-    function distributeVagas(partidos, QE, totalVotos, totalEleitores) {
+    function distributeVagas(partidos, QE) {
         let cenarios = JSON.parse(JSON.stringify(partidos));
         let totalVagasDiretas = 0;
 
@@ -547,12 +587,11 @@
     }
     
     // =================================================================================
-    // FUNÇÕES DE RENDERIZAÇÃO
+    // RENDERING FUNCTIONS
     // =================================================================================
     function renderAll(simulatedScenario) {
         const { QE, totalVotosValidos, totalVotosBrancos, totalVotosNulos, cenarios, sobrasLog } = simulatedScenario;
 
-        // --- Update summary panel ---
         document.getElementById('summary-vv').textContent = totalVotosValidos.toLocaleString('pt-BR');
         document.getElementById('summary-vb').textContent = totalVotosBrancos.toLocaleString('pt-BR');
         document.getElementById('summary-vn').textContent = totalVotosNulos.toLocaleString('pt-BR');
@@ -572,7 +611,7 @@
         const sorted = [...cenarios].filter(p => p.totalVagas > 0).sort((a, b) => b.totalVagas - a.totalVagas);
 
         sorted.forEach(p => {
-            const color = PARTY_COLORS[p.nome] || '#64748b';
+            const color = PARTY_COLORS[p.nome.split(' ')[0]] || '#64748b';
             const item = document.createElement('div');
             item.className = 'p-2 rounded-lg clickable';
             item.setAttribute('onclick', `showPartyModal('${p.nome}')`);
@@ -635,20 +674,15 @@
     }
     
     // =================================================================================
-    // LÓGICA DOS MODAIS
+    // MODAL LOGIC
     // =================================================================================
     function showModal(content) {
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
-        const modalOverlay = document.getElementById('modal-overlay');
-        
         modalContent.innerHTML = content;
         modal.classList.remove('hidden');
-        
         setTimeout(() => {
-            modalOverlay.classList.remove('opacity-0');
-            modalOverlay.classList.add('opacity-100');
-            modalContent.classList.remove('opacity-0', 'scale-95');
+            document.getElementById('modal-overlay').classList.add('opacity-100');
             modalContent.classList.add('opacity-100', 'scale-100');
         }, 10);
     }
@@ -656,13 +690,8 @@
     function closeModal() {
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
-        const modalOverlay = document.getElementById('modal-overlay');
-
-        modalOverlay.classList.remove('opacity-100');
-        modalOverlay.classList.add('opacity-0');
+        document.getElementById('modal-overlay').classList.remove('opacity-100');
         modalContent.classList.remove('opacity-100', 'scale-100');
-        modalContent.classList.add('opacity-0', 'scale-95');
-
         setTimeout(() => {
             modal.classList.add('hidden');
             modalContent.innerHTML = '';
@@ -673,7 +702,7 @@
         const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
         if (!partyData) return;
 
-        const color = PARTY_COLORS[partyName] || '#64748b';
+        const color = PARTY_COLORS[partyName.split(' ')[0]] || '#64748b';
         
         const diretas = Array.from({ length: partyData.vagasDiretas }, (_, i) => i);
         const sobras = Array.from({ length: partyData.vagasSobras }, (_, i) => i + partyData.vagasDiretas);
@@ -681,87 +710,19 @@
         const generateCandidateHtml = (index) => {
             const candidato = partyData.eleitos2022[index];
             if (!candidato) {
-                return `
-                    <li class="bg-background p-2 rounded-md opacity-70">
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-sm">${index + 1}. Nova Liderança</span>
-                            <span class="font-bold text-lg text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</span>
-                        </div>
-                        <div class="text-xs text-text-light flex justify-between items-center mt-1">
-                            <span>Votos Base: N/A</span>
-                            <span>Meta Mínima</span>
-                        </div>
-                    </li>
-                `;
+                return `<li class="bg-background p-2 rounded-md opacity-70"><div class="flex justify-between items-center"><span class="font-bold text-sm">${index + 1}. Nova Liderança</span><span class="font-bold text-lg text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</span></div><div class="text-xs text-text-light flex justify-between items-center mt-1"><span>Votos Base: N/A</span><span>Meta Mínima</span></div></li>`;
             }
             const votosProjetados = partyData.customCandidatos ? candidato.votos : Math.floor(candidato.votos * (1 + partyData.boost));
             const diff = votosProjetados - partyData.notaCorte;
-            return `
-                <li class="bg-background p-2 rounded-md">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-sm">${index + 1}. ${candidato.nome}</span>
-                        <span class="font-bold text-lg text-primary">${votosProjetados.toLocaleString('pt-BR')}</span>
-                    </div>
-                    <div class="text-xs text-text-light flex justify-between items-center mt-1">
-                        <span>Votos Base: ${candidato.votos.toLocaleString('pt-BR')}</span>
-                        <span class="${diff >= 0 ? 'text-success' : 'text-danger'}">
-                            ${diff >= 0 ? '+' : ''}${diff.toLocaleString('pt-BR')} vs. NC
-                        </span>
-                    </div>
-                </li>
-            `;
+            return `<li class="bg-background p-2 rounded-md"><div class="flex justify-between items-center"><span class="font-bold text-sm">${index + 1}. ${candidato.nome}</span><span class="font-bold text-lg text-primary">${votosProjetados.toLocaleString('pt-BR')}</span></div><div class="text-xs text-text-light flex justify-between items-center mt-1"><span>Votos Base: ${candidato.votos.toLocaleString('pt-BR')}</span><span class="${diff >= 0 ? 'text-success' : 'text-danger'}">${diff >= 0 ? '+' : ''}${diff.toLocaleString('pt-BR')} vs. NC</span></div></li>`;
         };
 
-        const diretasHtml = diretas.length > 0 ? diretas.map(generateCandidateHtml).join('') : '<li class="text-sm text-text-light text-center p-2">Nenhuma cadeira direta conquistada.</li>';
-        const sobrasHtml = sobras.length > 0 ? sobras.map(generateCandidateHtml).join('') : '<li class="text-sm text-text-light text-center p-2">Nenhuma cadeira de sobra conquistada.</li>';
+        const diretasHtml = diretas.length > 0 ? diretas.map(generateCandidateHtml).join('') : '<li class="text-sm text-text-light text-center p-2">Nenhuma cadeira direta.</li>';
+        const sobrasHtml = sobras.length > 0 ? sobras.map(generateCandidateHtml).join('') : '<li class="text-sm text-text-light text-center p-2">Nenhuma cadeira de sobra.</li>';
         
         const ultimoEleitoBase = partyData.eleitos2022 && partyData.eleitos2022.length > 0 ? partyData.eleitos2022[partyData.eleitos2022.length - 1] : null;
-        const ultimoEleitoVotosStr = ultimoEleitoBase ? ultimoEleitoBase.votos.toLocaleString('pt-BR') : 'N/A';
 
-        const modalHtml = `
-            <div class="p-6 text-text-light">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 rounded-full mr-3" style="background-color: ${color}"></div>
-                        <div>
-                            <h2 class="text-2xl font-bold text-text-main">${partyName}</h2>
-                            <p>Dossiê do Partido no Cenário Atual</p>
-                        </div>
-                    </div>
-                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div class="bg-background p-4 rounded-lg">
-                        <h3 class="font-bold mb-2 text-text-main">Composição dos Votos</h3>
-                        <ul class="text-sm space-y-2 font-mono">
-                            <li class="flex justify-between"><span>Base de Votos (2022):</span> <span>${(partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li>
-                            <li class="flex justify-between"><span>Impulso (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li>
-                            <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL PROJETADO:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li>
-                        </ul>
-                    </div>
-                     <div class="bg-background p-4 rounded-lg">
-                        <h3 class="font-bold mb-2 text-text-main">Cálculo da Nota de Corte</h3>
-                        <ul class="text-sm space-y-2 font-mono">
-                            <li class="flex justify-between"><span>Último Eleito (Base):</span> <span>${ultimoEleitoVotosStr}</span></li>
-                            <li class="flex justify-between"><span>Impulso de Campanha:</span> <span>${(partyData.boost * 100).toFixed(0)}%</span></li>
-                            <li class="flex justify-between border-t border-border pt-2 mt-2"><strong>META PROJETADA:</strong> <strong class="text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</strong></li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-background p-4 rounded-lg">
-                        <h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-bolt text-primary mr-1"></i>Cadeiras Diretas (${diretas.length})</h3>
-                        <ul class="text-sm space-y-2">${diretasHtml}</ul>
-                    </div>
-                    <div class="bg-background p-4 rounded-lg">
-                        <h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-shuffle text-warning mr-1"></i>Cadeiras de Sobra (${sobras.length})</h3>
-                        <ul class="text-sm space-y-2">${sobrasHtml}</ul>
-                    </div>
-                </div>
-            </div>
-        `;
+        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div class="flex items-center"><div class="w-8 h-8 rounded-full mr-3" style="background-color: ${color}"></div><div><h2 class="text-2xl font-bold text-text-main">${partyName}</h2><p>Dossiê do Partido</p></div></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main">Votos</h3><ul class="text-sm space-y-2 font-mono"><li class="flex justify-between"><span>Base (2022):</span> <span>${(partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li><li class="flex justify-between"><span>Impulso (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li><li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li></ul></div><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main">Nota de Corte</h3><ul class="text-sm space-y-2 font-mono"><li class="flex justify-between"><span>Último Eleito (Base):</span> <span>${ultimoEleitoBase ? ultimoEleitoBase.votos.toLocaleString('pt-BR') : 'N/A'}</span></li><li class="flex justify-between"><span>Impulso:</span> <span>${(partyData.boost * 100).toFixed(0)}%</span></li><li class="flex justify-between border-t border-border pt-2 mt-2"><strong>META:</strong> <strong class="text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</strong></li></ul></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-bolt text-primary mr-1"></i>Diretas (${diretas.length})</h3><ul class="text-sm space-y-2">${diretasHtml}</ul></div><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-shuffle text-warning mr-1"></i>Sobras (${sobras.length})</h3><ul class="text-sm space-y-2">${sobrasHtml}</ul></div></div></div>`;
         showModal(modalHtml);
     }
 
@@ -772,61 +733,24 @@
         const { vencedor, perdedor, mediaVencedor, mediaPerdedor, vaga } = log;
         const diff = perdedor ? Math.ceil(mediaVencedor - mediaPerdedor) : 0;
         
-        const vencedorData = currentSimulatedScenario.cenarios.find(p => p.nome === vencedor);
         const perdedorData = currentSimulatedScenario.cenarios.find(p => p.nome === perdedor);
 
         let analise = '';
         if (perdedorData) {
             const votosNecessarios = Math.ceil((mediaVencedor - perdedorData.mediaVotos) * (perdedorData.totalVagas + 1));
             const boostNecessario = (perdedorData.votos > 0) ? (votosNecessarios / perdedorData.votos) * 100 : 0;
-            analise = `
-                <h3 class="font-bold mt-4 mb-2 text-secondary">Análise de Virada</h3>
-                <p class="text-sm">Para o <strong>${perdedor}</strong> tomar esta vaga, precisaria de um adicional de <strong>${votosNecessarios.toLocaleString('pt-BR')}</strong> votos, o que equivale a um "Impulso de Campanha" de aproximadamente <strong>+${boostNecessario.toFixed(1)}%</strong>.</p>
-            `;
+            analise = `<h3 class="font-bold mt-4 mb-2 text-secondary">Análise de Virada</h3><p class="text-sm">Para o <strong>${perdedor}</strong> tomar esta vaga, precisaria de <strong>${votosNecessarios.toLocaleString('pt-BR')}</strong> votos a mais, um "Impulso" de <strong>+${boostNecessario.toFixed(1)}%</strong>.</p>`;
         }
 
-        const modalHtml = `
-             <div class="p-6 text-text-light">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-danger">Análise Tática: Vaga #${vaga}</h2>
-                        <p>Disputa por uma cadeira de sobra.</p>
-                    </div>
-                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-success/10 p-4 rounded-lg border border-success/30">
-                        <p class="text-sm font-bold text-success">CONQUISTANDO A VAGA</p>
-                        <p class="text-xl font-bold">${vencedor}</p>
-                        <p class="font-mono text-lg">${Math.ceil(mediaVencedor).toLocaleString('pt-BR')} <span class="text-xs text-text-light"> Média de Votos</span></p>
-                    </div>
-                    <div class="bg-warning/10 p-4 rounded-lg border border-warning/30">
-                        <p class="text-sm font-bold text-warning">AMEAÇA IMEDIATA</p>
-                        <p class="text-xl font-bold">${perdedor || 'N/A'}</p>
-                        <p class="font-mono text-lg">${perdedor ? Math.ceil(mediaPerdedor).toLocaleString('pt-BR') : '-'} <span class="text-xs text-text-light"> Média de Votos</span></p>
-                    </div>
-                </div>
-
-                <div class="mt-4 text-center bg-background p-3 rounded-lg">
-                    <p class="text-sm text-text-light">Diferença de Média para Virada</p>
-                    <p class="text-2xl font-bold text-secondary">${diff.toLocaleString('pt-BR')} Votos</p>
-                </div>
-                
-                <div class="bg-background p-4 rounded-lg mt-4">
-                    ${analise}
-                </div>
-             </div>
-        `;
+        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-danger">Análise Tática: Vaga #${vaga}</h2><p>Disputa por uma cadeira de sobra.</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="grid grid-cols-2 gap-4"><div class="bg-success/10 p-4 rounded-lg border border-success/30"><p class="text-sm font-bold text-success">GANHANDO</p><p class="text-xl font-bold">${vencedor}</p><p class="font-mono text-lg">${Math.ceil(mediaVencedor).toLocaleString('pt-BR')} <span class="text-xs text-text-light"> Média</span></p></div><div class="bg-warning/10 p-4 rounded-lg border border-warning/30"><p class="text-sm font-bold text-warning">AMEAÇA</p><p class="text-xl font-bold">${perdedor || 'N/A'}</p><p class="font-mono text-lg">${perdedor ? Math.ceil(mediaPerdedor).toLocaleString('pt-BR') : '-'} <span class="text-xs text-text-light"> Média</span></p></div></div><div class="mt-4 text-center bg-background p-3 rounded-lg"><p class="text-sm text-text-light">Diferença de Média</p><p class="text-2xl font-bold text-secondary">${diff.toLocaleString('pt-BR')} Votos</p></div><div class="bg-background p-4 rounded-lg mt-4">${analise}</div></div>`;
         showModal(modalHtml);
     }
     
     // =================================================================================
-    // LÓGICA DO SIMULADOR DE ALIANÇAS
+    // ALLIANCE SIMULATOR LOGIC
     // =================================================================================
     function updateAllianceButton() {
-        const selected = document.querySelectorAll('.alliance-checkbox:checked').length;
-        document.getElementById('alliance-button').disabled = selected < 2;
+        document.getElementById('alliance-button').disabled = document.querySelectorAll('.alliance-checkbox:checked').length < 2;
     }
 
     function simularAlianca() {
@@ -845,9 +769,7 @@
         let vagasSeparados = 0;
         selectedParties.forEach(partyName => {
             const baselineParty = baselineScenario.cenarios.find(p => p.nome === partyName);
-            if (baselineParty) {
-                vagasSeparados += baselineParty.totalVagas;
-            }
+            if (baselineParty) vagasSeparados += baselineParty.totalVagas;
         });
 
         const ganhoLiquido = vagasAlianca - vagasSeparados;
@@ -863,66 +785,17 @@
             }
         });
 
-        const modalHtml = `
-            <div class="p-6">
-                 <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-secondary">Análise de Aliança</h2>
-                        <p class="text-text-light">${selectedParties.join(' + ')}</p>
-                    </div>
-                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
-                </div>
-                <div class="grid grid-cols-2 gap-4 text-center">
-                    <div class="bg-background p-4 rounded-lg">
-                        <p class="text-sm text-text-light">Vagas (Separados)</p>
-                        <p class="text-4xl font-bold">${vagasSeparados}</p>
-                    </div>
-                    <div class="bg-primary/20 p-4 rounded-lg">
-                        <p class="text-sm text-primary">Vagas (Aliança)</p>
-                        <p class="text-4xl font-bold text-primary">${vagasAlianca}</p>
-                    </div>
-                </div>
-                <div class="mt-4 text-center bg-background p-3 rounded-lg">
-                    <p class="text-sm text-text-light">Ganho Líquido</p>
-                    <p class="text-2xl font-bold ${ganhoLiquido > 0 ? 'text-success' : ganhoLiquido < 0 ? 'text-danger' : ''}">${ganhoLiquido > 0 ? '+' : ''}${ganhoLiquido} Vaga(s)</p>
-                </div>
-                <div class="mt-4 bg-background p-4 rounded-lg">
-                    <h3 class="font-bold mb-2">Impacto no Cenário</h3>
-                    <ul class="text-sm space-y-2">${impactoHtml || '<li class="text-text-light">Nenhum outro partido foi impactado.</li>'}</ul>
-                </div>
-            </div>
-        `;
+        const modalHtml = `<div class="p-6"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">Análise de Aliança</h2><p class="text-text-light">${selectedParties.join(' + ')}</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="grid grid-cols-2 gap-4 text-center"><div class="bg-background p-4 rounded-lg"><p class="text-sm text-text-light">Vagas (Separados)</p><p class="text-4xl font-bold">${vagasSeparados}</p></div><div class="bg-primary/20 p-4 rounded-lg"><p class="text-sm text-primary">Vagas (Aliança)</p><p class="text-4xl font-bold text-primary">${vagasAlianca}</p></div></div><div class="mt-4 text-center bg-background p-3 rounded-lg"><p class="text-sm text-text-light">Ganho Líquido</p><p class="text-2xl font-bold ${ganhoLiquido > 0 ? 'text-success' : ganhoLiquido < 0 ? 'text-danger' : ''}">${ganhoLiquido > 0 ? '+' : ''}${ganhoLiquido} Vaga(s)</p></div><div class="mt-4 bg-background p-4 rounded-lg"><h3 class="font-bold mb-2">Impacto no Cenário</h3><ul class="text-sm space-y-2">${impactoHtml || '<li class="text-text-light">Nenhum outro partido foi impactado.</li>'}</ul></div></div>`;
         showModal(modalHtml);
     }
     
     // =================================================================================
-    // LÓGICA DO EDITOR DE LEGENDAS
+    // CUSTOM LIST EDITOR LOGIC
     // =================================================================================
     
     function openLegendaEditor() {
         let optionsHtml = baseScenario.partidos.map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
-        const modalHtml = `
-            <div class="p-6 text-text-light">
-                 <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-secondary">Editor de Legendas</h2>
-                        <p>Selecione um partido para editar sua lista de candidatos.</p>
-                    </div>
-                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
-                </div>
-                <div class="flex items-end gap-4">
-                    <div class="flex-grow">
-                        <label for="legenda-party-select" class="text-sm font-medium">Partido</label>
-                        <select id="legenda-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1">
-                            <option value="">Selecione...</option>
-                            ${optionsHtml}
-                        </select>
-                    </div>
-                    <button class="bg-primary px-4 py-2 rounded-lg" onclick="loadPartyEditor()">Carregar</button>
-                </div>
-                <div id="legenda-editor-content" class="mt-4"></div>
-            </div>
-        `;
+        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">Editor de Legendas</h2><p>Edite a lista de candidatos de um partido.</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="flex items-end gap-4"><div class="flex-grow"><label for="legenda-party-select" class="text-sm font-medium">Partido</label><select id="legenda-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1"><option value="">Selecione...</option>${optionsHtml}</select></div><button class="bg-primary px-4 py-2 rounded-lg" onclick="loadPartyEditor()">Carregar</button></div><div id="legenda-editor-content" class="mt-4"></div></div>`;
         showModal(modalHtml);
     }
 
@@ -933,44 +806,20 @@
         const partyData = baseScenario.partidos.find(p => p.nome === partyName);
         const candidates = partyData.customCandidatos || partyData.candidatos;
         
-        let candidatesHtml = candidates.map((cand, index) => `
-            <div class="flex items-center gap-2" data-candidate-index="${index}">
-                <input type="text" placeholder="Nome do Candidato" value="${cand.nome}" class="w-full bg-slate-900 p-2 rounded-lg border border-border">
-                <input type="number" placeholder="Votos" value="${cand.votos}" class="w-1/2 bg-slate-900 p-2 rounded-lg border border-border">
-                <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button>
-                <button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar Candidato" onclick="migrateCandidate(this, '${partyName}', ${index})"><i class="fa-solid fa-right-left"></i></button>
-            </div>
-        `).join('');
+        let candidatesHtml = candidates.map((cand, index) => `<div class="flex items-center gap-2" data-candidate-index="${index}"><input type="text" placeholder="Nome" value="${cand.nome}" class="w-full bg-slate-900 p-2 rounded-lg border border-border"><input type="number" placeholder="Votos" value="${cand.votos}" class="w-1/2 bg-slate-900 p-2 rounded-lg border border-border"><button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button><button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidate(this, '${partyName}', ${index})"><i class="fa-solid fa-right-left"></i></button></div>`).join('');
 
-        const editorContent = `
-            <div id="candidate-list" class="space-y-2 max-h-64 overflow-y-auto pr-2">${candidatesHtml}</div>
-            <button class="mt-2 text-sm text-primary" onclick="addCandidateRow()"><i class="fa-solid fa-plus mr-2"></i>Adicionar Candidato</button>
-            <div class="mt-4 flex justify-between">
-                <button class="text-sm text-danger" onclick="resetLegenda('${partyName}')">Restaurar Padrão (2022)</button>
-                <div>
-                    <button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveLegenda('${partyName}')">Salvar e Simular</button>
-                </div>
-            </div>
-        `;
-        document.getElementById('legenda-editor-content').innerHTML = editorContent;
+        document.getElementById('legenda-editor-content').innerHTML = `<div id="candidate-list" class="space-y-2 max-h-64 overflow-y-auto pr-2">${candidatesHtml}</div><button class="mt-2 text-sm text-primary" onclick="addCandidateRow()"><i class="fa-solid fa-plus mr-2"></i>Adicionar</button><div class="mt-4 flex justify-between"><button class="text-sm text-danger" onclick="resetLegenda('${partyName}')">Restaurar Padrão</button><div><button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveLegenda('${partyName}')">Salvar</button></div></div>`;
     }
 
     function addCandidateRow() {
         const list = document.getElementById('candidate-list');
         const newRow = document.createElement('div');
         newRow.className = 'flex items-center gap-2';
-        newRow.innerHTML = `
-            <input type="text" placeholder="Nome do Candidato" class="w-full bg-slate-900 p-2 rounded-lg border border-border">
-            <input type="number" placeholder="Votos" class="w-1/2 bg-slate-900 p-2 rounded-lg border border-border">
-            <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button>
-            <div class="w-10"></div>
-        `;
+        newRow.innerHTML = `<input type="text" placeholder="Nome" class="w-full bg-slate-900 p-2 rounded-lg border border-border"><input type="number" placeholder="Votos" class="w-1/2 bg-slate-900 p-2 rounded-lg border border-border"><button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button><div class="w-10"></div>`;
         list.appendChild(newRow);
     }
 
-    function removeCandidateRow(button) {
-        button.parentElement.remove();
-    }
+    function removeCandidateRow(button) { button.parentElement.remove(); }
 
     function saveLegenda(partyName) {
         const partyData = baseScenario.partidos.find(p => p.nome === partyName);
@@ -978,10 +827,8 @@
         const newCandidatos = [];
         let totalVotes = 0;
         rows.forEach(row => {
-            const nameInput = row.children[0];
-            const votesInput = row.children[1];
-            const name = nameInput.value.trim();
-            const votes = parseInt(votesInput.value, 10) || 0;
+            const name = row.children[0].value.trim();
+            const votes = parseInt(row.children[1].value, 10) || 0;
             if (name && votes > 0) {
                 newCandidatos.push({ nome: name, votos: votes });
                 totalVotes += votes;
@@ -990,14 +837,10 @@
 
         newCandidatos.sort((a,b) => b.votos - a.votos);
         partyData.customCandidatos = newCandidatos;
-        partyData.votosBase2022 = totalVotes; // Override base votes with the sum of custom candidates
+        partyData.votosBase2022 = totalVotes;
         
-        // Disable boost for this party as it's now manually controlled
         const boostInput = document.getElementById(`boost-${partyName}`);
-        if(boostInput) {
-            boostInput.value = 0;
-            boostInput.disabled = true;
-        }
+        if(boostInput) { boostInput.value = 0; boostInput.disabled = true; }
 
         closeModal();
         updateScenario();
@@ -1006,29 +849,21 @@
     function resetLegenda(partyName) {
         const partyData = baseScenario.partidos.find(p => p.nome === partyName);
         partyData.customCandidatos = null;
-        partyData.votosBase2022 = DADOS_ELEICOES.SC.de.historico[0].partidos[partyName].votos; // Restore original base votes
-        
+        partyData.votosBase2022 = DADOS_ELEICOES.SC.de.historico[0].partidos[partyName].votos;
         const boostInput = document.getElementById(`boost-${partyName}`);
-        if(boostInput) {
-            boostInput.disabled = false;
-        }
-        
-        loadPartyEditor(); // Reload editor to show default
+        if(boostInput) boostInput.disabled = false;
+        loadPartyEditor();
     }
     
     function migrateCandidate(button, fromPartyName, candidateIndex) {
-        const toPartyName = prompt("Digite a sigla do partido de destino:");
-        if (!toPartyName || toPartyName.trim() === '' || toPartyName.toUpperCase() === fromPartyName) return;
+        const toPartyName = prompt("Sigla do partido de destino:");
+        if (!toPartyName || toPartyName.trim().toUpperCase() === fromPartyName) return;
 
         const toParty = baseScenario.partidos.find(p => p.nome.toUpperCase() === toPartyName.toUpperCase());
-        if (!toParty) {
-            alert("Partido de destino não encontrado.");
-            return;
-        }
+        if (!toParty) { alert("Partido não encontrado."); return; }
 
         const fromParty = baseScenario.partidos.find(p => p.nome === fromPartyName);
         
-        // Garante que ambos os partidos usem listas customizadas a partir de agora
         if (!fromParty.customCandidatos) fromParty.customCandidatos = JSON.parse(JSON.stringify(fromParty.candidatos));
         if (!toParty.customCandidatos) toParty.customCandidatos = JSON.parse(JSON.stringify(toParty.candidatos));
 
@@ -1036,21 +871,19 @@
         toParty.customCandidatos.push(candidate);
         toParty.customCandidatos.sort((a, b) => b.votos - a.votos);
 
-        // Recalcula os votos base de ambos os partidos
         fromParty.votosBase2022 = fromParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
         toParty.votosBase2022 = toParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
         
-        // Desabilita o boost para ambos
         const boostInputFrom = document.getElementById(`boost-${fromParty.nome}`);
         if(boostInputFrom) boostInputFrom.disabled = true;
         const boostInputTo = document.getElementById(`boost-${toParty.nome}`);
         if(boostInputTo) boostInputTo.disabled = true;
 
-        loadPartyEditor(); // Recarrega o editor do partido de origem
+        loadPartyEditor();
     }
 
     // =================================================================================
-    // LÓGICA DA ABA DE CANDIDATOS
+    // CANDIDATE TAB LOGIC
     // =================================================================================
     function initializeCandidatosTab() {
         const container = document.getElementById('candidatos-accordion-container');
@@ -1058,71 +891,26 @@
 
         baseScenario.partidos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(party => {
             const color = PARTY_COLORS[party.nome] || '#64748b';
+            const totalVotosPartido = party.candidatos.reduce((sum, cand) => sum + cand.votos, 0);
+            
+            let candidatesHtml = party.candidatos.map((cand, index) => `<div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 border-t border-border candidate-row items-center" data-name="${cand.nome.toLowerCase()}"><div class="font-bold text-text-main col-span-2">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div><div class="flex items-center gap-2 justify-end md:justify-start"><input type="number" value="${cand.growth * 100}" oninput="updateCandidateGrowth('${party.nome}', ${index}, this.value)" class="w-20 bg-slate-900 p-1 rounded-lg border border-border text-right" placeholder="0"><span class="text-sm text-text-light">%</span></div><div class="text-text-light text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Base</span></div><div class="text-text-light text-right"><strong class="text-primary" id="proj-votos-${party.nome.replace(/\s/g, '')}-${index}">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Proj.</span></div></div>`).join('');
 
             const accordionItem = document.createElement('div');
             accordionItem.className = 'bg-slate-900/50 rounded-lg party-accordion-item';
-            accordionItem.dataset.partyName = party.nome;
-            
-            const totalVotosPartido = party.candidatos.reduce((sum, cand) => sum + cand.votos, 0);
-            const totalCandidatos = party.candidatos.length;
-
-            let candidatesHtml = party.candidatos.map((cand, index) => `
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 border-t border-border candidate-row items-center" data-name="${cand.nome.toLowerCase()}">
-                    <div class="font-bold text-text-main col-span-2">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div>
-                    <div class="flex items-center gap-2 justify-end md:justify-start">
-                        <input 
-                            type="number" 
-                            value="${cand.growth * 100}" 
-                            oninput="updateCandidateGrowth('${party.nome}', ${index}, this.value)"
-                            class="w-20 bg-slate-900 p-1 rounded-lg border border-border text-right"
-                            placeholder="0"
-                        >
-                        <span class="text-sm text-text-light">%</span>
-                    </div>
-                    <div class="text-text-light text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Base</span></div>
-                    <div class="text-text-light text-right"><strong class="text-primary" id="proj-votos-${party.nome.replace(/\s/g, '')}-${index}">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Proj.</span></div>
-                </div>
-            `).join('');
-
-            accordionItem.innerHTML = `
-                <button class="w-full p-4 text-left font-bold flex justify-between items-center text-text-main" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
-                    <div class="flex items-center">
-                        <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div>
-                        <span>${party.nome}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-sm font-normal text-text-light mr-4">${totalCandidatos} candidato(s)</span>
-                        <span class="text-sm font-normal text-text-light mr-4">Total da Legenda: <strong class="text-main" id="total-legenda-${party.nome}">${totalVotosPartido.toLocaleString('pt-BR')}</strong></span>
-                        <i class="fa-solid fa-chevron-down transition-transform"></i>
-                    </div>
-                </button>
-                <div class="p-2 hidden">
-                    <div class="space-y-1">${candidatesHtml}</div>
-                </div>
-            `;
+            accordionItem.innerHTML = `<button class="w-full p-4 text-left font-bold flex justify-between items-center text-text-main" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')"><div class="flex items-center"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div><span>${party.nome}</span></div><div class="flex items-center"><span class="text-sm font-normal text-text-light mr-4">${party.candidatos.length} cands.</span><span class="text-sm font-normal text-text-light mr-4">Total: <strong class="text-main" id="total-legenda-${party.nome}">${totalVotosPartido.toLocaleString('pt-BR')}</strong></span><i class="fa-solid fa-chevron-down transition-transform"></i></div></button><div class="p-2 hidden"><div class="space-y-1">${candidatesHtml}</div></div>`;
             container.appendChild(accordionItem);
         });
 
-        const searchInput = document.getElementById('candidato-search');
-        searchInput.addEventListener('input', (e) => {
+        document.getElementById('candidato-search').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             document.querySelectorAll('.party-accordion-item').forEach(partyItem => {
-                let partyHasVisibleCandidate = false;
-                partyItem.querySelectorAll('.candidate-row').forEach(candidateRow => {
-                    const candidateName = candidateRow.dataset.name;
-                    if (candidateName.includes(searchTerm)) {
-                        candidateRow.style.display = 'grid';
-                        partyHasVisibleCandidate = true;
-                    } else {
-                        candidateRow.style.display = 'none';
-                    }
+                let partyVisible = false;
+                partyItem.querySelectorAll('.candidate-row').forEach(row => {
+                    const isVisible = row.dataset.name.includes(searchTerm);
+                    row.style.display = isVisible ? 'grid' : 'none';
+                    if (isVisible) partyVisible = true;
                 });
-                
-                if (partyHasVisibleCandidate) {
-                    partyItem.style.display = 'block';
-                } else {
-                    partyItem.style.display = 'none';
-                }
+                partyItem.style.display = partyVisible ? 'block' : 'none';
             });
         });
     }
@@ -1134,50 +922,32 @@
         const candidate = party.candidatos[candidateIndex];
         candidate.growth = parseFloat(growthValue) / 100 || 0;
 
-        // Calcula e atualiza a projeção individual
         const projectedVotes = Math.floor(candidate.votos * (1 + candidate.growth));
-        const projectedVotesEl = document.getElementById(`proj-votos-${party.nome.replace(/\s/g, '')}-${candidateIndex}`);
-        if (projectedVotesEl) {
-            projectedVotesEl.textContent = projectedVotes.toLocaleString('pt-BR');
-        }
+        document.getElementById(`proj-votos-${party.nome.replace(/\s/g, '')}-${candidateIndex}`).textContent = projectedVotes.toLocaleString('pt-BR');
 
-        // Recalcula o total de votos base do partido com base no crescimento individual
-        const newPartyTotal = party.candidatos.reduce((sum, cand) => {
-            return sum + Math.floor(cand.votos * (1 + (cand.growth || 0)));
-        }, 0);
-
+        const newPartyTotal = party.candidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
         party.votosBase2022 = newPartyTotal;
+        document.getElementById(`total-legenda-${party.nome}`).textContent = newPartyTotal.toLocaleString('pt-BR');
 
-        // Atualiza o display do total da legenda no accordion para feedback imediato
-        const totalLegendaEl = document.getElementById(`total-legenda-${party.nome}`);
-        if (totalLegendaEl) {
-            totalLegendaEl.textContent = newPartyTotal.toLocaleString('pt-BR');
-        }
-
-        // Dispara a simulação completa
         updateScenario();
     }
 
-
     function changeTab(tabName) {
-        document.getElementById('content-simulador').classList.toggle('hidden', tabName !== 'simulador');
-        document.getElementById('content-candidatos').classList.toggle('hidden', tabName !== 'candidatos');
-        document.getElementById('content-analise').classList.toggle('hidden', tabName !== 'analise');
-        
+        ['simulador', 'candidatos', 'analise', 'eleitos2024'].forEach(id => {
+            document.getElementById(`content-${id}`).classList.toggle('hidden', id !== tabName);
+        });
         document.querySelectorAll('#main-tabs button').forEach(button => {
-            button.classList.remove('active');
+            button.classList.remove('active', 'text-text-main');
             button.classList.add('text-text-light');
         });
-        
         const activeButton = document.querySelector(`#main-tabs button[onclick="changeTab('${tabName}')"]`);
-        activeButton.classList.add('active');
+        activeButton.classList.add('active', 'text-text-main');
         activeButton.classList.remove('text-text-light');
-
         window.scrollTo(0, 0);
     }
     
     // =================================================================================
-    // LÓGICA DA ABA DE ANÁLISE
+    // ANALYSIS TAB LOGIC
     // =================================================================================
     function initializeAnaliseTab() {
         initializePuxadoresAnalise();
@@ -1188,78 +958,30 @@
         const container = document.getElementById('analise-puxadores-container');
         container.innerHTML = '';
 
-        baseScenario.partidos
-            .filter(p => p.votosBase2022 > 0)
-            .sort((a, b) => b.votosBase2022 - a.votosBase2022)
-            .forEach(party => {
-                const top3 = party.candidatos.slice(0, 3);
-                const top3Votes = top3.reduce((sum, cand) => sum + cand.votos, 0);
-                const percentage = (top3Votes / party.votosBase2022 * 100).toFixed(1);
-                
-                let diagnosis = '';
-                let diagnosisColor = '';
-                if (percentage >= 60) {
-                    diagnosis = 'Alta dependência dos puxadores de voto.';
-                    diagnosisColor = 'text-danger';
-                } else if (percentage >= 40) {
-                    diagnosis = 'Concentração moderada nos principais nomes.';
-                    diagnosisColor = 'text-warning';
-                } else {
-                    diagnosis = 'Votação bem distribuída entre os candidatos.';
-                    diagnosisColor = 'text-success';
-                }
+        baseScenario.partidos.filter(p => p.votosBase2022 > 0).sort((a, b) => b.votosBase2022 - a.votosBase2022).forEach(party => {
+            const top3 = party.candidatos.slice(0, 3);
+            const top3Votes = top3.reduce((sum, cand) => sum + cand.votos, 0);
+            const percentage = (top3Votes / party.votosBase2022 * 100).toFixed(1);
+            
+            let diagnosis = ''; let diagnosisColor = '';
+            if (percentage >= 60) { diagnosis = 'Alta dependência dos puxadores.'; diagnosisColor = 'text-danger'; } 
+            else if (percentage >= 40) { diagnosis = 'Concentração moderada.'; diagnosisColor = 'text-warning'; } 
+            else { diagnosis = 'Votação bem distribuída.'; diagnosisColor = 'text-success'; }
 
-                const card = document.createElement('div');
-                card.className = 'bg-slate-900/50 p-4 rounded-lg border border-border flex flex-col';
-                card.innerHTML = `
-                    <div class="flex items-center mb-3">
-                        <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div>
-                        <h3 class="font-bold text-lg text-text-main">${party.nome}</h3>
-                    </div>
-                    <ul class="text-sm space-y-2 flex-grow">
-                        ${top3.map((cand, i) => `
-                            <li class="flex justify-between items-center">
-                                <span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span>
-                                <div class="flex items-center">
-                                    <span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span>
-                                    <a href="#" onclick="openTransferModal('${party.nome}', '${cand.nome.replace(/'/g, "\\'")}')" class="text-secondary hover:text-orange-400" title="Transferir Candidato"><i class="fa-solid fa-right-left"></i></a>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                    <div class="mt-4 pt-4 border-t border-border">
-                        <div class="flex justify-between text-sm font-bold mb-1">
-                            <span>Concentração nos Top 3</span>
-                            <span class="${diagnosisColor}">${percentage}%</span>
-                        </div>
-                        <div class="w-full bg-slate-700 rounded-full h-2.5">
-                            <div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div>
-                        </div>
-                        <p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+            const card = document.createElement('div');
+            card.className = 'bg-slate-900/50 p-4 rounded-lg border border-border flex flex-col';
+            card.innerHTML = `<div class="flex items-center mb-3"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><h3 class="font-bold text-lg text-text-main">${party.nome}</h3></div><ul class="text-sm space-y-2 flex-grow">${top3.map((cand, i) => `<li class="flex justify-between items-center"><span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span><div class="flex items-center"><span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span><a href="#" onclick="openTransferModal('${party.nome}', '${cand.nome.replace(/'/g, "\\'")}')" class="text-secondary hover:text-orange-400" title="Transferir"><i class="fa-solid fa-right-left"></i></a></div></li>`).join('')}</ul><div class="mt-4 pt-4 border-t border-border"><div class="flex justify-between text-sm font-bold mb-1"><span>Concentração Top 3</span><span class="${diagnosisColor}">${percentage}%</span></div><div class="w-full bg-slate-700 rounded-full h-2.5"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div></div><p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p></div>`;
+            container.appendChild(card);
+        });
     }
 
     function initializeEficienciaAnalise() {
         const container = document.getElementById('analise-eficiencia-container');
         container.innerHTML = '';
-
         const partidosComEleitos = baseScenario.partidos.map(party => {
             const eleitos = party.candidatos.filter(c => c.isEleito).length;
-            if (eleitos > 0) {
-                return {
-                    nome: party.nome,
-                    custoPorCadeira: party.votosBase2022 / eleitos,
-                    totalVotos: party.votosBase2022,
-                    totalEleitos: eleitos
-                };
-            }
-            return null;
-        }).filter(p => p !== null);
-
-        partidosComEleitos.sort((a, b) => a.custoPorCadeira - b.custoPorCadeira);
+            return eleitos > 0 ? { nome: party.nome, custoPorCadeira: party.votosBase2022 / eleitos, totalVotos: party.votosBase2022, totalEleitos: eleitos } : null;
+        }).filter(p => p !== null).sort((a, b) => a.custoPorCadeira - b.custoPorCadeira);
         
         const maxCost = Math.max(...partidosComEleitos.map(p => p.custoPorCadeira));
 
@@ -1267,26 +989,7 @@
             const barWidth = (party.custoPorCadeira / maxCost * 100);
             const item = document.createElement('div');
             item.className = 'bg-slate-900/50 p-3 rounded-lg';
-            item.innerHTML = `
-                <div class="flex flex-col sm:flex-row justify-between sm:items-center">
-                    <div class="flex items-center mb-2 sm:mb-0">
-                        <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div>
-                        <span class="font-bold">${party.nome}</span>
-                    </div>
-                    <div class="text-sm text-text-light">
-                        ${party.totalEleitos} eleito(s) com ${party.totalVotos.toLocaleString('pt-BR')} votos
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <div class="flex justify-between items-center text-xs text-text-light mb-1">
-                        <span>Custo por Cadeira</span>
-                        <span class="font-bold text-lg text-primary">${Math.round(party.custoPorCadeira).toLocaleString('pt-BR')}</span>
-                    </div>
-                    <div class="w-full bg-slate-700 rounded-full h-4">
-                        <div class="bg-primary h-4 rounded-full" style="width: ${barWidth}%"></div>
-                    </div>
-                </div>
-            `;
+            item.innerHTML = `<div class="flex flex-col sm:flex-row justify-between sm:items-center"><div class="flex items-center mb-2 sm:mb-0"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><span class="font-bold">${party.nome}</span></div><div class="text-sm text-text-light">${party.totalEleitos} eleito(s) com ${party.totalVotos.toLocaleString('pt-BR')} votos</div></div><div class="mt-2"><div class="flex justify-between items-center text-xs text-text-light mb-1"><span>Custo por Cadeira</span><span class="font-bold text-lg text-primary">${Math.round(party.custoPorCadeira).toLocaleString('pt-BR')}</span></div><div class="w-full bg-slate-700 rounded-full h-4"><div class="bg-primary h-4 rounded-full" style="width: ${barWidth}%"></div></div></div>`;
             container.appendChild(item);
         });
     }
@@ -1294,63 +997,27 @@
     function openTransferModal(sourcePartyName, candidateName) {
         const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
         const candidate = sourceParty.candidatos.find(c => c.nome === candidateName);
-        
-        let optionsHtml = baseScenario.partidos
-            .filter(p => p.nome !== sourcePartyName)
-            .map(p => `<option value="${p.nome}">${p.nome}</option>`)
-            .join('');
-
-        const modalHtml = `
-            <div class="p-6 text-text-light">
-                 <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-secondary">Transferir Candidato</h2>
-                        <p>Simular a mudança de partido de <strong>${candidate.nome}</strong>.</p>
-                    </div>
-                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
-                </div>
-                <div class="space-y-4">
-                    <p>De: <strong class="font-mono">${sourcePartyName}</strong></p>
-                    <div>
-                        <label for="transfer-party-select" class="text-sm font-medium">Para:</label>
-                        <select id="transfer-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1">
-                            <option value="">Selecione o partido de destino...</option>
-                            ${optionsHtml}
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end">
-                    <button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="executeTransfer('${sourcePartyName}', '${candidate.nome.replace(/'/g, "\\'")}')">Confirmar Transferência</button>
-                </div>
-            </div>
-        `;
+        let optionsHtml = baseScenario.partidos.filter(p => p.nome !== sourcePartyName).map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
+        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">Transferir Candidato</h2><p>Simular a mudança de <strong>${candidate.nome}</strong>.</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="space-y-4"><p>De: <strong class="font-mono">${sourcePartyName}</strong></p><div><label for="transfer-party-select" class="text-sm font-medium">Para:</label><select id="transfer-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1"><option value="">Selecione...</option>${optionsHtml}</select></div></div><div class="mt-6 flex justify-end"><button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="executeTransfer('${sourcePartyName}', '${candidate.nome.replace(/'/g, "\\'")}')">Confirmar</button></div></div>`;
         showModal(modalHtml);
     }
 
     function executeTransfer(sourcePartyName, candidateName) {
         const destinationPartyName = document.getElementById('transfer-party-select').value;
-        if (!destinationPartyName) {
-            alert("Por favor, selecione um partido de destino.");
-            return;
-        }
+        if (!destinationPartyName) { showInfoModal("Selecione um partido de destino."); return; }
 
         const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
         const destParty = baseScenario.partidos.find(p => p.nome === destinationPartyName);
-
         const candidateIndex = sourceParty.candidatos.findIndex(c => c.nome === candidateName);
-        if (candidateIndex === -1) return; // Candidate not found
+        if (candidateIndex === -1) return;
 
-        // Remove candidate from source and add to destination
         const [candidateToMove] = sourceParty.candidatos.splice(candidateIndex, 1);
         destParty.candidatos.push(candidateToMove);
         destParty.candidatos.sort((a,b) => b.votos - a.votos);
 
-
-        // Recalculate base votes for both parties
         sourceParty.votosBase2022 = sourceParty.candidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
         destParty.votosBase2022 = destParty.candidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
 
-        // Re-render tabs and update simulation
         closeModal();
         initializeCandidatosTab();
         initializeAnaliseTab();
@@ -1358,92 +1025,273 @@
     }
     
     function resetAllData() {
-        if (confirm("Você tem certeza que deseja restaurar todos os dados para o padrão de 2022? Todas as transferências e simulações de crescimento serão perdidas.")) {
+        showConfirmationModal("Restaurar todos os dados para o padrão de 2022? As alterações serão perdidas.", () => {
             baseScenario = prepareBaseScenario();
             initializeControls();
             initializeCandidatosTab();
             initializeAnaliseTab();
             updateScenario();
-        }
+        });
+    }
+
+    function showInfoModal(message) {
+        showModal(`<div class="p-6 text-center"><p class="text-lg">${message}</p></div>`);
+        setTimeout(closeModal, 2000);
+    }
+
+    function showConfirmationModal(message, onConfirm) {
+        showModal(`<div class="p-6 text-text-light"><p class="text-lg mb-6 text-center">${message}</p><div class="flex justify-end space-x-4"><button onclick="closeModal()" class="bg-slate-700 hover:bg-slate-600 font-bold py-2 px-4 rounded-lg">Cancelar</button><button id="confirm-action-btn" class="bg-danger hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg">Confirmar</button></div></div>`);
+        document.getElementById('confirm-action-btn').onclick = () => { onConfirm(); closeModal(); };
     }
 
 
     // =================================================================================
-    // LÓGICA DE IMPRESSÃO
+    // ELECTED IN 2024 TAB LOGIC
     // =================================================================================
-    
-    // Roteador de Impressão
-    function printReport() {
-        const isCandidatosTabActive = !document.getElementById('content-candidatos').classList.contains('hidden');
-        if (isCandidatosTabActive) {
-            printCandidatosReport();
-        } else {
-            printSimuladorReport();
-        }
-    }
+    const ELEITOS_2024_DATA = {
+        "1ª REGIÃO": [{"CIDADE": "ARMAZEM", "NOME CANDIDATO": "CENARIO MONTEIRO MARCELINO", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "374"}, {"CIDADE": "BRAÇO DO NORTE", "NOME CANDIDATO": "REGINALDO DEMÉTRIO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "807"}, {"CIDADE": "GAROPABA", "NOME CANDIDATO": "JAIRO PEREIRA DOS SANTOS", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "1328"}, {"CIDADE": "IMBITUBA", "NOME CANDIDATO": "THIAGO ROSA", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "1065"}, {"CIDADE": "SANGÃO", "NOME CANDIDATO": "GENTIL TEIXEIRA SALVALAIO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "500"}, {"CIDADE": "SÃO LUDGERO", "NOME CANDIDATO": "LAUDY DA SILVA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "342"}],
+        "2ª REGIÃO": [{"CIDADE": "BALN. CAMBORIU", "NOME CANDIDATO": "ASINIL MEDEIROS", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "1831"}, {"CIDADE": "BOMBINHAS", "NOME CANDIDATO": "LEANDRO GRACIA", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "662"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "JOSUÉ PEREIRA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "958"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "POLICIAL SILVIO WOLFF", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "1216"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "EWERSON UMBELINO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "760"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "IRMÃO MAYER", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "888"}, {"CIDADE": "FLORIANOPOLIS", "NOME CANDIDATO": "PR. GILIARD TORQUATO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "3675"}, {"CIDADE": "GOV. CELSO RAMOS", "NOME CANDIDATO": "PB. RAFAEL ZEFERINO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "427"}, {"CIDADE": "ITAPEMA", "NOME CANDIDATO": "IRMÃ RUTI", "CARGO": "VEREADORA", "PARTIDO": "REPU", "VOTOS": "754"}, {"CIDADE": "PALHOÇA", "NOME CANDIDATO": "MESTRE VANDERLEI", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "1143"}, {"CIDADE": "PAULO LOPES", "NOME CANDIDATO": "PRISCILA ROGÉRIO", "CARGO": "VEREADORA", "PARTIDO": "UNIÃO", "VOTOS": "215"}, {"CIDADE": "PAULO LOPES", "NOME CANDIDATO": "CELINHO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "365"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "ALTINO JUNIOR", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "597"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "JOSIMAR JOSÉ", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "323"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "ONÉSIO RAMOS", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "715"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "AILTON NECKEL", "CARGO": "VICE PREFEITO", "PARTIDO": "MDB", "VOTOS": "10700"}, {"CIDADE": "SANTO AMARO DA IM", "NOME CANDIDATO": "JOAQUIM CUNHA", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "344"}, {"CIDADE": "SANTO AMARO DA IM", "NOME CANDIDATO": "ANDRÉ LUIZ AMARAL DAUFENBACH", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "286"}, {"CIDADE": "SÃO JOSÉ", "NOME CANDIDATO": "PR. ADAIR TESSARI", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "3176"}, {"CIDADE": "SÃO JOÃO BATISTA", "NOME CANDIDATO": "GUSTAVO GRIM", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "710"}],
+        "3ª REGIÃO": [{"CIDADE": "ASCURRA", "NOME CANDIDATO": "MARCIO DA COSTA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "189"}, {"CIDADE": "BLUMENAU", "NOME CANDIDATO": "JOVINO CARDOSO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "4506"}, {"CIDADE": "BLUMENAU", "NOME CANDIDATO": "SILMARA MIGUEL", "CARGO": "VEREADORA", "PARTIDO": "PSD", "VOTOS": "4131"}, {"CIDADE": "BRUSQUE", "NOME CANDIDATO": "ANTÔNIO ROBERTO SILVA", "CARGO": "VEREADOR", "PARTIDO": "PRD", "VOTOS": "854"}, {"CIDADE": "DOUTOR PEDRINHO", "NOME CANDIDATO": "GELEADE GADIEL WOLLERT", "CARGO": "PREFEITO", "PARTIDO": "MDB", "VOTOS": "1183"}, {"CIDADE": "DOUTOR PEDRINHO", "NOME CANDIDATO": "ELIAS MARAFIGO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "113"}, {"CIDADE": "ILHOTA", "NOME CANDIDATO": "VANDERLEI COSTA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "570"}, {"CIDADE": "INDAIAL", "NOME CANDIDATO": "VALMIR JORDANI", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "1036"}, {"CIDADE": "ITAJAI", "NOME CANDIDATO": "ADÃO BITENCOURT", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "2165"}],
+        "4ª REGIÃO": [{"CIDADE": "ARAQUARI", "NOME CANDIDATO": "AZEVEDO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "385"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "ADEMAR BORGES", "CARGO": "PREFEITO", "PARTIDO": "PSD", "VOTOS": "4345"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "RUAN CUNHA", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "478"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "WESLLEY FREITAS", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "447"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "JONATHAS LOPES", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "424"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "NELINHO BORGES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "422"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "KEMPO", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "402"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "MARA", "CARGO": "VEREADORA", "PARTIDO": "PODEMO", "VOTOS": "341"}, {"CIDADE": "BALN. PIÇARRAS", "NOME CANDIDATO": "GLEBER SILVEIRA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "310"}, {"CIDADE": "BALN. PIÇARRAS", "NOME CANDIDATO": "ADRIANA LINHARES", "CARGO": "VEREADORA", "PARTIDO": "PSDB", "VOTOS": "615"}, {"CIDADE": "BARRA VELHA", "NOME CANDIDATO": "MARCIEL BERLIN", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "598"}, {"CIDADE": "BARRA VELHA", "NOME CANDIDATO": "CAIO PINHEIRO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "591"}, {"CIDADE": "CAMPO ALEGRE", "NOME CANDIDATO": "PROFESSOR ERNANI", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "446"}, {"CIDADE": "CORUPÁ", "NOME CANDIDATO": "ALAOR DUARTE JAE", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "225"}, {"CIDADE": "GARUVA", "NOME CANDIDATO": "KLAUS EDUARDO LENNETZ", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "767"}, {"CIDADE": "GUARAMIRIM", "NOME CANDIDATO": "EMERSON FLORES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "657"}, {"CIDADE": "JARAGUA DO SUL", "NOME CANDIDATO": "ISRAEL CANI", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "2082"}, {"CIDADE": "JOINVILLE", "NOME CANDIDATO": "ADILSON GIRARDI", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "6447"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "DC. LUIZINHO AMÉRICO", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "6200"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "PB. MARIO MARQUETT", "CARGO": "VICE PREFEITO", "PARTIDO": "PL", "VOTOS": "6200"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "EV. ADRIANO TIBECO", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "883"}, {"CIDADE": "SÃO FRANSCISCO DO", "NOME CANDIDATO": "SODA", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "680"}, {"CIDADE": "SÃO FRANSCISCO DO SMARYAN", "NOME CANDIDATO": "", "CARGO": "VEREADORA", "PARTIDO": "PL", "VOTOS": "556"}, {"CIDADE": "SÃO JOÃO DO ITAPERI", "NOME CANDIDATO": "OZEIAS ALVES", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "313"}, {"CIDADE": "SCHROEDER", "NOME CANDIDATO": "JAIR BRIDAROLI", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "3816"}],
+        "5ª REGIÃO": [{"CIDADE": "FREI ROGÉRIO", "NOME CANDIDATO": "PB. VORLI SCHAFFER", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "93"}, {"CIDADE": "LAGES", "NOME CANDIDATO": "GABRIEL CÓRDOVA", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "2060"}, {"CIDADE": "SANTA CECILIA", "NOME CANDIDATO": "PB. JOSIAS RODRIGUES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "250"}, {"CIDADE": "SÃO CRISTÓVÃO", "NOME CANDIDATO": "PB. JOÃO PAULO GROBE", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "218"}, {"CIDADE": "SÃO CRISTÓVÃO", "NOME CANDIDATO": "PB. RAFAEL BRANCO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "143"}, {"CIDADE": "SÃO JOAQUIM", "NOME CANDIDATO": "PR. SEBASTIÃO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "596"}],
+        "6ª REGIÃO": [{"CIDADE": "BITURUNA", "NOME CANDIDATO": "CLEITON DE BASTIANI", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "367"}, {"CIDADE": "GENERAL CARNEIRO", "NOME CANDIDATO": "JOARILSO", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "305"}, {"CIDADE": "MAFRA", "NOME CANDIDATO": "DIRCILENE DITRICH PIΝΤΟ", "CARGO": "VEREADORA", "PARTIDO": "REPU", "VOTOS": "742"}, {"CIDADE": "PAPANDUVA", "NOME CANDIDATO": "MARLI DE LUCA", "CARGO": "VEREADORA", "PARTIDO": "PP", "VOTOS": "562"}, {"CIDADE": "PAULO FRONTIN", "NOME CANDIDATO": "JAIRO BERTUSSI", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "137"}, {"CIDADE": "PAULO FRONTIN", "NOME CANDIDATO": "MELQUIZEDEKE VERISSIMO", "CARGO": "VEREADOR", "PARTIDO": "PMB", "VOTOS": "165"}, {"CIDADE": "PAULO FRONTIN", "NOME CANDIDATO": "SEBASTIÃO DA SILVA", "CARGO": "VICE-PREFEITO", "PARTIDO": "PSD", "VOTOS": "1720"}],
+        "7ª REGIÃO": [{"CIDADE": "CORONEL FREITAS", "NOME CANDIDATO": "EDILVO BAGIO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "491"}, {"CIDADE": "LAGEADO GRANDE", "NOME CANDIDATO": "EVANDRO DE OLIVEIRA", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "62"}, {"CIDADE": "PALMITOS", "NOME CANDIDATO": "RODEMAR LEOCIR KUSSLER", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "614"}, {"CIDADE": "PAIAL", "NOME CANDIDATO": "JOSEMAR REIS DA SILVA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "105"}],
+        "8ª REGIÃO": [{"CIDADE": "AMPERE", "NOME CANDIDATO": "PROFESSOR IRIO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "567"}, {"CIDADE": "FRANCISCO BELTRÃO", "NOME CANDIDATO": "PEDRO TUFÃO FILHO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "1364"}, {"CIDADE": "REALEZA", "NOME CANDIDATO": "OZEIAS", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "320"}],
+        "9ª REGIÃO": [{"CIDADE": "CATANDUVAS", "NOME CANDIDATO": "MONA", "CARGO": "PREFEITA", "PARTIDO": "PL", "VOTOS": "3479"}, {"CIDADE": "CATANDUVAS", "NOME CANDIDATO": "PB. ANTONΝΙΟ", "CARGO": "VICE PREFEITO", "PARTIDO": "PL", "VOTOS": "3479"}, {"CIDADE": "CAPINZAL", "NOME CANDIDATO": "FRANCISCO SUTIL", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "580"}, {"CIDADE": "ERVAL VELHO", "NOME CANDIDATO": "JULIANO OLIVEIRA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "198"}, {"CIDADE": "JOAÇABA", "NOME CANDIDATO": "LUIZ VASTRES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "483"}, {"CIDADE": "PRES. CASTELLO BRANCO", "NOME CANDIDATO": "CLEUSIR WOLF", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "71"}, {"CIDADE": "VARGEM BONITA", "NOME CANDIDATO": "PR. OSCAR SALVADOR", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "160"}],
+        "10ª REGIÃO": [{"CIDADE": "ARARANGUÁ", "NOME CANDIDATO": "PEDRO PAULO DE SOUZA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "1373"}, {"CIDADE": "ARARANGUÁ", "NOME CANDIDATO": "NELSON SOARES", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "1210"}, {"CIDADE": "ARARANGUÁ", "NOME CANDIDATO": "JOSÉ CARLOS DOS SANTOS", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "1031"}, {"CIDADE": "BALN. GAIVOTA", "NOME CANDIDATO": "DC. PAULO ROBERTO", "CARGO": "VEREADOR", "PARTIDO": "PRD", "VOTOS": "260"}, {"CIDADE": "BALN. RINCÃO", "NOME CANDIDATO": "PB. ROGERIO CARDOSO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "751"}, {"CIDADE": "BALN. RINCÃO", "NOME CANDIDATO": "PB. AYRTON FERREIRA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "503"}, {"CIDADE": "BALN. RINCÃO", "NOME CANDIDATO": "EV. JUNIOR MOTA", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "349"}, {"CIDADE": "COCAL DO SUL", "NOME CANDIDATO": "DC. JULIO FOGAÇA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "411"}, {"CIDADE": "CRICIUMA", "NOME CANDIDATO": "PR. OBADIAS BENONES", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "2777"}, {"CIDADE": "CRICIUMA", "NOME CANDIDATO": "AX. AMARAL BITTENCOURT", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "2136"}, {"CIDADE": "CRICIUMA", "NOME CANDIDATO": "EV. NERI XAVIER", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "1460"}, {"CIDADE": "ERMO", "NOME CANDIDATO": "PB. DANIEL BORGES", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "185"}, {"CIDADE": "ERMO", "NOME CANDIDATO": "DC. JEAN", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "98"}, {"CIDADE": "FORQUILHINHA", "NOME CANDIDATO": "GRAZI CRAVO", "CARGO": "VEREADORA", "PARTIDO": "UNIÃO", "VOTOS": "766"}, {"CIDADE": "JACINTO MACHADO", "NOME CANDIDATO": "ADERVAL DA ROSA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "547"}, {"CIDADE": "JACINTO MACHADO", "NOME CANDIDATO": "ENISON RECCO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "418"}, {"CIDADE": "LAURO MULLER", "NOME CANDIDATO": "PB. LINDOMAR CATAΝΕΟ", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "545"}, {"CIDADE": "MORRO DA FUMAÇA", "NOME CANDIDATO": "JORGIA GUGLIELMI", "CARGO": "VEREADORA", "PARTIDO": "PL", "VOTOS": "824"}, {"CIDADE": "SANTA ROSA DO SUL", "NOME CANDIDATO": "VALÉRIO COLOMBO", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "263"}, {"CIDADE": "URUSSANGA", "NOME CANDIDATO": "IVAN VIEIRA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "710"}],
+        "11ª REGIÃO": [{"CIDADE": "CORONEL D. SOARES", "NOME CANDIDATO": "FERNANDO M. S. DA ROSA", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "228"}, {"CIDADE": "CORONEL VIVIDA", "NOME CANDIDATO": "FABIO DANIEL", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "473"}, {"CIDADE": "MANGUEIRINHA", "NOME CANDIDATO": "JOÃO DOS SANTOS", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "229"}, {"CIDADE": "SULINA", "NOME CANDIDATO": "LINDOMAR GASPAR", "CARGO": "VEREADOR", "PARTIDO": "PSB", "VOTOS": "158"}, {"CIDADE": "ITAPEJARA DO OESTE", "NOME CANDIDATO": "MARCIO", "CARGO": "VICE-PREFEITO", "PARTIDO": "PL", "VOTOS": "4428"}],
+        "12ª REGIÃO": [{"CIDADE": "BRUNÓPOLIS", "NOME CANDIDATO": "SIRLEI DE SOUZA", "CARGO": "VEREADORA", "PARTIDO": "MDB", "VOTOS": "160"}, {"CIDADE": "BRUNÓPOLIS", "NOME CANDIDATO": "ADILSON SOUZA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "121"}, {"CIDADE": "FRAIBURGO", "NOME CANDIDATO": "LUIZ RIEGERT", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "750"}, {"CIDADE": "FRAIBURGO", "NOME CANDIDATO": "DAVI FERNANDES", "CARGO": "VEREADOR", "PARTIDO": "PODEMO", "VOTOS": "538"}, {"CIDADE": "LEBON REGIS", "NOME CANDIDATO": "MOACIR MACUCO", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "201"}, {"CIDADE": "MONTE CARLO", "NOME CANDIDATO": "CARLINHOS", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "282"}, {"CIDADE": "SALTO VELOSO", "NOME CANDIDATO": "DIRCEU PERÃO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "309"}, {"CIDADE": "TIMBO GRANDE", "NOME CANDIDATO": "CLAUDIONOR MATOSO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "244"}, {"CIDADE": "TIMBO GRANDE", "NOME CANDIDATO": "JUSSARA GUEDES", "CARGO": "VEREADORA", "PARTIDO": "PL", "VOTOS": "184"}, {"CIDADE": "TIMBO GRANDE", "NOME CANDIDATO": "ARI JOSÉ GALESKI", "CARGO": "PREFEITO", "PARTIDO": "UNIÃO", "VOTOS": "2121"}],
+        "13ª REGIÃO": [{"CIDADE": "AGROLANDIA", "NOME CANDIDATO": "TATIANE SILVA", "CARGO": "VEREADORA", "PARTIDO": "MDB", "VOTOS": "317"}, {"CIDADE": "SALETE", "NOME CANDIDATO": "RICARDO PAGEL", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "488"}, {"CIDADE": "SALETE", "NOME CANDIDATO": "EDUARDO SCHUMBEDLER", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "304"}, {"CIDADE": "SALETE", "NOME CANDIDATO": "TAFINHA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "290"}, {"CIDADE": "SALETE", "NOME CANDIDATO": "ROBERTO LOCH", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "251"}, {"CIDADE": "POUSO REDONDO", "NOME CANDIDATO": "GEZIEL SARDÁ", "CARGO": "VEREADOR", "PARTIDO": "PRD", "VOTOS": "492"}],
+        "14ª REGIÃO": [{"CIDADE": "BANDEIRANTES", "NOME CANDIDATO": "CARMEN MACHADO", "CARGO": "VEREADORA", "PARTIDO": "PSB", "VOTOS": "114"}, {"CIDADE": "GUARUJA DO SUL", "NOME CANDIDATO": "FABRICIO WAGNER", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "183"}, {"CIDADE": "PARAISO", "NOME CANDIDATO": "ADEMIR VICHINIESKI", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "136"}, {"CIDADE": "RIQUEZA", "NOME CANDIDATO": "RONI GURKE", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "174"}, {"CIDADE": "RIQUEZA", "NOME CANDIDATO": "JULIANO BORTOLANZA", "CARGO": "PREFEITO", "PARTIDO": "MDB", "VOTOS": "1888"}, {"CIDADE": "ROMELÂNDIA", "NOME CANDIDATO": "ESMAEL BARPP", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "282"}, {"CIDADE": "SÃO JOSE DO CEDRO", "NOME CANDIDATO": "AX. ENIO CORROSSI", "CARGO": "VICE PREFEITO", "PARTIDO": "UNIÃO", "VOTOS": "4124"}],
+        "15ª REGIÃO": [{"CIDADE": "BOM JESUS", "NOME CANDIDATO": "DC. EMANUEL", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "105"}, {"CIDADE": "FAXINAL DOS GUEDES", "NOME CANDIDATO": "PB VALDEMIR NEVES", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "489"}, {"CIDADE": "FAXINAL DOS GUEDES", "NOME CANDIDATO": "MÁRCIO LUIZ DE LIMA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "415"}, {"CIDADE": "OURO VERDE", "NOME CANDIDATO": "GENI BIOTTO", "CARGO": "VEREADORA", "PARTIDO": "PL", "VOTOS": "106"}, {"CIDADE": "XANXERÊ", "NOME CANDIDATO": "PB. VINICIUS CRENONINI", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "1193"}, {"CIDADE": "XANXERÊ", "NOME CANDIDATO": "DAVI PINTO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "936"}],
+        "16ª REGIÃO": [{"CIDADE": "BARRACÃO", "NOME CANDIDATO": "RAUL PAZ BRIZOLLA", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "249"}, {"CIDADE": "BELA VISTA DA CAROBA", "NOME CANDIDATO": "JOSE VALDIR RODRIGUES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "127"}, {"CIDADE": "BOM JESUS DO SUL", "NOME CANDIDATO": "JULIO DE MOURA", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "218"}, {"CIDADE": "CAPANEMA", "NOME CANDIDATO": "EDSON WILMSEN", "CARGO": "VEREADOR", "PARTIDO": "PDT", "VOTOS": "503"}, {"CIDADE": "FLOR DA SERRA DO SUL", "NOME CANDIDATO": "VANDERLEI CHORNA", "CARGO": "VEREADOR", "PARTIDO": "PODEMO", "VOTOS": "298"}, {"CIDADE": "FLOR DA SERRA DO SUL", "NOME CANDIDATO": "DECIO LUBACHEVISKI", "CARGO": "VEREADOR", "PARTIDO": "PODEMO", "VOTOS": "306"}, {"CIDADE": "PLANALTO", "NOME CANDIDATO": "FABIO SCHIRMANN", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "344"}, {"CIDADE": "PRANCHITA", "NOME CANDIDATO": "DANIEL DE SOUZA DA LUZ", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "252"}, {"CIDADE": "STO ANTONIO DO SUDOESTE", "NOME CANDIDATO": "VANDERLEI NOVAKI", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "921"}, {"CIDADE": "STO ANTONIO DO SUDOESTE", "NOME CANDIDATO": "VALDIR ANTONIO CARVALHO", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "559"}, {"CIDADE": "STO ANTONIO DO SUDOESTE", "NOME CANDIDATO": "RICARDO ORTINA", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "10352"}],
+        "17ª REGIÃO": [{"CIDADE": "CORONEL MARTINS", "NOME CANDIDATO": "DAVI DUTRA", "CARGO": "VEREADOR", "PARTIDO": "PSB", "VOTOS": "50"}, {"CIDADE": "ENTRE RIOS", "NOME CANDIDATO": "EVANDRO", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "1497"}, {"CIDADE": "ENTRE RIOS", "NOME CANDIDATO": "ELIAS ARRUDA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "209"}, {"CIDADE": "ENTRE RIOS", "NOME CANDIDATO": "PAULO FIGUEIRA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "127"}, {"CIDADE": "ENTRE RIOS", "NOME CANDIDATO": "ESTEVÃO MARTINS", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "128"}, {"CIDADE": "JARDINÓPOLIS", "NOME CANDIDATO": "NEI LIMA", "CARGO": "VICE PREFEITO", "PARTIDO": "PP", "VOTOS": "1100"}, {"CIDADE": "JARDINÓPOLIS", "NOME CANDIDATO": "PABLO MAXSUEL", "CARGO": "VEREADOR", "PARTIDO": "PT", "VOTOS": "95"}, {"CIDADE": "JUPIÁ", "NOME CANDIDATO": "SAMUEL TRENTO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "124"}, {"CIDADE": "QUILOMBO", "NOME CANDIDATO": "LEONEL AFONSO DE SOUZA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "319"}, {"CIDADE": "QUILOMBO", "NOME CANDIDATO": "EDIANE RAMOS", "CARGO": "VEREADORA", "PARTIDO": "PP", "VOTOS": "347"}, {"CIDADE": "SALTINHO", "NOME CANDIDATO": "PB. LAURI GONÇALVES", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "136"}, {"CIDADE": "SÃO DOMINGOS", "NOME CANDIDATO": "EDSON BRUNETO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "266"}, {"CIDADE": "SUL BRASIL", "NOME CANDIDATO": "FABIANE PESENATO GOTZ", "CARGO": "VEREADORA", "PARTIDO": "PP", "VOTOS": "223"}],
+        "18ª REGIÃO": [{"CIDADE": "IBIRAMA", "NOME CANDIDATO": "GUIDO PENZ", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "243"}, {"CIDADE": "IBIRAMA", "NOME CANDIDATO": "JORGE ELI DE OLIVEIRA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "419"}, {"CIDADE": "LEOBERTO LEAL", "NOME CANDIDATO": "JULIANA FRANZEN", "CARGO": "VEREADORA", "PARTIDO": "PL", "VOTOS": "135"}, {"CIDADE": "PRESIDENTE GETULIO", "NOME CANDIDATO": "ALEXANDRE DA SILVA", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "416"}, {"CIDADE": "VITOR MEIRELLES", "NOME CANDIDATO": "PB. MARCELO DAROLT", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "2185"}]
+    };
 
-    function getLogoSvgDataUrl() {
-        const svgLogo = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-            <defs>
-                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-            <rect width="80" height="80" rx="8" ry="8" fill="url(#grad1)" />
-            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Playfair Display, serif" font-size="36" font-weight="bold" fill="white">SM</text>
-        </svg>`;
-        return 'data:image/svg+xml;base64,' + btoa(svgLogo);
-    }
+    let mapData = null; // To store the loaded TopoJSON data
 
-    function printSimuladorReport() {
-        const { QE, totalVotosValidos, totalVotosBrancos, totalVotosNulos, cenarios, sobrasLog, totalEleitores } = currentSimulatedScenario;
-        const logoSrc = getLogoSvgDataUrl();
-        const candidateName = document.querySelector('#logo-container p').textContent;
-        const currentDate = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-        const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        const abstentionRate = document.getElementById('abstention-rate').value;
-        const electorateGrowth = document.getElementById('electorate-growth').value;
-        const customParties = baseScenario.partidos.filter(p => p.customCandidatos).map(p => p.nome).join(', ') || 'Nenhuma';
-
-        let reportHtml = `
-            <!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Simulação Eleitoral</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet"><style>body{font-family:'Inter',sans-serif;background-color:#fff;color:#0f172a;margin:0;padding:0}.page{width:210mm;min-height:297mm;padding:20mm;margin:10mm auto;border:1px #d3d3d3 solid;border-radius:5px;background:#fff;box-shadow:0 0 5px rgba(0,0,0,.1);page-break-after:always}.report-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #334155;padding-bottom:1rem}.report-header img{max-width:80px;max-height:80px;border-radius:8px}.report-title h1{font-size:1.8rem;font-weight:700;margin:0;color:#1e293b}.report-title p{font-size:.9rem;margin:0;color:#475569}.section-title{font-size:1.5rem;font-weight:600;color:#1e3a8a;border-bottom:1px solid #94a3b8;padding-bottom:.5rem;margin-top:2rem;margin-bottom:1rem}.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}.summary-card{background-color:#f1f5f9;border-radius:8px;padding:1rem;text-align:center;border-left:5px solid #2563eb}.summary-card p{margin:0;font-size:.8rem;color:#475569;text-transform:uppercase}.summary-card span{display:block;font-size:1.75rem;font-weight:700;color:#1e293b}.custom-table{width:100%;border-collapse:collapse;margin-top:1rem}.custom-table th,.custom-table td{border:1px solid #cbd5e1;padding:.75rem;text-align:left}.custom-table th{background-color:#e2e8f0;font-weight:600}.custom-table tr:nth-child(even){background-color:#f8fafc}.risk-card-print{border:1px solid #cbd5e1;border-left:5px solid #ef4444;border-radius:8px;padding:1rem;margin-bottom:1rem;page-break-inside:avoid}.footer{text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid #cbd5e1;font-size:.8rem;color:#64748b}@media print{html,body{width:210mm;height:297mm;margin:0;padding:0}.page{margin:0;border:initial;border-radius:initial;width:initial;min-height:initial;box-shadow:initial;background:initial;page-break-after:always}}<\/style><\/head><body><div class="page"><header class="report-header"><div class="report-title"><h1>Relatório de Simulação Eleitoral</h1><p>Cenário para as Eleições de 2026 em Santa Catarina</p></div><div class="text-right"><img src="${logoSrc}" alt="Logo"><p class="font-bold mt-2">${candidateName}</p></div></header><main><h2 class="section-title"><i class="fa-solid fa-sliders mr-2"></i>Parâmetros da Simulação</h2><div class="summary-grid"><div class="summary-card" style="border-color:#f97316"><p>Taxa de Abstenção</p><span>${abstentionRate}%</span></div><div class="summary-card" style="border-color:#f97316"><p>Cresc. do Eleitorado</p><span>${electorateGrowth}%</span></div><div class="summary-card" style="border-color:#f97316"><p>Legendas Editadas</p><span class="text-base truncate" title="${customParties}">${customParties}</span></div></div><h2 class="section-title"><i class="fa-solid fa-chart-pie mr-2"></i>Resumo do Cenário</h2><div class="summary-grid"><div class="summary-card"><p>Votos Válidos</p><span>${totalVotosValidos.toLocaleString('pt-BR')}</span></div><div class="summary-card"><p>Quociente Eleitoral</p><span>${QE.toLocaleString('pt-BR')}</span></div><div class="summary-card"><p>Eleitorado Projetado</p><span>${totalEleitores.toLocaleString('pt-BR')}</span></div><div class="summary-card" style="border-color:#64748b"><p>Votos Brancos</p><span>${totalVotosBrancos.toLocaleString('pt-BR')}</span></div><div class="summary-card" style="border-color:#64748b"><p>Votos Nulos</p><span>${totalVotosNulos.toLocaleString('pt-BR')}</span></div><div class="summary-card" style="border-color:#eab308"><p>Cadeiras em Risco</p><span>${sobrasLog.length}</span></div></div><h2 class="section-title"><i class="fa-solid fa-ranking-star mr-2"></i>Ranking de Oportunidade</h2><table class="custom-table"><thead><tr><th>Partido</th><th>Votos Totais</th><th>Vagas Diretas</th><th>Vagas de Sobra</th><th>Total de Vagas</th><th>Nota de Corte</th></tr></thead><tbody>${cenarios.filter(p=>p.totalVagas>0).sort((a,b)=>b.totalVagas-a.totalVagas).map(p=>`<tr><td>${p.nome}</td><td>${p.votos.toLocaleString('pt-BR')}</td><td>${p.vagasDiretas}</td><td>${p.vagasSobras}</td><td class="font-bold">${p.totalVagas}</td><td>${p.notaCorte.toLocaleString('pt-BR')}</td></tr>`).join('')}</tbody></table><h2 class="section-title"><i class="fa-solid fa-fire-flame-curved mr-2"></i>Análise de Cadeiras em Risco</h2><div>${sobrasLog.slice().reverse().map(log=>`<div class="risk-card-print"><h3 class="font-bold text-lg mb-2">Disputa pela Vaga #${log.vaga}</h3><div class="grid grid-cols-2 gap-4"><div><p class="text-sm text-green-700 font-semibold">GANHANDO</p><p class="font-bold text-xl">${log.vencedor}</p><p class="text-sm">Média: ${Math.ceil(log.mediaVencedor).toLocaleString('pt-BR')}</p></div><div><p class="text-sm text-gray-600 font-semibold">AMEAÇANDO</p><p class="font-bold text-xl">${log.perdedor||"N/A"}</p><p class="text-sm">Média: ${log.perdedor?Math.ceil(log.mediaPerdedor).toLocaleString('pt-BR'):"-"}</p></div></div><div class="mt-3 pt-3 border-t text-center"><p class="text-sm text-orange-600">Diferença de Média: <strong class="text-lg">${(log.perdedor?Math.ceil(log.mediaVencedor-log.mediaPerdedor):0).toLocaleString('pt-BR')} votos</strong></p></div></div>`).join('')}${sobrasLog.length===0?'<p>Nenhuma vaga de sobra foi disputada neste cenário.</p>':''}</div></main><footer class="footer">Relatório gerado pela Sala de Guerra Eleitoral v7.8 em ${currentDate} às ${currentTime}.</footer></div></body></html>`;
+    async function initializeEleitos2024Tab() {
+        const container = document.getElementById('eleitos-2024-container');
+        const select = document.getElementById('region-select');
+        container.innerHTML = '';
+        select.innerHTML = '<option value="all">Todas as Regiões</option>';
         
-        const reportWindow = window.open('', '_blank');
-        reportWindow.document.write(reportHtml);
-        reportWindow.document.close();
-        reportWindow.focus(); 
-        setTimeout(() => { reportWindow.print(); reportWindow.close(); }, 500);
-    }
+        const allRegionCities = {};
 
-    function printCandidatosReport() {
-        const logoSrc = getLogoSvgDataUrl();
-        const candidateName = document.querySelector('#logo-container p').textContent;
-        const currentDate = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-        const currentTime = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        Object.keys(ELEITOS_2024_DATA).forEach(region => {
+            select.innerHTML += `<option value="${region}">${region}</option>`;
+            allRegionCities[region] = new Set();
+            ELEITOS_2024_DATA[region].forEach(cand => {
+                allRegionCities[region].add(cand.CIDADE);
+            });
+        });
+        
+        updateEleitosSummary('all');
 
-        let partiesHtml = baseScenario.partidos.sort((a, b) => a.nome.localeCompare(b.nome)).map(party => {
-            let candidatesHtml = party.candidatos.map(cand => `
-                <tr>
-                    <td>${cand.nome}</td>
-                    <td>${cand.votos.toLocaleString('pt-BR')}</td>
-                    <td style="color: ${cand.isEleito ? '#22c55e' : '#ef4444'};">${cand.isEleito ? 'Eleito' : 'Não Eleito'}</td>
+        Object.keys(ELEITOS_2024_DATA).forEach(region => {
+            const regionData = ELEITOS_2024_DATA[region];
+            let tableRows = regionData.map(cand => `
+                <tr class="border-b border-border">
+                    <td class="py-3 px-4">${cand.CIDADE}</td>
+                    <td class="py-3 px-4">${cand["NOME CANDIDATO"]}</td>
+                    <td class="py-3 px-4">${cand.CARGO}</td>
+                    <td class="py-3 px-4">${cand.PARTIDO || 'N/A'}</td>
+                    <td class="py-3 px-4 text-right">${cand.VOTOS}</td>
                 </tr>
             `).join('');
 
-            return `
-                <div style="page-break-inside: avoid; margin-top: 2rem;">
-                    <h2 class="section-title" style="margin-top: 0;">
-                        <i class="fa-solid fa-flag mr-2"></i>
-                        ${party.nome} - <span style="font-weight: 400;">Total da Legenda: ${party.votosBase2022.toLocaleString('pt-BR')}</span>
-                    </h2>
-                    <table class="custom-table">
-                        <thead>
+            container.innerHTML += `
+                <div class="region-table" id="region-${region.replace(/[^a-zA-Z0-9]/g, '')}">
+                    <h3 class="text-xl font-bold text-secondary mt-8 mb-2">${region}</h3>
+                    <p class="text-xs text-text-light mb-3 italic">Cidades: ${[...allRegionCities[region]].join(', ')}</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-900/50">
+                                <tr>
+                                    <th class="py-3 px-4">Cidade</th>
+                                    <th class="py-3 px-4">Nome</th>
+                                    <th class="py-3 px-4">Cargo</th>
+                                    <th class="py-3 px-4">Partido</th>
+                                    <th class="py-3 px-4 text-right">Votos</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Load and draw the map
+        try {
+            mapData = await d3.json("https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-42-mun.json");
+            drawMap('all');
+        } catch (error) {
+            console.error("Error loading map data:", error);
+            document.getElementById('map-container').innerHTML = `<p class="text-center text-danger p-4">Erro ao carregar o mapa.</p>`;
+        }
+    }
+
+    function updateEleitosSummary(region) {
+        const summaryContainer = document.getElementById('eleitos-2024-summary');
+        let summary = { cargos: {}, partidos: {}, generos: { homens: 0, mulheres: 0 } };
+        const regionsToProcess = region === 'all' ? Object.keys(ELEITOS_2024_DATA) : [region];
+
+        regionsToProcess.forEach(regionKey => {
+            const regionData = ELEITOS_2024_DATA[regionKey];
+            if (!regionData) return;
+            regionData.forEach(cand => {
+                let cargo = cand.CARGO.toUpperCase().replace('-', ' ');
+                if (cargo.endsWith('A')) cargo = cargo.slice(0, -1) + 'OR';
+                summary.cargos[cargo] = (summary.cargos[cargo] || 0) + 1;
+                const partido = cand.PARTIDO || 'N/A';
+                summary.partidos[partido] = (summary.partidos[partido] || 0) + 1;
+                if (cand.CARGO.toUpperCase().endsWith('A')) summary.generos.mulheres++;
+                else summary.generos.homens++;
+            });
+        });
+
+        const sortedPartidos = Object.entries(summary.partidos).sort(([,a],[,b]) => b-a);
+        summaryContainer.innerHTML = `<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <div class="bg-background p-3 rounded-lg text-center clickable" onclick="showSummaryModal('CARGO', 'PREFEITO', '${region}')"><p class="text-xs font-semibold text-text-light uppercase">Prefeitos</p><p class="text-2xl font-bold text-primary">${summary.cargos['PREFEITO'] || 0}</p></div>
+            <div class="bg-background p-3 rounded-lg text-center clickable" onclick="showSummaryModal('CARGO', 'VICE PREFEITO', '${region}')"><p class="text-xs font-semibold text-text-light uppercase">Vice-Prefeitos</p><p class="text-2xl font-bold text-primary">${summary.cargos['VICE PREFEITO'] || 0}</p></div>
+            <div class="bg-background p-3 rounded-lg text-center clickable" onclick="showSummaryModal('CARGO', 'VEREADOR', '${region}')"><p class="text-xs font-semibold text-text-light uppercase">Vereadores</p><p class="text-2xl font-bold text-primary">${summary.cargos['VEREADOR'] || 0}</p></div>
+            <div class="bg-background p-3 rounded-lg text-center clickable" onclick="showSummaryModal('GENERO', 'HOMEM', '${region}')"><p class="text-xs font-semibold text-text-light uppercase">Homens</p><p class="text-2xl font-bold text-blue-400">${summary.generos.homens}</p></div>
+            <div class="bg-background p-3 rounded-lg text-center clickable" onclick="showSummaryModal('GENERO', 'MULHER', '${region}')"><p class="text-xs font-semibold text-text-light uppercase">Mulheres</p><p class="text-2xl font-bold text-pink-400">${summary.generos.mulheres}</p></div>
+        </div>
+        <div>
+            <h3 class="text-lg font-bold text-secondary mb-3">Eleitos por Partido</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-sm">
+                ${sortedPartidos.map(([partido, total]) => `<div class="bg-background p-2 rounded-lg flex justify-between items-center clickable" onclick="showSummaryModal('PARTIDO', '${partido}', '${region}')"><span class="font-bold">${partido}</span><span class="font-mono text-primary font-semibold">${total}</span></div>`).join('')}
+            </div>
+        </div>`;
+    }
+
+    function filterEleitosByRegion(region) {
+        updateEleitosSummary(region);
+        drawMap(region);
+        document.querySelectorAll('.region-table').forEach(table => {
+            table.style.display = (region === 'all' || table.id === `region-${region.replace(/[^a-zA-Z0-9]/g, '')}`) ? 'block' : 'none';
+        });
+    }
+    
+    function drawMap(region) {
+        if (!mapData) return;
+
+        const container = d3.select("#map-container");
+        container.select("svg").remove();
+
+        const width = container.node().getBoundingClientRect().width;
+        const height = width * 0.6;
+
+        const svg = container.append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", `0 0 ${width} ${height}`);
+
+        const tooltip = d3.select("#map-tooltip");
+        const projection = d3.geoMercator().fitSize([width, height], mapData);
+        const path = d3.geoPath().projection(projection);
+
+        const electedCitiesData = {};
+        Object.values(ELEITOS_2024_DATA).flat().forEach(e => {
+            const city = e.CIDADE.toUpperCase();
+            if (!electedCitiesData[city]) electedCitiesData[city] = { parties: {} };
+            const party = e.PARTIDO || 'N/A';
+            electedCitiesData[city].parties[party] = (electedCitiesData[city].parties[party] || 0) + 1;
+        });
+
+        Object.keys(electedCitiesData).forEach(city => {
+            const parties = electedCitiesData[city].parties;
+            const topParty = Object.keys(parties).reduce((a, b) => parties[a] > parties[b] ? a : b, 'N/A');
+            electedCitiesData[city].topParty = topParty;
+        });
+        
+        const citiesInRegion = region === 'all' 
+            ? new Set(Object.keys(electedCitiesData)) 
+            : new Set(ELEITOS_2024_DATA[region] ? ELEITOS_2024_DATA[region].map(c => c.CIDADE.toUpperCase()) : []);
+
+        svg.selectAll("path")
+            .data(mapData.features)
+            .enter().append("path")
+            .attr("d", path)
+            .attr("class", "municipio")
+            .attr("fill", d => {
+                const cityName = d.properties.name.toUpperCase();
+                if (citiesInRegion.has(cityName) && electedCitiesData[cityName]) {
+                    const cityData = electedCitiesData[cityName];
+                    return PARTY_COLORS[cityData.topParty] || '#f97316';
+                }
+                return '#1e293b'; // Use card color for non-highlighted cities for better visibility
+            })
+            .style("cursor", d => citiesInRegion.has(d.properties.name.toUpperCase()) ? "pointer" : "default")
+            .on("mouseover", function(event, d) {
+                const cityName = d.properties.name;
+                if (citiesInRegion.has(cityName.toUpperCase())) {
+                    d3.select(this).classed("highlight", true);
+                    tooltip.style("opacity", 1)
+                           .html(cityName)
+                           .style("left", (event.pageX + 10) + "px")
+                           .style("top", (event.pageY - 28) + "px");
+                }
+            })
+            .on("mouseout", function() {
+                d3.select(this).classed("highlight", false);
+                tooltip.style("opacity", 0);
+            })
+            .on("click", function(event, d) {
+                const cityName = d.properties.name.toUpperCase();
+                if (citiesInRegion.has(cityName)) {
+                    showCityModal(d.properties.name);
+                }
+            });
+    }
+
+    function showCityModal(cityName) {
+        const upperCityName = cityName.toUpperCase();
+        const cityData = [];
+        for (const region in ELEITOS_2024_DATA) {
+            ELEITOS_2024_DATA[region].forEach(candidate => {
+                if (candidate.CIDADE.toUpperCase() === upperCityName) {
+                    cityData.push(candidate);
+                }
+            });
+        }
+
+        if (cityData.length === 0) return;
+
+        let candidatesHtml = cityData.map(cand => `
+            <tr class="border-b border-border hover:bg-background">
+                <td class="py-3 px-4">${cand["NOME CANDIDATO"]}</td>
+                <td class="py-3 px-4">${cand.CARGO}</td>
+                <td class="py-3 px-4">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${PARTY_COLORS[cand.PARTIDO] || '#64748b'}"></div>
+                        <span>${cand.PARTIDO || 'N/A'}</span>
+                    </div>
+                </td>
+                <td class="py-3 px-4 text-right font-mono">${cand.VOTOS}</td>
+            </tr>
+        `).join('');
+
+        const modalHtml = `
+            <div class="p-6 text-text-light">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-secondary">${cityName}</h2>
+                        <p>Eleitos em 2024</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-900/50">
                             <tr>
-                                <th>Candidato</th>
-                                <th>Votos em 2022</th>
-                                <th>Resultado</th>
+                                <th class="py-3 px-4">Nome</th>
+                                <th class="py-3 px-4">Cargo</th>
+                                <th class="py-3 px-4">Partido</th>
+                                <th class="py-3 px-4 text-right">Votos</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1451,19 +1299,100 @@
                         </tbody>
                     </table>
                 </div>
-            `;
-        }).join('');
-
-        let reportHtml = `
-            <!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório da Base de Candidatos 2022</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet"><style>body{font-family:'Inter',sans-serif;background-color:#fff;color:#0f172a;margin:0;padding:0}.page{width:210mm;min-height:297mm;padding:20mm;margin:10mm auto;border:1px #d3d3d3 solid;border-radius:5px;background:#fff;box-shadow:0 0 5px rgba(0,0,0,.1);page-break-after:always}.report-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #334155;padding-bottom:1rem}.report-header img{max-width:80px;max-height:80px;border-radius:8px}.report-title h1{font-size:1.8rem;font-weight:700;margin:0;color:#1e293b}.report-title p{font-size:.9rem;margin:0;color:#475569}.section-title{font-size:1.5rem;font-weight:600;color:#1e3a8a;border-bottom:1px solid #94a3b8;padding-bottom:.5rem;margin-top:2rem;margin-bottom:1rem}.custom-table{width:100%;border-collapse:collapse;margin-top:1rem}.custom-table th,.custom-table td{border:1px solid #cbd5e1;padding:.75rem;text-align:left;font-size:0.9rem}.custom-table th{background-color:#e2e8f0;font-weight:600}.custom-table tr:nth-child(even){background-color:#f8fafc}.footer{text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid #cbd5e1;font-size:.8rem;color:#64748b}@media print{html,body{width:210mm;height:297mm;margin:0;padding:0}.page{margin:0;border:initial;border-radius:initial;width:initial;min-height:initial;box-shadow:initial;background:initial;page-break-after:always}}<\/style><\/head><body><div class="page"><header class="report-header"><div class="report-title"><h1>Relatório da Base de Candidatos</h1><p>Dados completos das Eleições de 2022 em Santa Catarina</p></div><div class="text-right"><img src="${logoSrc}" alt="Logo"><p class="font-bold mt-2">${candidateName}</p></div></header><main>${partiesHtml}</main><footer class="footer">Relatório gerado pela Sala de Guerra Eleitoral v7.8 em ${currentDate} às ${currentTime}.</footer></div></body></html>`;
-
-        const reportWindow = window.open('', '_blank');
-        reportWindow.document.write(reportHtml);
-        reportWindow.document.close();
-        reportWindow.focus();
-        setTimeout(() => { reportWindow.print(); reportWindow.close(); }, 500);
+            </div>
+        `;
+        showModal(modalHtml);
     }
 
+    function showSummaryModal(filterType, filterValue, region) {
+        const regionsToProcess = region === 'all' ? Object.keys(ELEITOS_2024_DATA) : [region];
+        let filteredData = [];
+
+        regionsToProcess.forEach(regionKey => {
+            const regionData = ELEITOS_2024_DATA[regionKey];
+            if (!regionData) return;
+
+            regionData.forEach(candidate => {
+                let match = false;
+                if (filterType === 'CARGO') {
+                    let cargo = candidate.CARGO.toUpperCase().replace('-', ' ');
+                    if (cargo.endsWith('A')) cargo = cargo.slice(0, -1) + 'OR';
+                    if (cargo === filterValue.toUpperCase()) {
+                        match = true;
+                    }
+                } else if (filterType === 'PARTIDO') {
+                    const party = candidate.PARTIDO || 'N/A';
+                    if (party.toUpperCase() === filterValue.toUpperCase()) {
+                        match = true;
+                    }
+                } else if (filterType === 'GENERO') {
+                    const isMulher = candidate.CARGO.toUpperCase().endsWith('A');
+                    if (filterValue === 'MULHER' && isMulher) {
+                        match = true;
+                    } else if (filterValue === 'HOMEM' && !isMulher) {
+                        match = true;
+                    }
+                }
+                
+                if (match) {
+                    filteredData.push(candidate);
+                }
+            });
+        });
+
+        if (filteredData.length === 0) {
+            showInfoModal(`Nenhum resultado encontrado para "${filterValue}" na região selecionada.`);
+            return;
+        }
+        
+        filteredData.sort((a, b) => a.CIDADE.localeCompare(b.CIDADE) || a['NOME CANDIDATO'].localeCompare(b['NOME CANDIDATO']));
+
+        let candidatesHtml = filteredData.map(cand => `
+            <tr class="border-b border-border hover:bg-background">
+                <td class="py-3 px-4">${cand.CIDADE}</td>
+                <td class="py-3 px-4">${cand["NOME CANDIDATO"]}</td>
+                <td class="py-3 px-4">${cand.CARGO}</td>
+                <td class="py-3 px-4">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${PARTY_COLORS[cand.PARTIDO] || '#64748b'}"></div>
+                        <span>${cand.PARTIDO || 'N/A'}</span>
+                    </div>
+                </td>
+                <td class="py-3 px-4 text-right font-mono">${cand.VOTOS}</td>
+            </tr>
+        `).join('');
+
+        const title = `${filterValue.toLowerCase()}s eleitos ${region === 'all' ? '' : 'na ' + region}`;
+
+        const modalHtml = `
+            <div class="p-6 text-text-light">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-secondary capitalize">${title}</h2>
+                        <p>${filteredData.length} resultado(s) encontrado(s)</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
+                </div>
+                <div class="overflow-y-auto max-h-[60vh]">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-900/50 sticky top-0">
+                            <tr>
+                                <th class="py-3 px-4">Cidade</th>
+                                <th class="py-3 px-4">Nome</th>
+                                <th class="py-3 px-4">Cargo</th>
+                                <th class="py-3 px-4">Partido</th>
+                                <th class="py-3 px-4 text-right">Votos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${candidatesHtml}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+        showModal(modalHtml);
+    }
     </script>
 </body>
 </html>
