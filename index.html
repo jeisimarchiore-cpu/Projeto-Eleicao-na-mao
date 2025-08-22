@@ -12,7 +12,7 @@
     <script src="https://d3js.org/topojson.v3.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
     <script>
-        // Tailwind CSS configuration for a professional, modern look.
+        // Tailwind CSS configuration for a new professional color scheme.
         tailwind.config = {
             theme: {
                 extend: {
@@ -20,17 +20,17 @@
                         'playfair': ['"Playfair Display"', 'serif']
                     },
                     colors: {
-                        'primary': '#2563eb', // blue-600
-                        'secondary': '#f97316', // orange-500
-                        'background': '#0f172a', // slate-900
-                        'card': '#1e293b', // slate-800
-                        'text-main': '#ffffff', // white
-                        'text-light': '#e2e8f0', // slate-200
-                        'text-neutral': '#d1d5db', // coolGray-300
-                        'border': '#334155', // slate-700
-                        'success': '#22c55e', // green-500
-                        'danger': '#ef4444', // red-500
-                        'warning': '#eab308', // yellow-500
+                        'primary': '#8b5cf6', // violet-500
+                        'secondary': '#14b8a6', // teal-500
+                        'background': '#111827', // gray-900
+                        'card': '#1f2937', // gray-800
+                        'text-main': '#f9fafb', // gray-50
+                        'text-light': '#d1d5db', // gray-300
+                        'text-neutral': '#9ca3af', // gray-400
+                        'border': '#374151', // gray-700
+                        'success': '#10b981', // emerald-500
+                        'danger': '#dc2626', // red-600
+                        'warning': '#f59e0b', // amber-500
                     }
                 }
             }
@@ -47,7 +47,7 @@
             color: #ffffff;
         }
         input::placeholder {
-            color: #94a3b8; /* slate-400 */
+            color: #9ca3af; /* gray-400 */
         }
         .party-bar {
             transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
@@ -57,7 +57,7 @@
             border-left-width: 4px;
         }
         .clickable { cursor: pointer; transition: background-color 0.2s; }
-        .clickable:hover { background-color: #334155; }
+        .clickable:hover { background-color: #374151; }
         
         /* Modal Styles */
         .modal-overlay { transition: opacity 0.3s ease; }
@@ -65,14 +65,14 @@
 
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px;}
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
         
         /* Alliance Checkbox */
         .alliance-checkbox:checked + label {
-            background-color: #2563eb;
-            border-color: #2563eb;
+            background-color: #8b5cf6;
+            border-color: #8b5cf6;
             color: white;
         }
         .tab-button {
@@ -80,24 +80,24 @@
             border-bottom: 4px solid transparent;
         }
         .tab-button.active {
-            border-bottom-color: #2563eb;
-            color: #f1f5f9;
+            border-bottom-color: #8b5cf6;
+            color: #f9fafb;
         }
         
         /* Map Styles */
         #map-container {
             position: relative;
-            background-color: #1e293b;
+            background-color: #1f2937;
             border-radius: 0.5rem;
-            border: 1px solid #334155;
+            border: 1px solid #374151;
         }
         .municipio {
-            stroke: #475569;
+            stroke: #4b5563;
             stroke-width: 0.5px;
             transition: fill 0.3s ease, stroke 0.3s ease;
         }
         .municipio.highlight {
-            stroke: #f1f5f9;
+            stroke: #f9fafb;
             stroke-width: 1.5px;
         }
         #map-tooltip {
@@ -105,13 +105,59 @@
             text-align: center;
             padding: 8px;
             font-size: 12px;
-            background: #0f172a;
-            border: 1px solid #334155;
+            background: #111827;
+            border: 1px solid #374151;
             border-radius: 4px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.2s;
-            color: #e2e8f0;
+            color: #f9fafb;
+        }
+
+        /* Ensure all text is white */
+        .text-text-main, .text-text-light, .text-text-neutral, .font-bold, p, h1, h2, h3, h4, h5, h6, span, div, th, td { 
+            color: #f9fafb; 
+        }
+        .text-primary { color: #8b5cf6 !important; }
+        .text-secondary { color: #14b8a6 !important; }
+        .text-success { color: #10b981 !important; }
+        .text-danger { color: #dc2626 !important; }
+        .text-warning { color: #f59e0b !important; }
+        .text-blue-400 { color: #60a5fa !important; }
+        .text-pink-400 { color: #f472b6 !important; }
+
+
+        /* Print Styles */
+        @media print {
+            body { 
+                background-color: #111827 !important; 
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            header, aside, .no-print, #map-container { 
+                display: none !important; 
+            }
+            main, div, section { 
+                display: block !important; 
+                width: 100% !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+            }
+            .bg-card { 
+                background-color: #1f2937 !important; 
+                border: 1px solid #374151 !important; 
+                page-break-inside: avoid;
+            }
+            * {
+                color: #f9fafb !important;
+            }
+            .text-primary { color: #8b5cf6 !important; }
+            .text-secondary { color: #14b8a6 !important; }
+            .text-success { color: #10b981 !important; }
+            .text-danger { color: #dc2626 !important; }
+            .text-warning { color: #f59e0b !important; }
+            .text-blue-400 { color: #60a5fa !important; }
+            .text-pink-400 { color: #f472b6 !important; }
         }
     </style>
 </head>
@@ -185,7 +231,7 @@
                             <div class="space-y-4">
                                 <div>
                                     <label for="abstention-rate" class="block text-sm font-medium text-text-light mb-1">Taxa de Abstenção</label>
-                                    <input type="range" id="abstention-rate" min="15" max="30" value="18.6" step="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
+                                    <input type="range" id="abstention-rate" min="15" max="30" value="18.6" step="0.1" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
                                     <div class="flex justify-between items-center mt-1">
                                         <span class="text-xs text-text-light">Base 2022: <span id="base-abstention-display" class="font-mono"></span>%</span>
                                         <span class="text-sm font-mono text-primary"><span id="abstention-value">18.6</span>%</span>
@@ -193,7 +239,7 @@
                                 </div>
                                 <div>
                                     <label for="electorate-growth" class="block text-sm font-medium text-text-light mb-1">Crescimento do Eleitorado</label>
-                                    <input type="range" id="electorate-growth" min="-10" max="10" value="0" step="0.1" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
+                                    <input type="range" id="electorate-growth" min="-10" max="10" value="0" step="0.1" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
                                      <div class="flex justify-between items-center mt-1">
                                         <span class="text-xs text-text-light">Base 2022: <span id="base-electorate-display" class="font-mono"></span></span>
                                         <span class="text-sm font-mono text-primary"><span id="electorate-growth-value">0.0</span>%</span>
@@ -211,7 +257,7 @@
                             <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-handshake mr-2"></i>Simulador de Alianças</h2>
                             <p class="text-xs text-text-light mb-3">Selecione 2 ou mais partidos para analisar uma possível coligação.</p>
                             <div id="alliance-party-container" class="flex flex-wrap gap-2 mb-4"></div>
-                            <button id="alliance-button" onclick="simularAlianca()" class="w-full bg-primary text-white font-bold py-2 rounded-lg shadow-md hover:bg-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <button id="alliance-button" onclick="simularAlianca()" class="w-full bg-primary text-white font-bold py-2 rounded-lg shadow-md hover:bg-violet-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                                 Analisar Aliança
                             </button>
                         </div>
@@ -219,7 +265,7 @@
                         <div class="bg-card p-5 rounded-lg border border-border">
                             <h2 class="text-lg font-bold mb-4 text-secondary"><i class="fa-solid fa-user-pen mr-2"></i>Editor de Legendas</h2>
                             <p class="text-xs text-text-light mb-3">Crie legendas personalizadas para testar cenários específicos.</p>
-                            <button onclick="openLegendaEditor()" class="w-full bg-secondary text-white font-bold py-2 rounded-lg shadow-md hover:bg-orange-400 transition-all duration-200">
+                            <button onclick="openLegendaEditor()" class="w-full bg-secondary text-white font-bold py-2 rounded-lg shadow-md hover:bg-teal-500 transition-all duration-200">
                                 Abrir Editor
                             </button>
                         </div>
@@ -247,7 +293,7 @@
                  <div class="bg-card p-6 rounded-lg border border-border">
                     <h2 class="text-2xl font-bold mb-4">Base de Candidatos (Eleições 2022)</h2>
                     <div class="mb-6">
-                        <input type="text" id="candidato-search" placeholder="Pesquisar por nome do candidato..." class="w-full p-3 bg-slate-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
+                        <input type="text" id="candidato-search" placeholder="Pesquisar por nome do candidato..." class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
                     </div>
                     <div id="candidatos-accordion-container" class="space-y-2">
                         <!-- Accordion will be generated here -->
@@ -264,7 +310,7 @@
                                 <h2 class="text-2xl font-bold">Análise de Puxadores de Voto (Base 2022)</h2>
                                 <p class="text-text-light mt-1">Identifica a concentração de votos nos principais candidatos de cada partido.</p>
                             </div>
-                            <button onclick="resetAllData()" class="bg-danger hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm">
+                            <button onclick="resetAllData()" class="bg-danger hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm">
                                 <i class="fa-solid fa-undo mr-2"></i> Restaurar Dados Originais
                             </button>
                         </div>
@@ -292,7 +338,7 @@
                         </div>
                         <div class="mt-4 md:mt-0">
                             <label for="region-select" class="text-sm font-medium text-text-light mr-2">Filtrar por Região:</label>
-                            <select id="region-select" class="bg-slate-700 p-2 rounded-lg border border-border" onchange="filterEleitosByRegion(this.value)">
+                            <select id="region-select" class="bg-gray-700 p-2 rounded-lg border border-border" onchange="filterEleitosByRegion(this.value)">
                                 <!-- Options will be populated by JS -->
                             </select>
                         </div>
@@ -430,7 +476,7 @@
                     ${p.nome}
                 </label>
                 <div class="flex items-center space-x-2">
-                    <input type="range" id="boost-${p.nome}" min="-20" max="20" value="0" step="1" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
+                    <input type="range" id="boost-${p.nome}" min="-20" max="20" value="0" step="1" class="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
                     <span id="boost-value-${p.nome}" class="font-mono text-xs w-12 text-right">0%</span>
                 </div>
             `;
@@ -625,7 +671,7 @@
                     </div>
                     <span class="font-bold text-lg">${p.totalVagas} <span class="text-sm font-normal text-text-light">vaga(s)</span></span>
                 </div>
-                <div class="w-full bg-slate-700 rounded-full h-4 overflow-hidden">
+                <div class="w-full bg-gray-700 rounded-full h-4 overflow-hidden">
                     <div class="bg-primary h-4 rounded-full party-bar" style="width: ${p.totalVagas > 0 ? (p.vagasDiretas / p.totalVagas * 100) : 0}%" title="Vagas Diretas: ${p.vagasDiretas}"></div>
                 </div>
                 <div class="text-xs text-text-light mt-1 flex justify-between">
@@ -648,7 +694,7 @@
         riskLog.forEach((log, index) => {
             const diff = log.perdedor ? Math.ceil(log.mediaVencedor - log.mediaPerdedor) : 0;
             const item = document.createElement('div');
-            item.className = 'bg-slate-900/50 p-3 rounded-lg risk-card gain clickable';
+            item.className = 'bg-gray-900/50 p-3 rounded-lg risk-card gain clickable';
             item.setAttribute('onclick', `showRiskModal(${index})`);
             item.innerHTML = `
                 <div class="flex justify-between items-center">
@@ -795,7 +841,7 @@
     
     function openLegendaEditor() {
         let optionsHtml = baseScenario.partidos.map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
-        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">Editor de Legendas</h2><p>Edite a lista de candidatos de um partido.</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="flex items-end gap-4"><div class="flex-grow"><label for="legenda-party-select" class="text-sm font-medium">Partido</label><select id="legenda-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1"><option value="">Selecione...</option>${optionsHtml}</select></div><button class="bg-primary px-4 py-2 rounded-lg" onclick="loadPartyEditor()">Carregar</button></div><div id="legenda-editor-content" class="mt-4"></div></div>`;
+        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">Editor de Legendas</h2><p>Edite a lista de candidatos de um partido.</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="flex items-end gap-4"><div class="flex-grow"><label for="legenda-party-select" class="text-sm font-medium">Partido</label><select id="legenda-party-select" class="w-full bg-gray-700 p-2 rounded-lg border border-border mt-1"><option value="">Selecione...</option>${optionsHtml}</select></div><button class="bg-primary px-4 py-2 rounded-lg" onclick="loadPartyEditor()">Carregar</button></div><div id="legenda-editor-content" class="mt-4"></div></div>`;
         showModal(modalHtml);
     }
 
@@ -806,7 +852,7 @@
         const partyData = baseScenario.partidos.find(p => p.nome === partyName);
         const candidates = partyData.customCandidatos || partyData.candidatos;
         
-        let candidatesHtml = candidates.map((cand, index) => `<div class="flex items-center gap-2" data-candidate-index="${index}"><input type="text" placeholder="Nome" value="${cand.nome}" class="w-full bg-slate-900 p-2 rounded-lg border border-border"><input type="number" placeholder="Votos" value="${cand.votos}" class="w-1/2 bg-slate-900 p-2 rounded-lg border border-border"><button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button><button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidate(this, '${partyName}', ${index})"><i class="fa-solid fa-right-left"></i></button></div>`).join('');
+        let candidatesHtml = candidates.map((cand, index) => `<div class="flex items-center gap-2" data-candidate-index="${index}"><input type="text" placeholder="Nome" value="${cand.nome}" class="w-full bg-gray-900 p-2 rounded-lg border border-border"><input type="number" placeholder="Votos" value="${cand.votos}" class="w-1/2 bg-gray-900 p-2 rounded-lg border border-border"><button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button><button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidate(this, '${partyName}', ${index})"><i class="fa-solid fa-right-left"></i></button></div>`).join('');
 
         document.getElementById('legenda-editor-content').innerHTML = `<div id="candidate-list" class="space-y-2 max-h-64 overflow-y-auto pr-2">${candidatesHtml}</div><button class="mt-2 text-sm text-primary" onclick="addCandidateRow()"><i class="fa-solid fa-plus mr-2"></i>Adicionar</button><div class="mt-4 flex justify-between"><button class="text-sm text-danger" onclick="resetLegenda('${partyName}')">Restaurar Padrão</button><div><button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveLegenda('${partyName}')">Salvar</button></div></div>`;
     }
@@ -815,7 +861,7 @@
         const list = document.getElementById('candidate-list');
         const newRow = document.createElement('div');
         newRow.className = 'flex items-center gap-2';
-        newRow.innerHTML = `<input type="text" placeholder="Nome" class="w-full bg-slate-900 p-2 rounded-lg border border-border"><input type="number" placeholder="Votos" class="w-1/2 bg-slate-900 p-2 rounded-lg border border-border"><button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button><div class="w-10"></div>`;
+        newRow.innerHTML = `<input type="text" placeholder="Nome" class="w-full bg-gray-900 p-2 rounded-lg border border-border"><input type="number" placeholder="Votos" class="w-1/2 bg-gray-900 p-2 rounded-lg border border-border"><button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRow(this)">&times;</button><div class="w-10"></div>`;
         list.appendChild(newRow);
     }
 
@@ -893,10 +939,10 @@
             const color = PARTY_COLORS[party.nome] || '#64748b';
             const totalVotosPartido = party.candidatos.reduce((sum, cand) => sum + cand.votos, 0);
             
-            let candidatesHtml = party.candidatos.map((cand, index) => `<div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 border-t border-border candidate-row items-center" data-name="${cand.nome.toLowerCase()}"><div class="font-bold text-text-main col-span-2">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div><div class="flex items-center gap-2 justify-end md:justify-start"><input type="number" value="${cand.growth * 100}" oninput="updateCandidateGrowth('${party.nome}', ${index}, this.value)" class="w-20 bg-slate-900 p-1 rounded-lg border border-border text-right" placeholder="0"><span class="text-sm text-text-light">%</span></div><div class="text-text-light text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Base</span></div><div class="text-text-light text-right"><strong class="text-primary" id="proj-votos-${party.nome.replace(/\s/g, '')}-${index}">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Proj.</span></div></div>`).join('');
+            let candidatesHtml = party.candidatos.map((cand, index) => `<div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 border-t border-border candidate-row items-center" data-name="${cand.nome.toLowerCase()}"><div class="font-bold text-text-main col-span-2">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div><div class="flex items-center gap-2 justify-end md:justify-start"><input type="number" value="${cand.growth * 100}" oninput="updateCandidateGrowth('${party.nome}', ${index}, this.value)" class="w-20 bg-gray-900 p-1 rounded-lg border border-border text-right" placeholder="0"><span class="text-sm text-text-light">%</span></div><div class="text-text-light text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Base</span></div><div class="text-text-light text-right"><strong class="text-primary" id="proj-votos-${party.nome.replace(/\s/g, '')}-${index}">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Proj.</span></div></div>`).join('');
 
             const accordionItem = document.createElement('div');
-            accordionItem.className = 'bg-slate-900/50 rounded-lg party-accordion-item';
+            accordionItem.className = 'bg-gray-900/50 rounded-lg party-accordion-item';
             accordionItem.innerHTML = `<button class="w-full p-4 text-left font-bold flex justify-between items-center text-text-main" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')"><div class="flex items-center"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div><span>${party.nome}</span></div><div class="flex items-center"><span class="text-sm font-normal text-text-light mr-4">${party.candidatos.length} cands.</span><span class="text-sm font-normal text-text-light mr-4">Total: <strong class="text-main" id="total-legenda-${party.nome}">${totalVotosPartido.toLocaleString('pt-BR')}</strong></span><i class="fa-solid fa-chevron-down transition-transform"></i></div></button><div class="p-2 hidden"><div class="space-y-1">${candidatesHtml}</div></div>`;
             container.appendChild(accordionItem);
         });
@@ -969,8 +1015,8 @@
             else { diagnosis = 'Votação bem distribuída.'; diagnosisColor = 'text-success'; }
 
             const card = document.createElement('div');
-            card.className = 'bg-slate-900/50 p-4 rounded-lg border border-border flex flex-col';
-            card.innerHTML = `<div class="flex items-center mb-3"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><h3 class="font-bold text-lg text-text-main">${party.nome}</h3></div><ul class="text-sm space-y-2 flex-grow">${top3.map((cand, i) => `<li class="flex justify-between items-center"><span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span><div class="flex items-center"><span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span><a href="#" onclick="openTransferModal('${party.nome}', '${cand.nome.replace(/'/g, "\\'")}')" class="text-secondary hover:text-orange-400" title="Transferir"><i class="fa-solid fa-right-left"></i></a></div></li>`).join('')}</ul><div class="mt-4 pt-4 border-t border-border"><div class="flex justify-between text-sm font-bold mb-1"><span>Concentração Top 3</span><span class="${diagnosisColor}">${percentage}%</span></div><div class="w-full bg-slate-700 rounded-full h-2.5"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div></div><p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p></div>`;
+            card.className = 'bg-gray-900/50 p-4 rounded-lg border border-border flex flex-col';
+            card.innerHTML = `<div class="flex items-center mb-3"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><h3 class="font-bold text-lg text-text-main">${party.nome}</h3></div><ul class="text-sm space-y-2 flex-grow">${top3.map((cand, i) => `<li class="flex justify-between items-center"><span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span><div class="flex items-center"><span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span><a href="#" onclick="openTransferModal('${party.nome}', '${cand.nome.replace(/'/g, "\\'")}')" class="text-secondary hover:text-orange-400" title="Transferir"><i class="fa-solid fa-right-left"></i></a></div></li>`).join('')}</ul><div class="mt-4 pt-4 border-t border-border"><div class="flex justify-between text-sm font-bold mb-1"><span>Concentração Top 3</span><span class="${diagnosisColor}">${percentage}%</span></div><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div></div><p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p></div>`;
             container.appendChild(card);
         });
     }
@@ -988,8 +1034,8 @@
         partidosComEleitos.forEach(party => {
             const barWidth = (party.custoPorCadeira / maxCost * 100);
             const item = document.createElement('div');
-            item.className = 'bg-slate-900/50 p-3 rounded-lg';
-            item.innerHTML = `<div class="flex flex-col sm:flex-row justify-between sm:items-center"><div class="flex items-center mb-2 sm:mb-0"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><span class="font-bold">${party.nome}</span></div><div class="text-sm text-text-light">${party.totalEleitos} eleito(s) com ${party.totalVotos.toLocaleString('pt-BR')} votos</div></div><div class="mt-2"><div class="flex justify-between items-center text-xs text-text-light mb-1"><span>Custo por Cadeira</span><span class="font-bold text-lg text-primary">${Math.round(party.custoPorCadeira).toLocaleString('pt-BR')}</span></div><div class="w-full bg-slate-700 rounded-full h-4"><div class="bg-primary h-4 rounded-full" style="width: ${barWidth}%"></div></div></div>`;
+            item.className = 'bg-gray-900/50 p-3 rounded-lg';
+            item.innerHTML = `<div class="flex flex-col sm:flex-row justify-between sm:items-center"><div class="flex items-center mb-2 sm:mb-0"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><span class="font-bold">${party.nome}</span></div><div class="text-sm text-text-light">${party.totalEleitos} eleito(s) com ${party.totalVotos.toLocaleString('pt-BR')} votos</div></div><div class="mt-2"><div class="flex justify-between items-center text-xs text-text-light mb-1"><span>Custo por Cadeira</span><span class="font-bold text-lg text-primary">${Math.round(party.custoPorCadeira).toLocaleString('pt-BR')}</span></div><div class="w-full bg-gray-700 rounded-full h-4"><div class="bg-primary h-4 rounded-full" style="width: ${barWidth}%"></div></div></div>`;
             container.appendChild(item);
         });
     }
@@ -998,7 +1044,7 @@
         const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
         const candidate = sourceParty.candidatos.find(c => c.nome === candidateName);
         let optionsHtml = baseScenario.partidos.filter(p => p.nome !== sourcePartyName).map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
-        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">Transferir Candidato</h2><p>Simular a mudança de <strong>${candidate.nome}</strong>.</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="space-y-4"><p>De: <strong class="font-mono">${sourcePartyName}</strong></p><div><label for="transfer-party-select" class="text-sm font-medium">Para:</label><select id="transfer-party-select" class="w-full bg-slate-700 p-2 rounded-lg border border-border mt-1"><option value="">Selecione...</option>${optionsHtml}</select></div></div><div class="mt-6 flex justify-end"><button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="executeTransfer('${sourcePartyName}', '${candidate.nome.replace(/'/g, "\\'")}')">Confirmar</button></div></div>`;
+        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">Transferir Candidato</h2><p>Simular a mudança de <strong>${candidate.nome}</strong>.</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="space-y-4"><p>De: <strong class="font-mono">${sourcePartyName}</strong></p><div><label for="transfer-party-select" class="text-sm font-medium">Para:</label><select id="transfer-party-select" class="w-full bg-gray-700 p-2 rounded-lg border border-border mt-1"><option value="">Selecione...</option>${optionsHtml}</select></div></div><div class="mt-6 flex justify-end"><button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="executeTransfer('${sourcePartyName}', '${candidate.nome.replace(/'/g, "\\'")}')">Confirmar</button></div></div>`;
         showModal(modalHtml);
     }
 
@@ -1040,7 +1086,7 @@
     }
 
     function showConfirmationModal(message, onConfirm) {
-        showModal(`<div class="p-6 text-text-light"><p class="text-lg mb-6 text-center">${message}</p><div class="flex justify-end space-x-4"><button onclick="closeModal()" class="bg-slate-700 hover:bg-slate-600 font-bold py-2 px-4 rounded-lg">Cancelar</button><button id="confirm-action-btn" class="bg-danger hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg">Confirmar</button></div></div>`);
+        showModal(`<div class="p-6 text-text-light"><p class="text-lg mb-6 text-center">${message}</p><div class="flex justify-end space-x-4"><button onclick="closeModal()" class="bg-gray-700 hover:bg-gray-600 font-bold py-2 px-4 rounded-lg">Cancelar</button><button id="confirm-action-btn" class="bg-danger hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg">Confirmar</button></div></div>`);
         document.getElementById('confirm-action-btn').onclick = () => { onConfirm(); closeModal(); };
     }
 
@@ -1107,7 +1153,7 @@
                     <p class="text-xs text-text-light mb-3 italic">Cidades: ${[...allRegionCities[region]].join(', ')}</p>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
-                            <thead class="bg-slate-900/50">
+                            <thead class="bg-gray-900/50">
                                 <tr>
                                     <th class="py-3 px-4">Cidade</th>
                                     <th class="py-3 px-4">Nome</th>
@@ -1223,7 +1269,7 @@
                     const cityData = electedCitiesData[cityName];
                     return PARTY_COLORS[cityData.topParty] || '#f97316';
                 }
-                return '#1e293b'; // Use card color for non-highlighted cities for better visibility
+                return '#1e2937'; // Use card color for non-highlighted cities for better visibility
             })
             .style("cursor", d => citiesInRegion.has(d.properties.name.toUpperCase()) ? "pointer" : "default")
             .on("mouseover", function(event, d) {
@@ -1286,7 +1332,7 @@
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-900/50">
+                        <thead class="bg-gray-900/50">
                             <tr>
                                 <th class="py-3 px-4">Nome</th>
                                 <th class="py-3 px-4">Cargo</th>
@@ -1375,7 +1421,7 @@
                 </div>
                 <div class="overflow-y-auto max-h-[60vh]">
                     <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-900/50 sticky top-0">
+                        <thead class="bg-gray-900/50 sticky top-0">
                             <tr>
                                 <th class="py-3 px-4">Cidade</th>
                                 <th class="py-3 px-4">Nome</th>
