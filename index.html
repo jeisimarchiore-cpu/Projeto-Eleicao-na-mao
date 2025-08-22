@@ -222,6 +222,14 @@
                                     <p class="text-xs font-semibold text-text-light uppercase truncate">Em Risco</p>
                                     <p id="summary-vr" class="text-xl font-bold text-danger">0</p>
                                 </div>
+                                <div class="bg-background p-3 rounded-lg text-center col-span-2">
+                                    <p class="text-xs font-semibold text-text-light uppercase truncate">Total de Cadeiras</p>
+                                    <p id="summary-cadeiras" class="text-xl font-bold text-secondary">0</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center items-center bg-background rounded-lg p-1 mt-4">
+                                <button id="btn-cenario-base" onclick="viewBaseSummary()" class="w-full py-1 text-sm rounded-md">Base 2022</button>
+                                <button id="btn-cenario-projetado" onclick="viewProjectedSummary()" class="w-full py-1 text-sm rounded-md bg-primary text-white">Projetado 2026</button>
                             </div>
                         </div>
 
@@ -373,7 +381,7 @@
     // =================================================================================
     // DATA AND CONFIGURATIONS
     // =================================================================================
-    const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 40, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4028852, votos_brancos: 289065, votos_nulos: 153702, abstencao: 0.1862, partidos: { 
+    const DADOS_ELEICOES = { 'SC': { 'de': { vagas: 44, historico: [ { ano: 2022, eleitorado: 5495133, votos_validos: 4028852, votos_brancos: 289065, votos_nulos: 153702, abstencao: 0.1862, partidos: { 
         'PL': { votos: 878708, candidatos: [ { nome: 'Ana Campagnolo', votos: 196571, isEleito: true }, { nome: 'Sargento Lima', votos: 71185, isEleito: true }, { nome: 'Mauricio Eskudlark', votos: 65638, isEleito: true }, { nome: 'Jessé Lopes', votos: 55013, isEleito: true }, { nome: 'Carlos Humberto', votos: 46445, isEleito: true }, { nome: 'Ivan Naatz', votos: 45304, isEleito: true }, { nome: 'Berlanda', votos: 41488, isEleito: true }, { nome: 'Marcius Machado', votos: 39749, isEleito: true }, { nome: 'Massocco', votos: 31659, isEleito: true }, { nome: 'Oscar Gutz', votos: 26812, isEleito: true }, { nome: 'Soratto', votos: 25622, isEleito: true }, { nome: 'Maurício Peixer', votos: 22028, isEleito: false }, { nome: 'A Alex Brasil', votos: 20271, isEleito: false }, { nome: 'Jeferson Cardozo Canal Atalaia', votos: 17934, isEleito: false }, { nome: 'Rafael Laske - Mamão', votos: 15730, isEleito: false }, { nome: 'Frigo', votos: 15090, isEleito: false }, { nome: 'Leticia Mattos', votos: 11068, isEleito: false }, { nome: 'Dr. Jorge', votos: 8810, isEleito: false }, { nome: 'Neuri Mantelli', votos: 8484, isEleito: false }, { nome: 'Turibio Torres', votos: 7282, isEleito: false }, { nome: 'Alemãozinho - Claudir Henz', votos: 6893, isEleito: false }, { nome: 'Marcio Cardoso', votos: 5990, isEleito: false }, { nome: 'Roberto Salum', votos: 5082, isEleito: false }, { nome: 'Andresa Ribeiro', votos: 5071, isEleito: false }, { nome: 'A Guerreira Salete Cardoso', votos: 4829, isEleito: false }, { nome: 'Rabuja', votos: 4799, isEleito: false }, { nome: 'Maryanne Mattos', votos: 4420, isEleito: false }, { nome: 'Alex Wehrle Professor', votos: 3999, isEleito: false }, { nome: 'Eloir Dedonatti', votos: 3958, isEleito: false }, { nome: 'Enfermeiro Victor Nascimento', votos: 3700, isEleito: false }, { nome: 'Moacir Bertoldi', votos: 3688, isEleito: false }, { nome: 'Simone Lerner', votos: 2810, isEleito: false }, { nome: 'Leonardo Tatim', votos: 1650, isEleito: false }, { nome: 'Professor Hahne', votos: 1332, isEleito: false }, { nome: 'Odete Enfermeira', votos: 564, isEleito: false }, { nome: 'Engenheira Alessandra Kingeski', votos: 515, isEleito: false }, { nome: 'Betinha Thomaselli', votos: 506, isEleito: false }, { nome: 'Sueli Zincoski', votos: 407, isEleito: false }, { nome: 'Marta Efrayim', votos: 135, isEleito: false }, { nome: 'Silvana', votos: 112, isEleito: false } ] }, 
         'MDB': { votos: 505571, candidatos: [ { nome: 'Antídio Lunelli', votos: 74500, isEleito: true }, { nome: 'Mauro de Nadal', votos: 67065, isEleito: true }, { nome: 'Jerry Comper', votos: 64145, isEleito: true }, { nome: 'Fernando Krelling', votos: 54320, isEleito: true }, { nome: 'Volnei Weber', votos: 45995, isEleito: true }, { nome: 'Tiago Zilli', votos: 33733, isEleito: true }, { nome: 'Emerson Stein', votos: 25063, isEleito: false }, { nome: 'Rosi Maldaner', votos: 20189, isEleito: false }, { nome: 'Dirce Heiderscheidt', votos: 16906, isEleito: false }, { nome: 'Adilson Girardi', votos: 15943, isEleito: false }, { nome: 'Cleiton Fossa', votos: 12364, isEleito: false }, { nome: 'Paulo Basilio', votos: 10561, isEleito: false }, { nome: 'Carelli', votos: 10138, isEleito: false }, { nome: 'Suelen Geremia', votos: 4825, isEleito: false }, { nome: 'Marcelo Fett', votos: 4552, isEleito: false }, { nome: 'Ari Galeski', votos: 4473, isEleito: false }, { nome: 'Guella', votos: 3743, isEleito: false }, { nome: 'Juarez Matos', votos: 3602, isEleito: false }, { nome: 'Flávia Vicente', votos: 2943, isEleito: false }, { nome: 'Professor Toldo', votos: 2027, isEleito: false }, { nome: 'William', votos: 1685, isEleito: false }, { nome: 'Leila Conci', votos: 1502, isEleito: false }, { nome: 'Psicóloga Ronize Ferreira', votos: 1478, isEleito: false }, { nome: 'Mano Cadore', votos: 1359, isEleito: false }, { nome: 'Chico Bento', votos: 1089, isEleito: false }, { nome: 'Micheline', votos: 803, isEleito: false }, { nome: 'Biriba', votos: 553, isEleito: false }, { nome: 'Jairo Santos', votos: 292, isEleito: false }, { nome: 'Franciel Britos', votos: 233, isEleito: false }, { nome: 'Mairi', votos: 110, isEleito: false }, { nome: 'Zélia Grah', votos: 71, isEleito: false }, { nome: 'Keli Cordeiro', votos: 42, isEleito: false } ] }, 
         'PT': { votos: 438030, candidatos: [ { nome: 'Luciane Carminatti', votos: 92478, isEleito: true }, { nome: 'Neodi Saretta', votos: 38729, isEleito: true }, { nome: 'Fabiano da Luz', votos: 34972, isEleito: true }, { nome: 'Padre Pedro', votos: 26803, isEleito: true }, { nome: 'Professora Vanessa da Rosa', votos: 16832, isEleito: false }, { nome: 'Paulo Eccel', votos: 16561, isEleito: false }, { nome: 'Dirceu Dresch', votos: 14370, isEleito: false }, { nome: 'Rodrigo Preis', votos: 12844, isEleito: false }, { nome: 'Luci Choinacki', votos: 12699, isEleito: false }, { nome: 'Jean Volpato', votos: 12499, isEleito: false }, { nome: 'Adriano Pereira', votos: 10988, isEleito: false }, { nome: 'Celso Zuchi', votos: 9159, isEleito: false }, { nome: 'Professor Lino Peres', votos: 8619, isEleito: false }, { nome: 'Rodolfo de Ramos', votos: 8128, isEleito: false }, { nome: 'Marisa Zanoni', votos: 7826, isEleito: false }, { nome: 'Dani Coletivo Juventude', votos: 7752, isEleito: false }, { nome: 'Júlio Bittencourt', votos: 7495, isEleito: false }, { nome: 'Célio Elias', votos: 6938, isEleito: false }, { nome: 'Adriana Rossi', votos: 6188, isEleito: false }, { nome: 'Professor Alessandro', votos: 5404, isEleito: false }, { nome: 'Cléo Comunello', votos: 5171, isEleito: false }, { nome: 'Glauter', votos: 4070, isEleito: false }, { nome: 'Vanda Pinedo Nossa Força e Voz', votos: 3978, isEleito: false }, { nome: 'Matheus Madeira', votos: 3853, isEleito: false }, { nome: 'Professor Raul Ribas', votos: 3822, isEleito: false }, { nome: 'Rodrigo de Oliveira', votos: 3730, isEleito: false }, { nome: 'Claudia Bratti', votos: 3425, isEleito: false }, { nome: 'Tomio', votos: 2396, isEleito: false }, { nome: 'Valmor de Paula', votos: 2311, isEleito: false }, { nome: 'Sérgio', votos: 2279, isEleito: false }, { nome: 'Professor Chico do Sinte', votos: 2257, isEleito: false }, { nome: 'Gislaine Durski', votos: 2237, isEleito: false }, { nome: 'Elvira Manfroi', votos: 2219, isEleito: false }, { nome: 'Rafael Coletivo Feliz de Novo', votos: 1047, isEleito: false }, { nome: 'Cláudio Márcio', votos: 547, isEleito: false } ] }, 
@@ -406,6 +414,7 @@
     
     let baseScenario = {};
     let currentSimulatedScenario = {};
+    let baseSummary2022 = {};
 
     // =================================================================================
     // MAIN LOGIC
@@ -416,6 +425,7 @@
         initializeCandidatosTab();
         initializeAnaliseTab();
         initializeEleitos2024Tab();
+        calculateBaseSummary2022();
         updateScenario();
     });
 
@@ -636,19 +646,78 @@
     // RENDERING FUNCTIONS
     // =================================================================================
     function renderAll(simulatedScenario) {
-        const { QE, totalVotosValidos, totalVotosBrancos, totalVotosNulos, cenarios, sobrasLog } = simulatedScenario;
+        viewProjectedSummary(); // Default to projected view
+        renderVagasDist(simulatedScenario.cenarios);
+        renderRisk(simulatedScenario.sobrasLog.slice().reverse());
+    }
 
-        document.getElementById('summary-vv').textContent = totalVotosValidos.toLocaleString('pt-BR');
-        document.getElementById('summary-vb').textContent = totalVotosBrancos.toLocaleString('pt-BR');
-        document.getElementById('summary-vn').textContent = totalVotosNulos.toLocaleString('pt-BR');
-        document.getElementById('summary-qe').textContent = QE.toLocaleString('pt-BR');
+    function viewBaseSummary() {
+        document.getElementById('summary-vv').textContent = baseSummary2022.votos_validos.toLocaleString('pt-BR');
+        document.getElementById('summary-qe').textContent = baseSummary2022.QE.toLocaleString('pt-BR');
+        document.getElementById('summary-vb').textContent = baseSummary2022.votos_brancos.toLocaleString('pt-BR');
+        document.getElementById('summary-vn').textContent = baseSummary2022.votos_nulos.toLocaleString('pt-BR');
+        document.getElementById('summary-nc').textContent = baseSummary2022.notaCorte.toLocaleString('pt-BR');
+        document.getElementById('summary-vr').textContent = baseSummary2022.emRisco;
+        document.getElementById('summary-cadeiras').textContent = 40;
+
+        document.getElementById('btn-cenario-base').classList.add('bg-primary', 'text-white');
+        document.getElementById('btn-cenario-projetado').classList.remove('bg-primary', 'text-white');
+    }
+
+    function viewProjectedSummary() {
+        const { QE, totalVotosValidos, totalVotosBrancos, totalVotosNulos, cenarios, sobrasLog } = currentSimulatedScenario;
         const partidosComVaga = cenarios.filter(p => p.totalVagas > 0);
         const notaCorteMedia = partidosComVaga.length > 0 ? Math.ceil(partidosComVaga.reduce((acc, p) => acc + p.notaCorte, 0) / partidosComVaga.length) : 0;
+        
+        document.getElementById('summary-vv').textContent = totalVotosValidos.toLocaleString('pt-BR');
+        document.getElementById('summary-qe').textContent = QE.toLocaleString('pt-BR');
+        document.getElementById('summary-vb').textContent = totalVotosBrancos.toLocaleString('pt-BR');
+        document.getElementById('summary-vn').textContent = totalVotosNulos.toLocaleString('pt-BR');
         document.getElementById('summary-nc').textContent = (notaCorteMedia || 0).toLocaleString('pt-BR');
         document.getElementById('summary-vr').textContent = sobrasLog.length.toLocaleString('pt-BR');
+        document.getElementById('summary-cadeiras').textContent = DADOS_ELEICOES.SC.de.vagas;
 
-        renderVagasDist(cenarios);
-        renderRisk(sobrasLog.slice().reverse());
+        document.getElementById('btn-cenario-projetado').classList.add('bg-primary', 'text-white');
+        document.getElementById('btn-cenario-base').classList.remove('bg-primary', 'text-white');
+    }
+
+    function calculateBaseSummary2022() {
+        const historico2022 = DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2022);
+        const QE2022 = Math.floor(historico2022.votos_validos / 40);
+        
+        const partidos2022 = Object.keys(historico2022.partidos).map(nome => ({
+            nome: nome,
+            votos: historico2022.partidos[nome].votos
+        }));
+
+        // Simplified distribution for summary only
+        let totalVagasDiretas = 0;
+        partidos2022.forEach(p => {
+            p.vagasDiretas = (QE2022 > 0) ? Math.floor(p.votos / QE2022) : 0;
+            p.vagasSobras = 0;
+            totalVagasDiretas += p.vagasDiretas;
+        });
+        const emRisco = 40 - totalVagasDiretas;
+
+        // Calculate average note de corte from raw data
+        let notasDeCorte = [];
+        Object.values(historico2022.partidos).forEach(p => {
+            const eleitos = p.candidatos.filter(c => c.isEleito);
+            if (eleitos.length > 0) {
+                const ultimoEleito = eleitos[eleitos.length - 1];
+                notasDeCorte.push(ultimoEleito.votos);
+            }
+        });
+        const notaCorteMedia = notasDeCorte.length > 0 ? Math.ceil(notasDeCorte.reduce((a, b) => a + b, 0) / notasDeCorte.length) : 0;
+
+        baseSummary2022 = {
+            votos_validos: historico2022.votos_validos,
+            votos_brancos: historico2022.votos_brancos,
+            votos_nulos: historico2022.votos_nulos,
+            QE: QE2022,
+            notaCorte: notaCorteMedia,
+            emRisco: emRisco
+        };
     }
 
     function renderVagasDist(cenarios) {
