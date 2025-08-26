@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v8.4 - Análise com Mapa</title>
+    <title>Sala de Guerra Eleitoral v8.6 - Análise com Mapa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -174,7 +174,7 @@
                 </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v8.4</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v8.6</span>
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
                 </div>
@@ -304,20 +304,17 @@
             
             <!-- TAB: EDITAR LEGENDA -->
             <div id="content-editarLegenda" class="hidden">
-                <div class="bg-card p-6 rounded-lg border border-border">
-                    <h2 class="text-2xl font-bold text-secondary mb-4">Editor de Legendas</h2>
-                    <p class="text-text-light mb-6">Selecione um partido para editar sua lista de candidatos para simulações.</p>
-                    <div class="flex items-end gap-4 mb-6">
-                        <div class="flex-grow">
-                            <label for="legenda-party-select-tab" class="text-sm font-medium">Partido</label>
-                            <select id="legenda-party-select-tab" class="w-full bg-gray-700 p-2 rounded-lg border border-border mt-1">
-                                <!-- Options will be populated by JS -->
-                            </select>
-                        </div>
-                        <button class="bg-primary px-4 py-2 rounded-lg" onclick="loadPartyEditorTab()">Carregar</button>
+                 <div class="bg-card p-6 rounded-lg border border-border">
+                    <div class="flex justify-between items-center mb-6">
+                         <h2 class="text-2xl font-bold text-secondary">Editor de Legendas Completo</h2>
+                         <div>
+                             <button class="bg-danger text-white font-bold py-2 px-4 rounded-lg mr-2" onclick="resetAllLegendas()">Restaurar Padrão</button>
+                             <button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveAllLegendas()">Salvar Todas as Alterações</button>
+                         </div>
                     </div>
-                    <div id="legenda-editor-content-tab">
-                         <p class="text-center text-text-light p-4">Selecione um partido e clique em "Carregar" para começar a editar.</p>
+                    <p class="text-text-light mb-6">Edite as listas de candidatos de todos os partidos. As alterações serão usadas nas simulações após serem salvas.</p>
+                    <div id="full-legenda-editor-container" class="space-y-2">
+                        <!-- Accordions will be generated here -->
                     </div>
                 </div>
             </div>
@@ -564,7 +561,7 @@
             let votosProjetadosBase;
 
             if (p.customCandidatos) {
-                votosProjetadosBase = p.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
+                votosProjetadosBase = p.customCandidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
                 votosFinais = votosProjetadosBase;
                 eleitos = p.customCandidatos.slice();
                 const ultimoEleito = eleitos.length > 0 ? eleitos[Math.min(eleitos.length, 40) - 1] : null;
@@ -923,104 +920,221 @@
     // CUSTOM LIST EDITOR (TAB) LOGIC
     // =================================================================================
     function initializeEditarLegendaTab() {
-        const select = document.getElementById('legenda-party-select-tab');
-        if (!select) return;
-        let optionsHtml = baseScenario.partidos.map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
-        select.innerHTML = `<option value="">Selecione...</option>${optionsHtml}`;
+        const container = document.getElementById('content-editarLegenda');
+        container.innerHTML = `
+            <div class="bg-card p-6 rounded-lg border border-border">
+                <div class="flex justify-between items-center mb-6">
+                     <h2 class="text-2xl font-bold text-secondary">Editor de Legendas Completo</h2>
+                     <div>
+                         <button class="bg-danger text-white font-bold py-2 px-4 rounded-lg mr-2" onclick="resetAllLegendas()">Restaurar Padrão</button>
+                         <button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveAllLegendas()">Salvar Todas as Alterações</button>
+                     </div>
+                </div>
+                <p class="text-text-light mb-6">Edite as listas de candidatos de todos os partidos. As alterações serão usadas nas simulações após serem salvas.</p>
+                <div id="full-legenda-editor-container" class="space-y-2">
+                    <!-- Accordions will be generated here -->
+                </div>
+            </div>
+        `;
+
+        const editorContainer = document.getElementById('full-legenda-editor-container');
+        baseScenario.partidos.sort((a, b) => b.votosBase2022 - a.votosBase2022).forEach(party => {
+            const color = PARTY_COLORS[party.nome] || '#64748b';
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'bg-gray-900/50 rounded-lg';
+            const partyId = party.nome.replace(/[^a-zA-Z0-9]/g, '');
+            accordionItem.id = `legenda-accordion-${partyId}`;
+
+            const candidates = party.customCandidatos || party.candidatos;
+            const totalVotosPartido = candidates.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
+
+            let candidatesHtml = candidates.map((cand, index) => `
+                <div class="grid grid-cols-12 items-center gap-2 mb-2 candidate-row" data-original-index="${index}">
+                    <input type="text" placeholder="Nome" value="${cand.nome}" class="col-span-5 bg-background p-2 rounded-lg border border-border">
+                    <input type="number" placeholder="Votos" value="${cand.votos}" class="col-span-2 bg-background p-2 rounded-lg border border-border" oninput="updateProjectedVotesInEditor(this, '${partyId}')">
+                    <div class="col-span-3 flex items-center gap-2">
+                        <input type="number" placeholder="% Cresc." value="${(cand.growth || 0) * 100}" class="w-24 bg-background p-2 rounded-lg border border-border text-right" oninput="updateProjectedVotesInEditor(this, '${partyId}')">
+                        <span class="text-sm text-text-light">%</span>
+                    </div>
+                    <strong class="col-span-2 text-primary text-right projected-votes">${Math.floor(cand.votos * (1 + (cand.growth || 0))).toLocaleString('pt-BR')}</strong>
+                    <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRowFromParty(this, '${partyId}')">&times;</button>
+                    <button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidateFromParty(this, '${party.nome}')"><i class="fa-solid fa-right-left"></i></button>
+                </div>
+            `).join('');
+
+            accordionItem.innerHTML = `
+                <button class="w-full p-4 text-left font-bold flex justify-between items-center text-text-main" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div>
+                        <span>${party.nome}</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-normal text-text-light">${candidates.length} cands.</span>
+                        <span class="text-sm font-normal text-text-light">Total: <strong class="text-main" id="total-legenda-editor-${partyId}">${totalVotosPartido.toLocaleString('pt-BR')}</strong></span>
+                        <i class="fa-solid fa-chevron-down transition-transform"></i>
+                    </div>
+                </button>
+                <div class="p-4 border-t border-border hidden">
+                    <div class="grid grid-cols-12 gap-2 mb-2 text-xs text-text-light">
+                        <div class="col-span-5">Nome do Candidato</div>
+                        <div class="col-span-2">Votos Base</div>
+                        <div class="col-span-3">Crescimento</div>
+                        <div class="col-span-2 text-right">Votos Projetados</div>
+                    </div>
+                    <div class="candidate-list-container space-y-2">${candidatesHtml}</div>
+                    <button class="mt-4 text-sm text-primary" onclick="addCandidateRowToParty('${partyId}')"><i class="fa-solid fa-plus mr-2"></i>Adicionar Candidato</button>
+                </div>
+            `;
+            editorContainer.appendChild(accordionItem);
+        });
     }
 
-    function loadPartyEditorTab() {
-        const partyName = document.getElementById('legenda-party-select-tab').value;
-        const container = document.getElementById('legenda-editor-content-tab');
-        if (!partyName) {
-            container.innerHTML = `<p class="text-center text-text-light p-4">Selecione um partido e clique em "Carregar" para começar a editar.</p>`;
-            return;
-        }
+    function updateProjectedVotesInEditor(element, partyId) {
+        const row = element.closest('.candidate-row');
+        const baseVotesInput = row.querySelector('input[type="number"]');
+        const growthInput = row.querySelector('input[type="number"][placeholder="% Cresc."]');
+        const projectedVotesDisplay = row.querySelector('.projected-votes');
 
-        const partyData = baseScenario.partidos.find(p => p.nome === partyName);
-        const candidates = partyData.customCandidatos || partyData.candidatos;
+        const baseVotes = parseInt(baseVotesInput.value, 10) || 0;
+        const growth = parseFloat(growthInput.value) / 100 || 0;
         
-        let candidatesHtml = candidates.map((cand, index) => `<div class="flex items-center gap-2 mb-2" data-candidate-index="${index}"><input type="text" placeholder="Nome" value="${cand.nome}" class="w-full bg-gray-900 p-2 rounded-lg border border-border"><input type="number" placeholder="Votos" value="${cand.votos}" class="w-1/2 bg-gray-900 p-2 rounded-lg border border-border"><button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRowTab(this)">&times;</button><button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidateTab(this, '${partyName}', ${index})"><i class="fa-solid fa-right-left"></i></button></div>`).join('');
-
-        container.innerHTML = `<div id="candidate-list-tab" class="space-y-2 max-h-[50vh] overflow-y-auto pr-2">${candidatesHtml}</div><button class="mt-4 text-sm text-primary" onclick="addCandidateRowTab()"><i class="fa-solid fa-plus mr-2"></i>Adicionar Candidato</button><div class="mt-6 flex justify-between items-center"><button class="text-sm text-danger" onclick="resetLegendaTab('${partyName}')">Restaurar Padrão do Partido</button><div><button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveLegendaTab('${partyName}')">Salvar Legenda</button></div></div>`;
+        const projectedVotes = Math.floor(baseVotes * (1 + growth));
+        projectedVotesDisplay.textContent = projectedVotes.toLocaleString('pt-BR');
+        
+        updateLegendaTotalVotes(partyId);
     }
 
-    function addCandidateRowTab() {
-        const list = document.getElementById('candidate-list-tab');
-        const newRow = document.createElement('div');
-        newRow.className = 'flex items-center gap-2 mb-2';
-        newRow.innerHTML = `<input type="text" placeholder="Nome" class="w-full bg-gray-900 p-2 rounded-lg border border-border"><input type="number" placeholder="Votos" class="w-1/2 bg-gray-900 p-2 rounded-lg border border-border"><button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRowTab(this)">&times;</button><div class="w-10 h-10"></div>`;
-        list.appendChild(newRow);
-    }
-
-    function removeCandidateRowTab(button) { button.parentElement.remove(); }
-
-    function saveLegendaTab(partyName) {
-        const partyData = baseScenario.partidos.find(p => p.nome === partyName);
-        const rows = document.querySelectorAll('#candidate-list-tab > div');
-        const newCandidatos = [];
+    function updateLegendaTotalVotes(partyId) {
+        const container = document.querySelector(`#legenda-accordion-${partyId}`);
+        if (!container) return;
+        
         let totalVotes = 0;
+        const rows = container.querySelectorAll('.candidate-row');
         rows.forEach(row => {
-            const name = row.children[0].value.trim();
-            const votes = parseInt(row.children[1].value, 10) || 0;
-            if (name && votes > 0) {
-                newCandidatos.push({ nome: name, votos: votes });
-                totalVotes += votes;
+            const projectedVotesText = row.querySelector('.projected-votes').textContent;
+            totalVotes += parseInt(projectedVotesText.replace(/\./g, ''), 10) || 0;
+        });
+
+        const totalDisplay = container.querySelector(`#total-legenda-editor-${partyId}`);
+        if (totalDisplay) {
+            totalDisplay.textContent = totalVotes.toLocaleString('pt-BR');
+        }
+    }
+
+    function addCandidateRowToParty(partyId) {
+        const container = document.querySelector(`#legenda-accordion-${partyId} .candidate-list-container`);
+        const newRow = document.createElement('div');
+        newRow.className = 'grid grid-cols-12 items-center gap-2 mb-2 candidate-row';
+        newRow.innerHTML = `
+            <input type="text" placeholder="Nome do Novo Candidato" class="col-span-5 bg-background p-2 rounded-lg border border-border">
+            <input type="number" placeholder="Votos" value="0" class="col-span-2 bg-background p-2 rounded-lg border border-border" oninput="updateProjectedVotesInEditor(this, '${partyId}')">
+            <div class="col-span-3 flex items-center gap-2">
+                <input type="number" placeholder="% Cresc." value="0" class="w-24 bg-background p-2 rounded-lg border border-border text-right" oninput="updateProjectedVotesInEditor(this, '${partyId}')">
+                <span class="text-sm text-text-light">%</span>
+            </div>
+            <strong class="col-span-2 text-primary text-right projected-votes">0</strong>
+            <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRowFromParty(this, '${partyId}')">&times;</button>
+            <button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidateFromParty(this, '${partyId}')"><i class="fa-solid fa-right-left"></i></button>
+        `;
+        container.appendChild(newRow);
+    }
+
+    function removeCandidateRowFromParty(buttonElement, partyId) {
+        buttonElement.closest('.candidate-row').remove();
+        updateLegendaTotalVotes(partyId);
+    }
+    
+    function migrateCandidateFromParty(buttonElement, fromPartyName) {
+        const row = buttonElement.closest('.candidate-row');
+        const nameInput = row.querySelector('input[type="text"]');
+        const votesInput = row.querySelector('input[type="number"]');
+        const growthInput = row.querySelector('input[type="number"][placeholder="% Cresc."]');
+        const candidateName = nameInput.value;
+        const candidateVotes = votesInput.value;
+        const candidateGrowth = growthInput.value;
+
+        showPartySelectModal(`Transferir <strong>${candidateName}</strong> para:`, fromPartyName, (toPartyName) => {
+            if (!toPartyName) return;
+            const fromPartyId = fromPartyName.replace(/[^a-zA-Z0-9]/g, '');
+            const toPartyId = toPartyName.replace(/[^a-zA-Z0-9]/g, '');
+            const toContainer = document.querySelector(`#legenda-accordion-${toPartyId} .candidate-list-container`);
+            
+            const newRow = document.createElement('div');
+            newRow.className = 'grid grid-cols-12 items-center gap-2 mb-2 candidate-row';
+            newRow.innerHTML = `
+                <input type="text" placeholder="Nome" value="${candidateName}" class="col-span-5 bg-background p-2 rounded-lg border border-border">
+                <input type="number" placeholder="Votos" value="${candidateVotes}" class="col-span-2 bg-background p-2 rounded-lg border border-border" oninput="updateProjectedVotesInEditor(this, '${toPartyId}')">
+                <div class="col-span-3 flex items-center gap-2">
+                    <input type="number" placeholder="% Cresc." value="${candidateGrowth}" class="w-24 bg-background p-2 rounded-lg border border-border text-right" oninput="updateProjectedVotesInEditor(this, '${toPartyId}')">
+                    <span class="text-sm text-text-light">%</span>
+                </div>
+                <strong class="col-span-2 text-primary text-right projected-votes">${Math.floor(parseInt(candidateVotes) * (1 + parseFloat(candidateGrowth)/100)).toLocaleString('pt-BR')}</strong>
+                <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRowFromParty(this, '${toPartyId}')">&times;</button>
+                <button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidateFromParty(this, '${toPartyName}')"><i class="fa-solid fa-right-left"></i></button>
+            `;
+            toContainer.appendChild(newRow);
+            row.remove();
+            
+            updateLegendaTotalVotes(fromPartyId);
+            updateLegendaTotalVotes(toPartyId);
+
+            showInfoModal(`${candidateName} movido para ${toPartyName}. Salve as alterações para aplicar.`);
+        });
+    }
+
+    function saveAllLegendas() {
+        baseScenario.partidos.forEach(party => {
+            const partyId = party.nome.replace(/[^a-zA-Z0-9]/g, '');
+            const container = document.getElementById(`legenda-accordion-${partyId}`);
+            if (!container) return;
+
+            const rows = container.querySelectorAll('.candidate-row');
+            const newCandidatos = [];
+            let totalVotes = 0;
+
+            rows.forEach(row => {
+                const name = row.querySelector('input[type="text"]').value.trim();
+                const votes = parseInt(row.querySelector('input[type="number"]').value, 10) || 0;
+                const growth = parseFloat(row.querySelector('input[type="number"][placeholder="% Cresc."]').value) / 100 || 0;
+                
+                if (name && votes > 0) {
+                    newCandidatos.push({ nome: name, votos: votes, growth: growth });
+                    totalVotes += Math.floor(votes * (1 + growth));
+                }
+            });
+
+            newCandidatos.sort((a, b) => b.votos - a.votos);
+            party.customCandidatos = newCandidatos;
+            party.votosBase2022 = totalVotes;
+            
+            const boostInput = document.getElementById(`boost-${party.nome}`);
+            if(boostInput) {
+                boostInput.value = 0;
+                boostInput.disabled = true;
+                document.getElementById(`boost-value-${party.nome}`).textContent = '0%';
             }
         });
 
-        newCandidatos.sort((a,b) => b.votos - a.votos);
-        partyData.customCandidatos = newCandidatos;
-        partyData.votosBase2022 = totalVotes;
-        
-        const boostInput = document.getElementById(`boost-${partyName}`);
-        if(boostInput) { boostInput.value = 0; boostInput.disabled = true; }
-
-        showInfoModal(`Legenda para ${partyName} salva com sucesso!`);
+        showInfoModal('Todas as legendas foram salvas e aplicadas nas simulações!');
         updateScenario();
+        initializeAnaliseTab(); // Refresh analysis with new data
     }
 
-    function resetLegendaTab(partyName) {
-        const partyData = baseScenario.partidos.find(p => p.nome === partyName);
-        partyData.customCandidatos = null;
-        partyData.votosBase2022 = DADOS_ELEICOES.SC.de.historico[0].partidos[partyName].votos;
-        const boostInput = document.getElementById(`boost-${partyName}`);
-        if(boostInput) boostInput.disabled = false;
-        loadPartyEditorTab();
-    }
-    
-    function migrateCandidateTab(button, fromPartyName, candidateIndex) {
-        const fromParty = baseScenario.partidos.find(p => p.nome === fromPartyName);
-        const candidate = (fromParty.customCandidatos || fromParty.candidatos)[candidateIndex];
-
-        showPartySelectModal(`Transferir <strong>${candidate.nome}</strong> para:`, fromPartyName, (toPartyName) => {
-            if (!toPartyName) return;
-
-            const toParty = baseScenario.partidos.find(p => p.nome === toPartyName);
-            
-            if (!fromParty.customCandidatos) fromParty.customCandidatos = JSON.parse(JSON.stringify(fromParty.candidatos));
-            if (!toParty.customCandidatos) toParty.customCandidatos = JSON.parse(JSON.stringify(toParty.candidatos));
-
-            const actualCandidateIndex = fromParty.customCandidatos.findIndex(c => c.nome === candidate.nome && c.votos === candidate.votos);
-            if (actualCandidateIndex === -1) return; 
-            const [movedCandidate] = fromParty.customCandidatos.splice(actualCandidateIndex, 1);
-            
-            toParty.customCandidatos.push(movedCandidate);
-            toParty.customCandidatos.sort((a, b) => b.votos - a.votos);
-
-            fromParty.votosBase2022 = fromParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
-            toParty.votosBase2022 = toParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
-            
-            const boostInputFrom = document.getElementById(`boost-${fromParty.nome}`);
-            if(boostInputFrom) boostInputFrom.disabled = true;
-            const boostInputTo = document.getElementById(`boost-${toParty.nome}`);
-            if(boostInputTo) boostInputTo.disabled = true;
-
-            loadPartyEditorTab();
-            showInfoModal(`${movedCandidate.nome} migrado para ${toParty.nome}.`);
+    function resetAllLegendas() {
+        showConfirmationModal("Tem a certeza que quer restaurar todas as legendas para o padrão de 2022?", () => {
+            baseScenario.partidos.forEach(p => {
+                p.customCandidatos = null;
+                p.votosBase2022 = DADOS_ELEICOES.SC.de.historico[0].partidos[p.nome].votos;
+                const boostInput = document.getElementById(`boost-${p.nome}`);
+                if (boostInput) boostInput.disabled = false;
+            });
+            initializeEditarLegendaTab();
             updateScenario();
+            initializeAnaliseTab();
+            showInfoModal("Todas as legendas foram restauradas.");
         });
     }
+
 
     // =================================================================================
     // CANDIDATE TAB LOGIC
@@ -1033,7 +1147,7 @@
             const color = PARTY_COLORS[party.nome] || '#64748b';
             const totalVotosPartido = party.candidatos.reduce((sum, cand) => sum + cand.votos, 0);
             
-            let candidatesHtml = party.candidatos.map((cand, index) => `<div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 border-t border-border candidate-row items-center" data-name="${cand.nome.toLowerCase()}"><div class="font-bold text-text-main col-span-2">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div><div class="flex items-center gap-2 justify-end md:justify-start"><input type="number" value="${cand.growth * 100}" oninput="updateCandidateGrowth('${party.nome}', ${index}, this.value)" class="w-20 bg-gray-900 p-1 rounded-lg border border-border text-right" placeholder="0"><span class="text-sm text-text-light">%</span></div><div class="text-text-light text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Base</span></div><div class="text-text-light text-right"><strong class="text-primary" id="proj-votos-${party.nome.replace(/\s/g, '')}-${index}">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Proj.</span></div></div>`).join('');
+            let candidatesHtml = party.candidatos.map((cand, index) => `<div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 border-t border-border candidate-row items-center" data-name="${cand.nome.toLowerCase()}"><div class="font-bold text-text-main col-span-2">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div><div class="flex items-center gap-2 justify-end md:justify-start"><input type="number" value="${(cand.growth || 0) * 100}" oninput="updateCandidateGrowth('${party.nome}', ${index}, this.value)" class="w-20 bg-gray-900 p-1 rounded-lg border border-border text-right" placeholder="0"><span class="text-sm text-text-light">%</span></div><div class="text-text-light text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Base</span></div><div class="text-text-light text-right"><strong class="text-primary" id="proj-votos-${party.nome.replace(/\s/g, '')}-${index}">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Proj.</span></div></div>`).join('');
 
             const accordionItem = document.createElement('div');
             accordionItem.className = 'bg-gray-900/50 rounded-lg party-accordion-item';
@@ -1099,9 +1213,11 @@
         container.innerHTML = '';
 
         baseScenario.partidos.filter(p => p.votosBase2022 > 0).sort((a, b) => b.votosBase2022 - a.votosBase2022).forEach(party => {
-            const top3 = party.candidatos.slice(0, 3);
+            const candidates = party.customCandidatos || party.candidatos;
+            const top3 = candidates.slice(0, 3);
             const top3Votes = top3.reduce((sum, cand) => sum + cand.votos, 0);
-            const percentage = (top3Votes / party.votosBase2022 * 100).toFixed(1);
+            const partyTotalVotes = candidates.reduce((sum, cand) => sum + cand.votos, 0);
+            const percentage = (partyTotalVotes > 0) ? (top3Votes / partyTotalVotes * 100).toFixed(1) : 0;
             
             let diagnosis = ''; let diagnosisColor = '';
             if (percentage >= 60) { diagnosis = 'Alta dependência dos puxadores.'; diagnosisColor = 'text-danger'; } 
@@ -1110,7 +1226,7 @@
 
             const card = document.createElement('div');
             card.className = 'bg-gray-900/50 p-4 rounded-lg border border-border flex flex-col';
-            card.innerHTML = `<div class="flex items-center mb-3"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><h3 class="font-bold text-lg text-text-main">${party.nome}</h3></div><ul class="text-sm space-y-2 flex-grow">${top3.map((cand, i) => `<li class="flex justify-between items-center"><span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span><div class="flex items-center"><span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span><a href="#" onclick="openTransferModal('${party.nome}', '${cand.nome.replace(/'/g, "\\'")}')" class="text-secondary hover:text-orange-400" title="Transferir"><i class="fa-solid fa-right-left"></i></a></div></li>`).join('')}</ul><div class="mt-4 pt-4 border-t border-border"><div class="flex justify-between text-sm font-bold mb-1"><span>Concentração Top 3</span><span class="${diagnosisColor}">${percentage}%</span></div><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div></div><p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p></div>`;
+            card.innerHTML = `<div class="flex items-center mb-3"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><h3 class="font-bold text-lg text-text-main">${party.nome}</h3></div><ul class="text-sm space-y-2 flex-grow">${top3.map((cand, i) => `<li class="flex justify-between items-center"><span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span><div class="flex items-center"><span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span></div></li>`).join('')}</ul><div class="mt-4 pt-4 border-t border-border"><div class="flex justify-between text-sm font-bold mb-1"><span>Concentração Top 3</span><span class="${diagnosisColor}">${percentage}%</span></div><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div></div><p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p></div>`;
             container.appendChild(card);
         });
     }
@@ -1119,8 +1235,10 @@
         const container = document.getElementById('analise-eficiencia-container');
         container.innerHTML = '';
         const partidosComEleitos = baseScenario.partidos.map(party => {
-            const eleitos = party.candidatos.filter(c => c.isEleito).length;
-            return eleitos > 0 ? { nome: party.nome, custoPorCadeira: party.votosBase2022 / eleitos, totalVotos: party.votosBase2022, totalEleitos: eleitos } : null;
+            const candidates = party.customCandidatos || party.candidatos;
+            const eleitos = candidates.filter(c => c.isEleito).length;
+            const totalVotos = candidates.reduce((sum, cand) => sum + cand.votos, 0);
+            return eleitos > 0 ? { nome: party.nome, custoPorCadeira: totalVotos / eleitos, totalVotos: totalVotos, totalEleitos: eleitos } : null;
         }).filter(p => p !== null).sort((a, b) => a.custoPorCadeira - b.custoPorCadeira);
         
         const maxCost = Math.max(...partidosComEleitos.map(p => p.custoPorCadeira));
@@ -1136,7 +1254,7 @@
 
     function openTransferModal(sourcePartyName, candidateName) {
         const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
-        const candidate = sourceParty.candidatos.find(c => c.nome === candidateName);
+        const candidate = (sourceParty.customCandidatos || sourceParty.candidatos).find(c => c.nome === candidateName);
         
         showPartySelectModal(`Transferir <strong>${candidate.nome}</strong> de <strong>${sourcePartyName}</strong> para:`, sourcePartyName, (destinationPartyName) => {
              executeTransfer(sourcePartyName, candidateName, destinationPartyName);
@@ -1146,18 +1264,26 @@
     function executeTransfer(sourcePartyName, candidateName, destinationPartyName) {
         const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
         const destParty = baseScenario.partidos.find(p => p.nome === destinationPartyName);
-        const candidateIndex = sourceParty.candidatos.findIndex(c => c.nome === candidateName);
+        
+        if (!sourceParty.customCandidatos) sourceParty.customCandidatos = JSON.parse(JSON.stringify(sourceParty.candidatos));
+        if (!destParty.customCandidatos) destParty.customCandidatos = JSON.parse(JSON.stringify(destParty.candidatos));
+
+        const candidateIndex = sourceParty.customCandidatos.findIndex(c => c.nome === candidateName);
         if (candidateIndex === -1) return;
 
-        const [candidateToMove] = sourceParty.candidatos.splice(candidateIndex, 1);
-        destParty.candidatos.push(candidateToMove);
-        destParty.candidatos.sort((a,b) => b.votos - a.votos);
+        const [candidateToMove] = sourceParty.customCandidatos.splice(candidateIndex, 1);
+        destParty.customCandidatos.push(candidateToMove);
+        destParty.customCandidatos.sort((a,b) => b.votos - a.votos);
 
-        sourceParty.votosBase2022 = sourceParty.candidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
-        destParty.votosBase2022 = destParty.candidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
+        sourceParty.votosBase2022 = sourceParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
+        destParty.votosBase2022 = destParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
+        
+        [sourceParty, destParty].forEach(p => {
+             const boostInput = document.getElementById(`boost-${p.nome}`);
+             if(boostInput) boostInput.disabled = true;
+        });
 
         closeModal();
-        initializeCandidatosTab();
         initializeAnaliseTab();
         updateScenario();
     }
@@ -1167,8 +1293,10 @@
             baseScenario = prepareBaseScenario();
             initializeControls();
             initializeCandidatosTab();
+            initializeEditarLegendaTab();
             initializeAnaliseTab();
             updateScenario();
+            showInfoModal("Todos os dados foram restaurados.");
         });
     }
 
@@ -1206,7 +1334,6 @@
         document.getElementById('party-select-confirm-btn').onclick = () => {
             if (select.value) {
                 onConfirm(select.value);
-                closeModal();
             }
         };
     }
