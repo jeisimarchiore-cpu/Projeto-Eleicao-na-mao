@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v8.2 - Análise com Mapa</title>
+    <title>Sala de Guerra Eleitoral v8.4 - Análise com Mapa</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -174,7 +174,7 @@
                 </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v8.2</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v8.4</span>
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
                 </div>
@@ -1215,6 +1215,20 @@
     // =================================================================================
     // ELECTED IN 2024 TAB LOGIC
     // =================================================================================
+    const cityStateMap = {
+        // Paraná
+        "BITURUNA": "PR", "GENERAL CARNEIRO": "PR", "PAULO FRONTIN": "PR",
+        "AMPERE": "PR", "FRANCISCO BELTRÃO": "PR", "REALEZA": "PR",
+        "CORONEL D. SOARES": "PR", "CORONEL VIVIDA": "PR", "MANGUEIRINHA": "PR",
+        "SULINA": "PR", "ITAPEJARA DO OESTE": "PR", "BARRACÃO": "PR",
+        "BELA VISTA DA CAROBA": "PR", "CAPANEMA": "PR", "FLOR DA SERRA DO SUL": "PR",
+        "PLANALTO": "PR", "PRANCHITA": "PR", "STO ANTONIO DO SUDOESTE": "PR",
+    };
+
+    function getCityState(cityName) {
+        return cityStateMap[cityName.toUpperCase()] || 'SC';
+    }
+
     const ELEITOS_2024_DATA = {
         "1ª REGIÃO": [{"CIDADE": "ARMAZEM", "NOME CANDIDATO": "CENARIO MONTEIRO MARCELINO", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "374"}, {"CIDADE": "BRAÇO DO NORTE", "NOME CANDIDATO": "REGINALDO DEMÉTRIO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "807"}, {"CIDADE": "GAROPABA", "NOME CANDIDATO": "JAIRO PEREIRA DOS SANTOS", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "1328"}, {"CIDADE": "IMBITUBA", "NOME CANDIDATO": "THIAGO ROSA", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "1065"}, {"CIDADE": "SANGÃO", "NOME CANDIDATO": "GENTIL TEIXEIRA SALVALAIO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "500"}, {"CIDADE": "SÃO LUDGERO", "NOME CANDIDATO": "LAUDY DA SILVA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "342"}],
         "2ª REGIÃO": [{"CIDADE": "BALN. CAMBORIU", "NOME CANDIDATO": "ASINIL MEDEIROS", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "1831"}, {"CIDADE": "BOMBINHAS", "NOME CANDIDATO": "LEANDRO GRACIA", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "662"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "JOSUÉ PEREIRA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "958"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "POLICIAL SILVIO WOLFF", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "1216"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "EWERSON UMBELINO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "760"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "IRMÃO MAYER", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "888"}, {"CIDADE": "FLORIANOPOLIS", "NOME CANDIDATO": "PR. GILIARD TORQUATO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "3675"}, {"CIDADE": "GOV. CELSO RAMOS", "NOME CANDIDATO": "PB. RAFAEL ZEFERINO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "427"}, {"CIDADE": "ITAPEMA", "NOME CANDIDATO": "IRMÃ RUTI", "CARGO": "VEREADORA", "PARTIDO": "REPU", "VOTOS": "754"}, {"CIDADE": "PALHOÇA", "NOME CANDIDATO": "MESTRE VANDERLEI", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "1143"}, {"CIDADE": "PAULO LOPES", "NOME CANDIDATO": "PRISCILA ROGÉRIO", "CARGO": "VEREADORA", "PARTIDO": "UNIÃO", "VOTOS": "215"}, {"CIDADE": "PAULO LOPES", "NOME CANDIDATO": "CELINHO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "365"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "ALTINO JUNIOR", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "597"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "JOSIMAR JOSÉ", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "323"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "ONÉSIO RAMOS", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "715"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "AILTON NECKEL", "CARGO": "VICE PREFEITO", "PARTIDO": "MDB", "VOTOS": "10700"}, {"CIDADE": "SANTO AMARO DA IM", "NOME CANDIDATO": "JOAQUIM CUNHA", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "344"}, {"CIDADE": "SANTO AMARO DA IM", "NOME CANDIDATO": "ANDRÉ LUIZ AMARAL DAUFENBACH", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "286"}, {"CIDADE": "SÃO JOSÉ", "NOME CANDIDATO": "PR. ADAIR TESSARI", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "3176"}, {"CIDADE": "SÃO JOÃO BATISTA", "NOME CANDIDATO": "GUSTAVO GRIM", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "710"}],
@@ -1257,20 +1271,23 @@
         
         updateEleitosSummary('all');
 
-        Object.keys(ELEITOS_2024_DATA).forEach(region => {
+        Object.keys(ELEITOS_2024_DATA).forEach((region, regionIndex) => {
             const regionData = ELEITOS_2024_DATA[region];
-            let tableRows = regionData.map(cand => `
-                <tr class="border-b border-border">
-                    <td class="py-3 px-4">${cand.CIDADE}</td>
+            let tableRows = regionData.map((cand, candIndex) => {
+                const uniqueId = `support-check-${regionIndex}-${candIndex}`;
+                const state = getCityState(cand.CIDADE);
+                return `
+                <tr class="border-b border-border" data-party="${cand.PARTIDO || 'N/A'}">
+                    <td class="py-3 px-4">${cand.CIDADE} (${state})</td>
                     <td class="py-3 px-4">${cand["NOME CANDIDATO"]}</td>
                     <td class="py-3 px-4">${cand.CARGO}</td>
                     <td class="py-3 px-4">${cand.PARTIDO || 'N/A'}</td>
                     <td class="py-3 px-4 text-right">${cand.VOTOS}</td>
                     <td class="py-3 px-4 text-center">
-                        <input type="checkbox" class="h-5 w-5 bg-gray-700 border-border rounded text-primary focus:ring-primary shadow-lg" onchange="recalculateTotalSupportVotes()">
+                        <input type="checkbox" id="${uniqueId}" class="h-5 w-5 bg-gray-700 border-border rounded text-primary focus:ring-primary shadow-lg" onchange="recalculateTotalSupportVotes()">
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
 
             container.innerHTML += `
                 <div class="region-table" id="region-${region.replace(/[^a-zA-Z0-9]/g, '')}">
@@ -1374,7 +1391,7 @@
         <div>
             <h3 class="text-lg font-bold text-secondary mb-3">Eleitos por Partido</h3>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 text-sm">
-                ${sortedPartidos.map(([partido, total]) => `<div class="bg-background p-2 rounded-lg flex justify-between items-center clickable" onclick="showSummaryModal('PARTIDO', '${partido}', '${region}')"><span class="font-bold">${partido}</span><span class="font-mono text-primary font-semibold">${total}</span></div>`).join('')}
+                ${sortedPartidos.map(([partido, total]) => `<div class="bg-background p-2 rounded-lg flex justify-between items-center clickable" onclick="showPartySupportModal('${partido}', '${region}')"><span class="font-bold">${partido}</span><span class="font-mono text-primary font-semibold">${total}</span></div>`).join('')}
             </div>
         </div>`;
     }
@@ -1476,8 +1493,11 @@
 
         if (cityData.length === 0) return;
 
-        let candidatesHtml = cityData.map(cand => `
+        let candidatesHtml = cityData.map(cand => {
+            const state = getCityState(cand.CIDADE);
+            return `
             <tr class="border-b border-border hover:bg-background">
+                <td class="py-3 px-4">${cand.CIDADE} (${state})</td>
                 <td class="py-3 px-4">${cand["NOME CANDIDATO"]}</td>
                 <td class="py-3 px-4">${cand.CARGO}</td>
                 <td class="py-3 px-4">
@@ -1488,7 +1508,7 @@
                 </td>
                 <td class="py-3 px-4 text-right font-mono">${cand.VOTOS}</td>
             </tr>
-        `).join('');
+        `}).join('');
 
         const modalHtml = `
             <div class="p-6 text-text-light">
@@ -1503,6 +1523,7 @@
                     <table class="w-full text-sm text-left">
                         <thead class="bg-gray-900/50">
                             <tr>
+                                <th class="py-3 px-4">Cidade</th>
                                 <th class="py-3 px-4">Nome</th>
                                 <th class="py-3 px-4">Cargo</th>
                                 <th class="py-3 px-4">Partido</th>
@@ -1517,6 +1538,43 @@
             </div>
         `;
         showModal(modalHtml);
+    }
+    
+    function showPartySupportModal(partyName, region) {
+        const modalHtml = `
+            <div class="p-6 text-text-light">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-secondary">Gerir Apoio - ${partyName}</h2>
+                        <p>Região: ${region === 'all' ? 'Todas' : region}</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button>
+                </div>
+                <div class="space-y-4">
+                    <button class="w-full bg-success text-white font-bold py-3 rounded-lg" onclick="togglePartySupport('${partyName}', '${region}', true)">Apoiar Todos do Partido</button>
+                    <button class="w-full bg-danger text-white font-bold py-3 rounded-lg" onclick="togglePartySupport('${partyName}', '${region}', false)">Remover Apoio de Todos</button>
+                </div>
+            </div>
+        `;
+        showModal(modalHtml);
+    }
+
+    function togglePartySupport(partyName, region, shouldSupport) {
+        const regionsToProcess = region === 'all' ? Object.keys(ELEITOS_2024_DATA) : [region];
+        
+        regionsToProcess.forEach(regionKey => {
+            const table = document.getElementById(`region-${regionKey.replace(/[^a-zA-Z0-9]/g, '')}`);
+            if (table) {
+                const candidateRows = table.querySelectorAll(`tbody tr[data-party="${partyName}"]`);
+                candidateRows.forEach(row => {
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = shouldSupport;
+                });
+            }
+        });
+        
+        recalculateTotalSupportVotes();
+        closeModal();
     }
 
     function showSummaryModal(filterType, filterValue, region) {
@@ -1562,9 +1620,11 @@
         
         filteredData.sort((a, b) => a.CIDADE.localeCompare(b.CIDADE) || a['NOME CANDIDATO'].localeCompare(b['NOME CANDIDATO']));
 
-        let candidatesHtml = filteredData.map(cand => `
+        let candidatesHtml = filteredData.map(cand => {
+            const state = getCityState(cand.CIDADE);
+            return `
             <tr class="border-b border-border hover:bg-background">
-                <td class="py-3 px-4">${cand.CIDADE}</td>
+                <td class="py-3 px-4">${cand.CIDADE} (${state})</td>
                 <td class="py-3 px-4">${cand["NOME CANDIDATO"]}</td>
                 <td class="py-3 px-4">${cand.CARGO}</td>
                 <td class="py-3 px-4">
@@ -1575,7 +1635,7 @@
                 </td>
                 <td class="py-3 px-4 text-right font-mono">${cand.VOTOS}</td>
             </tr>
-        `).join('');
+        `}).join('');
 
         const title = `${filterValue.toLowerCase()}s eleitos ${region === 'all' ? '' : 'na ' + region}`;
 
