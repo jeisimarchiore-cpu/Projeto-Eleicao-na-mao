@@ -54,13 +54,13 @@
         #message-area, #import-message-area, #cep-message-area { margin-top: 5px; font-size: 0.9em; color: #28a745; height: 1.2em; }
         #message-area.error, #import-message-area.error, #cep-message-area.error { color: #dc3545; }
         hr { border: none; border-top: 1px solid #eee; margin: 15px 0; }
-        #bottom-left-controls { position: absolute; bottom: 20px; left: 20px; z-index: 999; display: flex; gap: 10px; }
-        #church-counter, #scan-button { background: rgba(255, 255, 255, 0.9); padding: 8px 15px; border-radius: 8px; font-size: 1.1em; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); cursor: pointer; line-height: 1.4; }
-        #scan-button { background-color: #007bff; color: white; border: none; }
+        #church-counter { position: absolute; bottom: 20px; left: 20px; z-index: 999; background: rgba(255, 255, 255, 0.9); padding: 8px 15px; border-radius: 8px; font-size: 1.1em; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3); cursor: pointer; line-height: 1.4; }
         .modal-overlay { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
         .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; position: relative; }
         .modal-content h2 { margin-top: 0;}
         .modal-close-btn { color: #aaa; position: absolute; top: 10px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-footer { text-align: right; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;}
+        #clear-map-btn { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9em; }
         #church-list-content h4 { margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #007bff; padding-bottom: 5px; color: #007bff; text-align: left; }
         #church-list-content ul { list-style-type: none; padding: 0; text-align: left; max-height: 60vh; overflow-y: auto;}
         #church-list-content li { padding: 8px; border-bottom: 1px solid #ddd; cursor: pointer; }
@@ -75,13 +75,19 @@
 <body>
 
     <div id="map"></div>
-    <div id="bottom-left-controls">
-        <div id="church-counter">Carregando igrejas...</div>
-        <button id="scan-button" title="Escanear área por novas igrejas"><i class="fa fa-search"></i> Escanear Área</button>
-    </div>
+    <div id="church-counter">Carregando igrejas...</div>
 
     <!-- Modais -->
-    <div id="church-list-modal" class="modal-overlay"><div class="modal-content"><span class="modal-close-btn">&times;</span><h2>Lista de Igrejas por Bairro</h2><div id="church-list-content"></div></div></div>
+    <div id="church-list-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            <h2>Lista de Igrejas por Bairro</h2>
+            <div id="church-list-content"></div>
+            <div class="modal-footer">
+                <button id="clear-map-btn" title="Apagar todos os dados do mapa"><i class="fa fa-trash-alt"></i> Limpar Mapa</button>
+            </div>
+        </div>
+    </div>
     <div id="confirm-modal" class="modal-overlay"><div class="modal-content"><span class="modal-close-btn">&times;</span><h3>Confirmar Exclusão</h3><p id="confirm-message"></p><div class="modal-buttons"><button id="confirm-delete-btn">Sim, Excluir</button><button id="cancel-delete-btn">Cancelar</button></div></div></div>
     
     <!-- Painel Lateral -->
@@ -127,7 +133,7 @@
         let idEmEdicao = null;
         let ruaDoCep = '';
         let markers = [];
-
+        
         function updateChurchCount() { document.getElementById('church-counter').innerHTML = `<i class="fa fa-church"></i> Total de Igrejas: <strong>${igrejas.length}</strong>`; }
         function showMessage(elementId, message, isError = false) { const el = document.getElementById(elementId); el.textContent = message; el.classList.toggle('error', isError); }
 
@@ -241,25 +247,6 @@
             map.setView(latLng, zoomLevel);
             document.getElementById('coords-info').textContent = 'Localização selecionada no mapa!';
         }
-        
-        async function reverseGeocode(lat, lon) {
-            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data && data.address) {
-                    const addr = data.address;
-                    const rua = addr.road || '';
-                    const numero = addr.house_number || '';
-                    const bairro = addr.suburb || addr.city_district || '';
-                    return {
-                        endereco: numero ? `${rua}, ${numero}` : rua,
-                        bairro: bairro
-                    };
-                }
-            } catch (error) { console.error("Erro no reverse geocode:", error); }
-            return { endereco: '', bairro: '' };
-        }
 
         map.on('click', function(e) { if (idEmEdicao !== null) return; setLocationOnMap(e.latlng.lat, e.latlng.lng); });
         document.getElementById('cancel-edit-btn').addEventListener('click', resetarPainel);
@@ -343,6 +330,27 @@
         };
         const confirmModal = document.getElementById('confirm-modal');
         confirmModal.querySelector('.modal-close-btn').onclick = () => confirmModal.style.display = 'none';
+        
+        document.getElementById('clear-map-btn').addEventListener('click', () => {
+            const password = prompt("Esta ação é irreversível e apagará TODAS as igrejas do mapa.\n\nPara confirmar, digite a senha:");
+            if (password === "2308") {
+                if (confirm("Você tem ABSOLUTA CERTEZA? Todos os dados serão perdidos para sempre.")) {
+                    clearAllData();
+                }
+            } else if (password !== null) {
+                alert("Senha incorreta.");
+            }
+        });
+
+        async function clearAllData() {
+            if (igrejas.length === 0) { alert("O mapa já está vazio."); return; }
+            const batch = writeBatch(db);
+            igrejas.forEach(igreja => { batch.delete(doc(db, 'igrejas', igreja.id)); });
+            try {
+                await batch.commit();
+                alert("Todos os dados do mapa foram limpos com sucesso!");
+            } catch (error) { console.error("Erro ao limpar o mapa: ", error); alert("Ocorreu um erro ao tentar limpar o mapa."); }
+        }
 
         const timeOptions = (() => { let opts = '<option value="">--:--</option>'; for (let h=0;h<24;h++) for(let m=0;m<60;m+=30) {const t=`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`; opts+=`<option value="${t}">${t}</option>`;} return opts; })();
         const horariosContainer = document.getElementById('horarios-container');
@@ -354,88 +362,6 @@
             const checkbox = dayDiv.querySelector(`#check-${diaId}`);
             const fieldsDiv = dayDiv.querySelector(`#fields-${diaId}`);
             checkbox.addEventListener('change', () => { fieldsDiv.classList.toggle('active', checkbox.checked); if(checkbox.checked) { fieldsDiv.querySelector(`#desc-${diaId}`).focus(); }});
-        });
-
-        document.getElementById('scan-button').addEventListener('click', async function() {
-            const bounds = map.getBounds();
-            const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
-            const query = `[out:json][timeout:25];
-            area[name="Blumenau"][boundary="administrative"][admin_level="8"]->.searchArea;
-            (
-                node["amenity"="place_of_worship"](area.searchArea)(${bbox});
-                way["amenity"="place_of_worship"](area.searchArea)(${bbox});
-                node["building"~"church|chapel|cathedral"](area.searchArea)(${bbox});
-                way["building"~"church|chapel|cathedral"](area.searchArea)(${bbox});
-            );
-            out center;`;
-            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-            
-            const btn = this;
-            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Escaneando...';
-            btn.disabled = true;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                let newChurchesCount = 0;
-                let updatedChurchesCount = 0;
-                const batch = writeBatch(db);
-                const promises = [];
-
-                for (const element of data.elements) {
-                    const lat = element.center ? element.center.lat : element.lat;
-                    const lon = element.center ? element.center.lon : element.lon;
-                    const nome = element.tags.name || "Igreja sem nome";
-                    const coords = [lat, lon];
-                    
-                    const existingChurch = igrejas.find(igreja => 
-                        (igreja.nome.trim().toLowerCase() === nome.trim().toLowerCase()) ||
-                        (Math.abs(igreja.coords[0] - coords[0]) < 0.0001 && Math.abs(igreja.coords[1] - coords[1]) < 0.0001)
-                    );
-
-                    if (existingChurch) {
-                        if (!existingChurch.endereco || existingChurch.endereco.trim() === '') {
-                             promises.push(reverseGeocode(lat, lon).then(addr => {
-                                if (addr.endereco) {
-                                    updatedChurchesCount++;
-                                    const churchRef = doc(db, 'igrejas', existingChurch.id);
-                                    batch.update(churchRef, { endereco: addr.endereco, bairro: addr.bairro });
-                                }
-                            }));
-                        }
-                    } else {
-                        newChurchesCount++;
-                        promises.push(reverseGeocode(lat, lon).then(addr => {
-                            const novaIgreja = {
-                                nome: nome, coords: coords, bairro: addr.bairro || '', endereco: addr.endereco || '',
-                                pastor: '', horarios: [], contato: '', whatsapp: '', redes_sociais: ''
-                            };
-                            const newDocRef = doc(igrejasCollection);
-                            batch.set(newDocRef, novaIgreja);
-                        }));
-                    }
-                }
-                
-                await Promise.all(promises);
-
-                if (newChurchesCount > 0 || updatedChurchesCount > 0) {
-                    await batch.commit();
-                    let alertMessage = "Escaneamento concluído!\n";
-                    if (newChurchesCount > 0) alertMessage += `${newChurchesCount} nova(s) igreja(s) foram adicionada(s).\n`;
-                    if (updatedChurchesCount > 0) alertMessage += `${updatedChurchesCount} igreja(s) existente(s) foram atualizada(s) com o endereço.`;
-                    alert(alertMessage);
-                } else {
-                    alert("Nenhuma igreja nova ou para atualizar foi encontrada na área visível do mapa.");
-                }
-
-            } catch (error) {
-                console.error("Erro ao escanear:", error);
-                alert("Ocorreu um erro ao escanear a área. Tente novamente.");
-            } finally {
-                btn.innerHTML = '<i class="fa fa-search"></i> Escanear Área';
-                btn.disabled = false;
-            }
         });
         
         async function main() {
