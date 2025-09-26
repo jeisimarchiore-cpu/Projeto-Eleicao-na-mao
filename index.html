@@ -23,21 +23,26 @@
         /* Estilos personalizados para complementar o Tailwind e o Leaflet */
         .leaflet-popup-content-wrapper {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border-radius: 8px;
+            border-radius: 12px;
+        }
+        .leaflet-popup-content {
+            padding: 16px;
         }
         .leaflet-popup-content h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #1f2937;
+            font-size: 1.25rem; /* Aumentado */
+            font-weight: 700; /* Mais forte */
+            margin-bottom: 12px;
+            color: #111827;
         }
         .leaflet-popup-content p {
-            margin: 4px 0;
-            font-size: 0.9rem;
-            color: #4b5563;
+            margin: 6px 0;
+            font-size: 0.95rem; /* Levemente maior */
+            color: #374151;
+            display: flex;
+            align-items: center;
         }
         .leaflet-popup-content strong {
-            color: #374151;
+            color: #1f2937;
         }
         #map-container {
              cursor: grab;
@@ -47,17 +52,17 @@
         }
         /* Custom scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #e5e7eb;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 3px;
+            background: #a1a1aa;
+            border-radius: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+            background: #71717a;
         }
         .schedule-day-fields { display: none; }
         .schedule-day-fields.active { display: block; }
@@ -69,6 +74,15 @@
         #side-panel.closed {
             transform: translateX(100%);
         }
+        
+        /* Estilos para o Modo Inspeção */
+        #inspect-mode-btn.active {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+        }
+        body.inspect-mode-active #map-container {
+            cursor: crosshair;
+        }
     </style>
 </head>
 <body class="h-full bg-gray-100 antialiased overflow-hidden">
@@ -79,9 +93,9 @@
 
         <!-- Overlays do Mapa (Controles, Pesquisa, etc.) -->
         <div class="absolute top-0 left-0 p-2 md:p-4 z-[999] w-full md:w-auto">
-            <div class="bg-white/90 backdrop-blur-sm p-2 rounded-lg shadow-lg flex items-center space-x-2 w-full md:max-w-md">
+            <div class="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-lg flex items-center space-x-2 w-full md:max-w-md">
                 <i class="fa fa-search text-gray-400 px-2"></i>
-                <input type="text" id="search-input" placeholder="Pesquisar por nome, líder ou bairro..." class="w-full bg-transparent focus:outline-none text-gray-700">
+                <input type="text" id="search-input" placeholder="Pesquisar por nome, líder ou bairro..." class="w-full bg-transparent focus:outline-none text-gray-800 placeholder-gray-500">
                 <button id="clear-search-btn" class="hidden text-gray-500 hover:text-gray-800 pr-2">
                     <i class="fa fa-times"></i>
                 </button>
@@ -90,14 +104,17 @@
 
         <!-- Controles do Mapa (à direita) -->
         <div class="absolute top-4 right-4 z-[999] flex flex-col space-y-2">
-             <button id="toggle-panel-btn" class="bg-white/90 backdrop-blur-sm w-10 h-10 rounded-lg shadow-lg flex items-center justify-center text-gray-700 hover:bg-gray-200 transition" title="Adicionar / Editar Igreja">
-                <i class="fa fa-plus"></i>
+             <button id="toggle-panel-btn" class="bg-white/90 backdrop-blur-sm w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-gray-800 hover:bg-gray-200 transition" title="Adicionar com Formulário Vazio">
+                <i class="fa fa-plus text-lg"></i>
+            </button>
+            <button id="inspect-mode-btn" class="bg-white/90 backdrop-blur-sm w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-gray-800 hover:bg-gray-200 transition" title="Adicionar Igreja pelo Mapa (Modo Inspeção)">
+                <i class="fa fa-crosshairs text-lg"></i>
             </button>
         </div>
 
         <div class="absolute bottom-10 right-4 z-[999] flex flex-col space-y-2">
-            <button id="user-location-btn" class="bg-white/90 backdrop-blur-sm w-10 h-10 rounded-lg shadow-lg flex items-center justify-center text-blue-600 hover:bg-gray-200 transition" title="Minha Localização">
-                <i class="fa fa-location-crosshairs"></i>
+            <button id="user-location-btn" class="bg-white/90 backdrop-blur-sm w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-blue-600 hover:bg-gray-200 transition" title="Minha Localização">
+                <i class="fa fa-location-crosshairs text-lg"></i>
             </button>
         </div>
         
@@ -107,103 +124,121 @@
         </div>
 
         <!-- Painel Lateral para Adicionar/Editar -->
-        <div id="side-panel" class="absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-[1000] p-6 flex flex-col closed">
-            <div class="flex-shrink-0 flex justify-between items-center mb-4 border-b pb-4">
-                <h3 id="panel-title" class="text-xl font-bold text-gray-800">Adicionar Nova Igreja</h3>
-                <button id="close-panel-btn" class="text-gray-500 hover:text-gray-800">
-                    <i class="fa fa-times fa-lg"></i>
+        <div id="side-panel" class="absolute top-0 right-0 h-full w-full max-w-lg bg-gray-50 shadow-2xl z-[1000] flex flex-col closed">
+             <div class="flex-shrink-0 bg-white/80 backdrop-blur-sm flex justify-between items-center p-6 border-b">
+                <h3 id="panel-title" class="text-2xl font-bold text-gray-900">Adicionar Nova Igreja</h3>
+                <button id="close-panel-btn" class="text-gray-500 hover:text-gray-900 transition-colors">
+                    <i class="fa fa-times fa-xl"></i>
                 </button>
             </div>
-            <div class="flex-grow overflow-y-auto custom-scrollbar pr-2">
-                <form id="church-form" class="space-y-4">
+            <div class="flex-grow overflow-y-auto custom-scrollbar p-6">
+                <form id="church-form" class="space-y-5">
                     <!-- Importar do Google Maps -->
                     <div>
                         <label for="gmaps-url" class="block text-sm font-medium text-gray-700">Importar do Google Maps</label>
-                        <div class="mt-1 flex rounded-md shadow-sm">
-                            <input type="url" id="gmaps-url" placeholder="Cole o link do Google Maps aqui" class="flex-1 block w-full rounded-none rounded-l-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            <button type="button" id="import-gmaps-btn" title="Importar dados do link" class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 hover:bg-gray-100">
+                        <div class="mt-1 flex rounded-lg shadow-sm">
+                            <input type="url" id="gmaps-url" placeholder="Cole o link do Google Maps aqui" class="flex-1 block w-full rounded-none rounded-l-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <button type="button" id="import-gmaps-btn" title="Importar dados do link" class="inline-flex items-center px-4 rounded-r-lg border border-l-0 border-gray-300 bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
                                 <i class="fa fa-download"></i>
                             </button>
                         </div>
                         <div id="import-message-area" class="mt-1 text-xs h-4"></div>
                     </div>
 
-                    <div class="text-center text-gray-500">ou</div>
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center">
+                            <span class="bg-gray-50 px-2 text-sm text-gray-500">ou</span>
+                        </div>
+                    </div>
 
-                    <p id="coords-info" class="text-sm text-gray-600 bg-gray-100 p-3 rounded-md text-center"><i class="fa fa-map-pin mr-2"></i>Clique no mapa ou use o CEP para localizar.</p>
+                    <p id="coords-info" class="text-sm text-gray-700 bg-blue-50 border border-blue-200 p-3 rounded-lg text-center flex items-center justify-center"><i class="fa fa-map-pin mr-2 text-blue-500"></i>Clique no mapa ou use o CEP para localizar.</p>
                     
                     <!-- Campos do Formulário -->
                     <input type="hidden" id="church-coords-lat">
                     <input type="hidden" id="church-coords-lng">
                     
-                    <div><label for="church-name" class="block text-sm font-medium text-gray-700">Nome da Igreja*</label><input type="text" id="church-name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
-                    <div><label for="church-pastor" class="block text-sm font-medium text-gray-700">Líder / Pastor / Padre</label><input type="text" id="church-pastor" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
+                    <div><label for="church-name" class="block text-sm font-medium text-gray-700">Nome da Igreja*</label><input type="text" id="church-name" required class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
+                    <div><label for="church-pastor" class="block text-sm font-medium text-gray-700">Líder / Pastor / Padre</label><input type="text" id="church-pastor" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label for="church-cep" class="block text-sm font-medium text-gray-700">CEP</label><input type="text" id="church-cep" placeholder="Apenas números" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><div id="cep-message-area" class="mt-1 text-xs h-4"></div></div>
-                        <div><label for="church-numero" class="block text-sm font-medium text-gray-700">Número</label><input type="text" id="church-numero" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
+                        <div><label for="church-cep" class="block text-sm font-medium text-gray-700">CEP</label><input type="text" id="church-cep" placeholder="Apenas números" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"><div id="cep-message-area" class="mt-1 text-xs h-4"></div></div>
+                        <div><label for="church-numero" class="block text-sm font-medium text-gray-700">Número</label><input type="text" id="church-numero" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
                     </div>
-                     <div><label for="church-bairro" class="block text-sm font-medium text-gray-700">Bairro</label><input type="text" id="church-bairro" class="mt-1 block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm sm:text-sm" readonly></div>
-                    <div><label for="church-endereco" class="block text-sm font-medium text-gray-700">Endereço Completo</label><input type="text" id="church-endereco" class="mt-1 block w-full bg-gray-50 border-gray-300 rounded-md shadow-sm sm:text-sm" readonly></div>
+                     <div><label for="church-bairro" class="block text-sm font-medium text-gray-700">Bairro</label><input type="text" id="church-bairro" class="mt-1 block w-full bg-gray-200 border-gray-300 rounded-lg shadow-sm sm:text-sm" readonly></div>
+                    <div><label for="church-endereco" class="block text-sm font-medium text-gray-700">Endereço Completo</label><input type="text" id="church-endereco" class="mt-1 block w-full bg-gray-200 border-gray-300 rounded-lg shadow-sm sm:text-sm" readonly></div>
 
                     <!-- Horários -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Horários e Atividades</label>
-                        <div id="horarios-container" class="space-y-2"></div>
+                        <div id="horarios-container" class="space-y-3"></div>
                     </div>
 
-                    <div><label for="church-contato" class="block text-sm font-medium text-gray-700">Telefone Fixo</label><input type="tel" id="church-contato" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
-                    <div><label for="church-whatsapp" class="block text-sm font-medium text-gray-700">WhatsApp</label><input type="tel" id="church-whatsapp" placeholder="(47) 9XXXX-XXXX" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
-                    <div><label for="church-redes" class="block text-sm font-medium text-gray-700">Rede Social (URL)</label><input type="url" id="church-redes" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
+                    <div><label for="church-contato" class="block text-sm font-medium text-gray-700">Telefone Fixo</label><input type="tel" id="church-contato" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
+                    <div><label for="church-whatsapp" class="block text-sm font-medium text-gray-700">WhatsApp</label><input type="tel" id="church-whatsapp" placeholder="(47) 9XXXX-XXXX" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
+                    <div><label for="church-redes" class="block text-sm font-medium text-gray-700">Rede Social (URL)</label><input type="url" id="church-redes" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></div>
                 </form>
             </div>
-            <div class="flex-shrink-0 pt-6 border-t mt-4 space-y-2">
+             <div class="flex-shrink-0 bg-white/80 backdrop-blur-sm p-6 border-t mt-auto space-y-3">
                  <div id="message-area" class="text-sm text-center h-5"></div>
-                 <button type="button" id="save-church-btn" class="w-full bg-blue-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">Adicionar Igreja</button>
-                 <button type="button" id="cancel-edit-btn" style="display: none;" class="w-full bg-gray-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">Cancelar Edição</button>
+                 <button type="button" id="save-church-btn" class="w-full bg-blue-600 text-white py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">Adicionar Igreja</button>
+                 <button type="button" id="cancel-edit-btn" style="display: none;" class="w-full bg-gray-600 text-white py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition">Cancelar Edição</button>
+            </div>
+        </div>
+
+        <!-- Barra de Progresso para Escaneamento -->
+        <div id="scan-progress-bar" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-[999] bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg w-full max-w-sm hidden transition-opacity duration-300">
+            <div class="flex justify-between items-center mb-1">
+                <span id="scan-progress-label" class="text-sm font-semibold text-gray-700">Escaneando...</span>
+                <span id="scan-progress-text" class="text-sm font-medium text-gray-600">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="scan-progress-fill" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-linear" style="width: 0%"></div>
             </div>
         </div>
     </div>
 
     <!-- Modal: Lista de Igrejas -->
-    <div id="church-list-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 z-[1001] hidden items-center justify-center">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4 flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h2 class="text-lg font-bold text-gray-800">Lista de Igrejas por Bairro</h2>
-                <button class="modal-close-btn text-gray-500 hover:text-gray-800"><i class="fa fa-times fa-lg"></i></button>
+    <div id="church-list-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 z-[1001] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl m-4 flex flex-col max-h-[90vh]">
+             <div class="flex justify-between items-center p-5 border-b bg-gray-50/50 rounded-t-xl">
+                <h2 class="text-xl font-bold text-gray-900">Lista de Igrejas por Bairro</h2>
+                <button class="modal-close-btn text-gray-500 hover:text-gray-900 transition"><i class="fa fa-times fa-lg"></i></button>
             </div>
             <div id="church-list-content" class="p-6 overflow-y-auto custom-scrollbar flex-grow"></div>
-            <div class="flex justify-between items-center p-4 border-t bg-gray-50 rounded-b-lg">
-                <span class="text-sm text-gray-600">Funções Administrativas</span>
+             <div class="flex justify-between items-center p-5 border-t bg-gray-50/50 rounded-b-xl">
+                <span class="text-sm text-gray-700 font-medium">Funções Administrativas</span>
                 <div>
-                     <button id="scan-map-btn" class="bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-md shadow-sm hover:bg-blue-700 transition" title="Escanear mapa por novas igrejas"><i class="fa fa-search mr-2"></i>Escanear Mapa</button>
-                    <button id="clear-map-btn" class="bg-red-600 text-white text-sm font-medium py-2 px-4 rounded-md shadow-sm hover:bg-red-700 transition ml-2" title="Apagar todos os dados do mapa"><i class="fa fa-trash-alt mr-2"></i>Limpar Mapa</button>
+                     <button id="scan-map-btn" class="bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-blue-700 transition" title="Escanear mapa por novas igrejas"><i class="fa fa-search mr-2"></i>Escanear Mapa</button>
+                    <button id="clear-map-btn" class="bg-red-600 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-sm hover:bg-red-700 transition ml-2" title="Apagar todos os dados do mapa"><i class="fa fa-trash-alt mr-2"></i>Limpar Mapa</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal: Confirmação Genérica (para Excluir, Limpar, Escanear) -->
-    <div id="confirm-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 z-[1002] hidden items-center justify-center">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4 p-6 text-center">
-            <h3 id="confirm-title" class="text-lg font-bold text-gray-900"></h3>
-            <p id="confirm-message" class="mt-2 text-sm text-gray-600"></p>
-            <div id="password-field-container" class="mt-4 hidden">
-                <label for="admin-password" class="block text-sm font-medium text-gray-700">Senha de Administrador</label>
-                <input type="password" id="admin-password" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+    <div id="confirm-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 z-[1002] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md m-4 p-8 text-center">
+            <h3 id="confirm-title" class="text-xl font-bold text-gray-900"></h3>
+            <p id="confirm-message" class="mt-3 text-base text-gray-600"></p>
+            <div id="password-field-container" class="mt-6 hidden">
+                <label for="admin-password" class="sr-only">Senha de Administrador</label>
+                <input type="password" id="admin-password" placeholder="Senha de Administrador" class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-center">
                 <p id="password-error" class="text-red-500 text-xs mt-1 h-4"></p>
             </div>
-            <div class="mt-6 flex justify-center space-x-4">
-                <button id="confirm-action-btn" class="px-6 py-2 rounded-md text-white font-semibold"></button>
-                <button id="cancel-action-btn" class="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-md hover:bg-gray-300">Cancelar</button>
+            <div class="mt-8 flex justify-center space-x-4">
+                <button id="confirm-action-btn" class="px-8 py-2.5 rounded-lg text-white font-semibold"></button>
+                <button id="cancel-action-btn" class="px-8 py-2.5 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition">Cancelar</button>
             </div>
         </div>
     </div>
 
     <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-white/50 backdrop-blur-sm z-[2000] flex flex-col items-center justify-center">
-        <i class="fa fa-church fa-spin text-4xl text-blue-600"></i>
-        <p class="mt-4 text-gray-700 font-semibold">Carregando mapa...</p>
+    <div id="loading-overlay" class="fixed inset-0 bg-white/60 backdrop-blur-sm z-[2000] flex flex-col items-center justify-center">
+        <i class="fa fa-church fa-spin text-5xl text-blue-600"></i>
+        <p class="mt-4 text-gray-800 font-semibold text-lg">Carregando mapa...</p>
     </div>
 
 
@@ -251,6 +286,7 @@
         let tempMarker = null;
         let editingId = null;
         let currentStreet = '';
+        let isInspectMode = false;
 
         const DIAS_SEMANA = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
@@ -261,6 +297,7 @@
             sidePanel: document.getElementById('side-panel'),
             togglePanelBtn: document.getElementById('toggle-panel-btn'),
             closePanelBtn: document.getElementById('close-panel-btn'),
+            inspectModeBtn: document.getElementById('inspect-mode-btn'),
             form: document.getElementById('church-form'),
             panelTitle: document.getElementById('panel-title'),
             saveBtn: document.getElementById('save-church-btn'),
@@ -277,6 +314,10 @@
             confirmModal: document.getElementById('confirm-modal'),
             gmapsUrlInput: document.getElementById('gmaps-url'),
             horariosContainer: document.getElementById('horarios-container'),
+            scanProgressBar: document.getElementById('scan-progress-bar'),
+            scanProgressLabel: document.getElementById('scan-progress-label'),
+            scanProgressText: document.getElementById('scan-progress-text'),
+            scanProgressFill: document.getElementById('scan-progress-fill'),
             fields: {
                 lat: document.getElementById('church-coords-lat'),
                 lng: document.getElementById('church-coords-lng'),
@@ -322,7 +363,7 @@
                 document.getElementById('confirm-message').textContent = message;
                 const actionBtn = document.getElementById('confirm-action-btn');
                 actionBtn.textContent = actionText;
-                actionBtn.className = `px-6 py-2 rounded-md text-white font-semibold transition ${actionClass}`;
+                actionBtn.className = `px-8 py-2.5 rounded-lg text-white font-semibold transition ${actionClass}`;
                 
                 const passwordContainer = document.getElementById('password-field-container');
                 const passwordInput = document.getElementById('admin-password');
@@ -346,6 +387,7 @@
                             UI.hideModal('confirm-modal');
                         } else {
                             passwordError.textContent = 'Senha incorreta.';
+                            passwordInput.focus();
                         }
                     } else {
                         onConfirm();
@@ -357,7 +399,25 @@
                     cancelBtn.onclick = () => UI.hideModal('confirm-modal');
                 }
                 UI.showModal('confirm-modal');
-            }
+            },
+            showProgressBar: (label) => {
+                DOMElements.scanProgressBar.classList.remove('hidden');
+                DOMElements.scanProgressLabel.textContent = label || 'Processando...';
+                UI.updateProgressBar(0);
+            },
+            hideProgressBar: () => {
+                setTimeout(() => {
+                    DOMElements.scanProgressBar.classList.add('hidden');
+                }, 3000);
+            },
+            updateProgressBar: (percentage, label = null) => {
+                const p = Math.round(percentage);
+                DOMElements.scanProgressFill.style.width = `${p}%`;
+                DOMElements.scanProgressText.textContent = `${p}%`;
+                if (label) {
+                    DOMElements.scanProgressLabel.textContent = label;
+                }
+            },
         };
 
         // --- LÓGICA DO MAPA ---
@@ -376,27 +436,27 @@
             },
             createPopupContent: (church) => {
                 let content = `<h3>${church.nome}</h3>`;
-                if (church.pastor) content += `<p><strong>Líder:</strong> ${church.pastor}</p>`;
-                if (church.endereco) content += `<p><strong>Endereço:</strong> ${church.endereco}</p>`;
+                if (church.pastor) content += `<p><i class="fa fa-user mr-3 text-gray-400"></i><strong>Líder:</strong>&nbsp; ${church.pastor}</p>`;
+                if (church.endereco) content += `<p><i class="fa fa-map-marker-alt mr-3 text-gray-400"></i><strong>Endereço:</strong>&nbsp; ${church.endereco}</p>`;
                 
                 if (church.horarios && church.horarios.length > 0) {
-                    let horariosHtml = "<strong>Horários:</strong><br>";
+                    let horariosHtml = "<p><i class='fa fa-clock mr-3 text-gray-400'></i><strong>Horários:</strong></p><ul style='list-style-position: inside; padding-left: 28px; margin-top: -8px;'>";
                     DIAS_SEMANA.forEach(dia => {
                         const atividades = church.horarios.filter(h => h.dia === dia);
                         if (atividades.length > 0) {
-                            horariosHtml += `&bull; ${dia}: ${atividades.map(a => `${a.horaInicio}${a.horaFim ? ` - ${a.horaFim}`: ''} (${a.desc})`).join(', ')}<br>`;
+                            horariosHtml += `<li><strong>${dia}:</strong> ${atividades.map(a => `${a.horaInicio}${a.horaFim ? ` - ${a.horaFim}`: ''} (${a.desc})`).join(', ')}</li>`;
                         }
                     });
-                    content += `<p>${horariosHtml}</p>`;
+                    content += horariosHtml + "</ul>";
                 }
 
-                if (church.contato) content += `<p><i class="fa fa-phone mr-2 text-gray-500"></i>${church.contato}</p>`;
-                if (church.whatsapp) content += `<p><i class="fab fa-whatsapp mr-2 text-green-500"></i>${church.whatsapp}</p>`;
-                if (church.redes_sociais) content += `<p><a href="${church.redes_sociais}" target="_blank" class="text-blue-600 hover:underline"><i class="fa fa-globe mr-2"></i>Visitar Rede Social</a></p>`;
+                if (church.contato) content += `<p><i class="fa fa-phone mr-3 text-gray-400"></i>${church.contato}</p>`;
+                if (church.whatsapp) content += `<p><i class="fab fa-whatsapp mr-3 text-green-500"></i>${church.whatsapp}</p>`;
+                if (church.redes_sociais) content += `<p><a href="${church.redes_sociais}" target="_blank" class="text-blue-600 hover:underline"><i class="fa fa-globe mr-3 text-gray-400"></i>Visitar Rede Social</a></p>`;
                 
-                content += `<div class="mt-4 pt-2 border-t flex space-x-2">
-                    <button class="popup-edit-btn text-xs bg-yellow-400 text-yellow-900 font-semibold py-1 px-3 rounded hover:bg-yellow-500" data-id="${church.id}">Editar</button>
-                    <button class="popup-delete-btn text-xs bg-red-500 text-white font-semibold py-1 px-3 rounded hover:bg-red-600" data-id="${church.id}" data-name="${church.nome.replace(/"/g, '&quot;')}">Excluir</button>
+                content += `<div class="mt-4 pt-3 border-t flex space-x-2">
+                    <button class="popup-edit-btn text-sm bg-yellow-400 text-yellow-900 font-semibold py-2 px-4 rounded-lg hover:bg-yellow-500 transition" data-id="${church.id}">Editar</button>
+                    <button class="popup-delete-btn text-sm bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition" data-id="${church.id}" data-name="${church.nome.replace(/"/g, '&quot;')}">Excluir</button>
                 </div>`;
                 return content;
             },
@@ -462,15 +522,16 @@
                     map.removeLayer(tempMarker);
                     tempMarker = null;
                 }
-                DOMElements.coordsInfo.innerHTML = '<i class="fa fa-map-pin mr-2"></i>Clique no mapa ou use o CEP para localizar.';
+                DOMElements.coordsInfo.innerHTML = '<i class="fa fa-map-pin mr-2 text-blue-500"></i>Clique no mapa ou use o CEP para localizar.';
                 UI.showMessage(DOMElements.messageArea, '');
                 UI.showMessage(DOMElements.importMessageArea, '');
                 UI.showMessage(DOMElements.cepMessageArea, '');
 
                 DOMElements.panelTitle.textContent = 'Adicionar Nova Igreja';
                 DOMElements.saveBtn.textContent = 'Adicionar Igreja';
-                DOMElements.saveBtn.className = 'w-full bg-blue-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition';
+                DOMElements.saveBtn.className = 'w-full bg-blue-600 text-white py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition';
                 DOMElements.cancelEditBtn.style.display = 'none';
+                DOMElements.fields.name.placeholder = '';
             },
             startEdit: (id) => {
                 const church = allChurches.find(c => c.id === id);
@@ -501,7 +562,7 @@
 
                 DOMElements.panelTitle.textContent = 'Editar Igreja';
                 DOMElements.saveBtn.textContent = 'Salvar Alterações';
-                DOMElements.saveBtn.className = 'w-full bg-yellow-500 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition';
+                DOMElements.saveBtn.className = 'w-full bg-yellow-500 text-white py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition';
                 DOMElements.cancelEditBtn.style.display = 'block';
                 map.closePopup();
                 UI.openPanel();
@@ -560,18 +621,18 @@
                 DIAS_SEMANA.forEach(dia => {
                     const diaId = dia.toLowerCase();
                     const dayDiv = document.createElement('div');
-                    dayDiv.className = 'bg-gray-50 p-3 rounded-md';
+                    dayDiv.className = 'bg-white border border-gray-200 p-3 rounded-lg';
                     dayDiv.innerHTML = `
                         <label class="flex items-center cursor-pointer">
                             <input type="checkbox" id="check-${diaId}" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                             <span class="ml-3 text-sm font-medium text-gray-800">${dia}</span>
                         </label>
-                        <div class="schedule-day-fields mt-2 space-y-2 pl-7" id="fields-${diaId}">
-                            <input type="text" id="desc-${diaId}" placeholder="Descrição (Ex: Culto, Missa)" class="block w-full border-gray-300 rounded-md shadow-sm sm:text-sm">
+                        <div class="schedule-day-fields mt-3 space-y-2 pl-7" id="fields-${diaId}">
+                            <input type="text" id="desc-${diaId}" placeholder="Descrição (Ex: Culto, Missa)" class="block w-full border-gray-300 rounded-lg shadow-sm sm:text-sm">
                             <div class="flex items-center space-x-2 text-sm">
-                                <select id="hora-inicio-${diaId}" class="block w-full border-gray-300 rounded-md shadow-sm sm:text-sm">${timeOptions}</select>
-                                <span>até</span>
-                                <select id="hora-fim-${diaId}" class="block w-full border-gray-300 rounded-md shadow-sm sm:text-sm">${timeOptions}</select>
+                                <select id="hora-inicio-${diaId}" class="block w-full border-gray-300 rounded-lg shadow-sm sm:text-sm">${timeOptions}</select>
+                                <span class="text-gray-500">até</span>
+                                <select id="hora-fim-${diaId}" class="block w-full border-gray-300 rounded-lg shadow-sm sm:text-sm">${timeOptions}</select>
                             </div>
                         </div>
                     `;
@@ -706,26 +767,114 @@
                     onConfirm: Admin.scanMapForChurches
                 });
             },
+            findAndAddChurchFromMap: async (lat, lng) => {
+                UI.showLoading('Inspecionando o mapa...');
+                const query = `[out:json][timeout:10];(node(around:50, ${lat}, ${lng})["amenity"="place_of_worship"];way(around:50, ${lat}, ${lng})["amenity"="place_of_worship"];relation(around:50, ${lat}, ${lng})["amenity"="place_of_worship"];);out center;`;
+                const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('API do mapa falhou.');
+                    const data = await response.json();
+
+                    if (data.elements.length === 0) {
+                        UI.hideLoading();
+                        UI.setupConfirmModal({ title: 'Nenhum Local Encontrado', message: 'Não foi possível identificar uma igreja ou local de culto neste ponto exato. Tente clicar um pouco mais perto do ícone.', actionText: 'OK', actionClass: 'bg-blue-600 hover:bg-blue-700', onConfirm: () => {}, showCancelButton: false });
+                        return;
+                    }
+
+                    const element = data.elements[0];
+                    const churchName = element.tags?.name || '';
+                    const churchLat = element.center ? element.center.lat : element.lat;
+                    const churchLng = element.center ? element.center.lon : element.lon;
+
+                    const alreadyExists = allChurches.some(church => (Math.abs(church.coords[0] - churchLat) < 0.0001 && Math.abs(church.coords[1] - churchLng) < 0.0001));
+
+                    if (alreadyExists) {
+                        UI.hideLoading();
+                        UI.setupConfirmModal({ title: 'Igreja já Cadastrada', message: `A igreja "${element.tags?.name || 'Neste local'}" já parece estar na sua base de dados.`, actionText: 'OK', actionClass: 'bg-blue-600 hover:bg-blue-700', onConfirm: () => {}, showCancelButton: false });
+                        return;
+                    }
+
+                    const addr = await API.fetchAddressForCoords(churchLat, churchLng);
+                    FormLogic.reset();
+                    DOMElements.fields.name.value = churchName;
+                    DOMElements.fields.lat.value = churchLat.toFixed(6);
+                    DOMElements.fields.lng.value = churchLng.toFixed(6);
+                    DOMElements.fields.bairro.value = addr.bairro;
+                    DOMElements.fields.endereco.value = addr.endereco;
+                    
+                    if (!churchName) {
+                        DOMElements.fields.name.placeholder = 'Digite o nome (não encontrado no mapa)';
+                        DOMElements.fields.name.focus();
+                    }
+                    
+                    UI.hideLoading();
+                    UI.openPanel();
+                    DOMElements.panelTitle.textContent = 'Confirmar Nova Igreja';
+
+                } catch (e) {
+                    console.error("Erro ao inspecionar o mapa:", e);
+                    UI.hideLoading();
+                    UI.setupConfirmModal({ title: 'Erro na Inspeção', message: 'Ocorreu um erro ao tentar buscar informações do mapa. Tente novamente.', actionText: 'OK', actionClass: 'bg-red-600 hover:bg-red-700', onConfirm: () => {}, showCancelButton: false });
+                } finally {
+                    isInspectMode = false;
+                    DOMElements.inspectModeBtn.classList.remove('active');
+                    document.body.classList.remove('inspect-mode-active');
+                }
+            },
             scanMapForChurches: async () => {
-                UI.showLoading('Realizando busca profunda em Blumenau...');
-                const query = `[out:json][timeout:60];
+                UI.showProgressBar('Consultando base de dados do mapa...');
+
+                // Query otimizada para ser mais estável, focando em tags específicas
+                const query = `[out:json][timeout:120];
                     area[name="Blumenau"][boundary="administrative"][admin_level="8"]->.searchArea;
                     (
                         node["amenity"="place_of_worship"](area.searchArea);
                         way["amenity"="place_of_worship"](area.searchArea);
                         relation["amenity"="place_of_worship"](area.searchArea);
-                        node["building"~"church|chapel|cathedral|synagogue|mosque|temple"](area.searchArea);
-                        way["building"~"church|chapel|cathedral|synagogue|mosque|temple"](area.searchArea);
-                        relation["building"~"church|chapel|cathedral|synagogue|mosque|temple"](area.searchArea);
+                        node["building"~"church|chapel|cathedral"](area.searchArea);
+                        way["building"~"church|chapel|cathedral"](area.searchArea);
+                        relation["building"~"church|chapel|cathedral"](area.searchArea);
                     );
                     out center;`;
                 const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
                 try {
                     const response = await fetch(url);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error("Erro da API Overpass:", errorText);
+                        throw new Error(`A API do mapa retornou um erro: ${response.status}`);
+                    }
+
                     const data = await response.json();
                     
-                    const newElements = data.elements.filter(element => {
+                    UI.updateProgressBar(0, `Processando dados encontrados...`);
+
+                    const uniqueElements = [];
+                    const existingCoords = new Set();
+                    
+                    for (const element of data.elements) {
+                        const lat = element.center ? element.center.lat : element.lat;
+                        const lon = element.center ? element.center.lon : element.lon;
+                        const coordKey = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+
+                        if (!existingCoords.has(coordKey)) {
+                            uniqueElements.push(element);
+                            existingCoords.add(coordKey);
+                        }
+                    }
+
+                    const newElements = uniqueElements.filter(element => {
+                        if (!element.tags || !element.tags.name) {
+                            return false;
+                        }
+                        const nameLower = element.tags.name.toLowerCase();
+                        if (nameLower.includes('cemitério') || nameLower.includes('escola')) {
+                            return false;
+                        }
                         const lat = element.center ? element.center.lat : element.lat;
                         const lon = element.center ? element.center.lon : element.lon;
                         return !allChurches.some(church =>
@@ -733,28 +882,33 @@
                         );
                     });
 
+
                     if (newElements.length === 0) {
-                         UI.setupConfirmModal({
+                        UI.hideProgressBar();
+                        UI.setupConfirmModal({
                             title: 'Escaneamento Concluído',
-                            message: 'Nenhuma igreja nova foi encontrada em Blumenau.',
+                            message: 'Nenhuma igreja nova foi encontrada em Blumenau. A base de dados parece estar atualizada.',
                             actionText: 'OK',
                             actionClass: 'bg-blue-600 hover:bg-blue-700',
                             onConfirm: () => {},
                             showCancelButton: false
                         });
-                        UI.hideLoading();
                         return;
                     }
 
-                    UI.showLoading(`Encontrados ${newElements.length} novos locais. Buscando endereços... (Isso pode demorar)`);
+                    UI.updateProgressBar(0, `Encontrados ${newElements.length} locais. Buscando endereços...`);
 
                     const batch = writeBatch(db);
                     let newChurchesCount = 0;
 
-                    for (const element of newElements) {
+                    for (let i = 0; i < newElements.length; i++) {
+                        const element = newElements[i];
+                        const percentage = ((i + 1) / newElements.length) * 100;
+                        UI.updateProgressBar(percentage, `Buscando endereço ${i + 1} de ${newElements.length}`);
+                        
                         const lat = element.center ? element.center.lat : element.lat;
                         const lon = element.center ? element.center.lon : element.lon;
-                        const nome = element.tags.name || "Local sem nome";
+                        const nome = element.tags.name;
 
                         const addr = await API.fetchAddressForCoords(lat, lon);
                         
@@ -772,8 +926,7 @@
                             redes_sociais: ''
                         });
                         
-                        // Pausa para não sobrecarregar a API de geocodificação
-                        await new Promise(resolve => setTimeout(resolve, 1100));
+                        await new Promise(resolve => setTimeout(resolve, 1100)); // Pausa para não sobrecarregar API
                     }
 
                     if (newChurchesCount > 0) {
@@ -789,16 +942,16 @@
                     }
                 } catch(e) {
                     UI.setupConfirmModal({
-                        title: 'Erro',
-                        message: 'Ocorreu um erro ao escanear o mapa. A API pode estar sobrecarregada. Tente novamente mais tarde.',
-                        actionText: 'OK',
+                        title: 'Erro no Escaneamento',
+                        message: 'Não foi possível concluir o escaneamento. A API do mapa pode estar temporariamente indisponível ou a busca foi muito complexa. Por favor, tente novamente mais tarde.',
+                        actionText: 'Entendi',
                         actionClass: 'bg-red-600 hover:bg-red-700',
                         onConfirm: () => {},
                         showCancelButton: false
                     });
-                    console.error(e);
+                    console.error("Erro detalhado no escaneamento:", e);
                 } finally {
-                    UI.hideLoading();
+                    UI.hideProgressBar();
                 }
             }
         };
@@ -817,9 +970,13 @@
 
             // Mapa
             map.on('click', (e) => {
-                if (editingId) return; // Não muda o ponto ao editar
-                MapLogic.setLocationOnMap(e.latlng.lat, e.latlng.lng);
-                API.reverseGeocode(e.latlng.lat, e.latlng.lng);
+                if (isInspectMode) {
+                    Admin.findAndAddChurchFromMap(e.latlng.lat, e.latlng.lng);
+                } else {
+                    if (editingId) return; // Não muda o ponto ao editar
+                    MapLogic.setLocationOnMap(e.latlng.lat, e.latlng.lng);
+                    API.reverseGeocode(e.latlng.lat, e.latlng.lng);
+                }
             });
             
             // Popups
@@ -881,12 +1038,12 @@
                 }, {});
                 
                 Object.keys(grouped).sort().forEach(bairro => {
-                    contentDiv.insertAdjacentHTML('beforeend', `<h4 class="text-lg font-bold text-blue-700 mt-4 first:mt-0 mb-2 border-b-2 border-blue-200 pb-1">${bairro}</h4>`);
+                    contentDiv.insertAdjacentHTML('beforeend', `<h4 class="text-xl font-bold text-blue-800 mt-5 first:mt-0 mb-3 border-b-2 border-blue-200 pb-2">${bairro}</h4>`);
                     const list = document.createElement('ul');
-                    list.className = 'space-y-1';
+                    list.className = 'space-y-2';
                     grouped[bairro].sort((a,b) => a.nome.localeCompare(b.nome)).forEach(church => {
                         const li = document.createElement('li');
-                        li.className = 'p-2 rounded-md hover:bg-gray-100 cursor-pointer text-gray-700';
+                        li.className = 'p-3 rounded-lg hover:bg-gray-100 cursor-pointer text-gray-800';
                         li.textContent = church.nome;
                         li.onclick = () => {
                             const marker = allMarkers.find(m => m.churchId === church.id);
@@ -908,6 +1065,21 @@
             // Funções Admin
             document.getElementById('clear-map-btn').addEventListener('click', Admin.confirmClearMap);
             document.getElementById('scan-map-btn').addEventListener('click', Admin.confirmScanMap);
+            DOMElements.inspectModeBtn.addEventListener('click', () => {
+                isInspectMode = !isInspectMode;
+                DOMElements.inspectModeBtn.classList.toggle('active', isInspectMode);
+                document.body.classList.toggle('inspect-mode-active', isInspectMode);
+                if (isInspectMode) {
+                    UI.setupConfirmModal({
+                        title: 'Modo Inspeção Ativado',
+                        message: 'Clique em um ícone de cruz no mapa para adicionar uma igreja não cadastrada.',
+                        actionText: 'Entendi!',
+                        actionClass: 'bg-blue-600 hover:bg-blue-700',
+                        onConfirm: () => {},
+                        showCancelButton: false
+                    });
+                }
+            });
 
             // Pesquisa
             DOMElements.searchInput.addEventListener('input', (e) => {
@@ -975,6 +1147,4 @@
     </script>
 </body>
 </html>
-
-
 
