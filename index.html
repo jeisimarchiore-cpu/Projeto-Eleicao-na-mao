@@ -698,8 +698,8 @@
             },
             confirmScanMap: () => {
                 UI.setupConfirmModal({
-                    title: 'Escanear Mapa',
-                    message: 'Isso buscará por locais de culto no OpenStreetMap na área visível do mapa e os adicionará se não existirem. Requer senha de administrador.',
+                    title: 'Escaneamento Profundo',
+                    message: 'Isso buscará por locais de culto em TODA a cidade de Blumenau e pode levar alguns minutos. Requer senha de administrador.',
                     actionText: 'Iniciar Escaneamento',
                     actionClass: 'bg-blue-600 hover:bg-blue-700',
                     requiresPassword: true,
@@ -707,14 +707,16 @@
                 });
             },
             scanMapForChurches: async () => {
-                UI.showLoading('Escaneando a área do mapa...');
-                const bounds = map.getBounds();
-                const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
-                const query = `[out:json][timeout:30];
-                    area[name="Blumenau"][boundary="administrative"]->.searchArea;
+                UI.showLoading('Realizando busca profunda em Blumenau...');
+                const query = `[out:json][timeout:60];
+                    area[name="Blumenau"][boundary="administrative"][admin_level="8"]->.searchArea;
                     (
-                        node["amenity"="place_of_worship"](area.searchArea)(${bbox});
-                        way["amenity"="place_of_worship"](area.searchArea)(${bbox});
+                        node["amenity"="place_of_worship"](area.searchArea);
+                        way["amenity"="place_of_worship"](area.searchArea);
+                        relation["amenity"="place_of_worship"](area.searchArea);
+                        node["building"~"church|chapel|cathedral|synagogue|mosque|temple"](area.searchArea);
+                        way["building"~"church|chapel|cathedral|synagogue|mosque|temple"](area.searchArea);
+                        relation["building"~"church|chapel|cathedral|synagogue|mosque|temple"](area.searchArea);
                     );
                     out center;`;
                 const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
@@ -722,40 +724,57 @@
                 try {
                     const response = await fetch(url);
                     const data = await response.json();
-                    let newChurchesCount = 0;
-                    const batch = writeBatch(db);
-                    const promises = [];
-
-                    for (const element of data.elements) {
+                    
+                    const newElements = data.elements.filter(element => {
                         const lat = element.center ? element.center.lat : element.lat;
                         const lon = element.center ? element.center.lon : element.lon;
-                        const nome = element.tags.name || "Igreja sem nome";
-
-                        const isDuplicate = allChurches.some(church =>
+                        return !allChurches.some(church =>
                             (Math.abs(church.coords[0] - lat) < 0.0001 && Math.abs(church.coords[1] - lon) < 0.0001)
                         );
-                        
-                        if (!isDuplicate) {
-                            const promise = API.fetchAddressForCoords(lat, lon).then(addr => {
-                                newChurchesCount++;
-                                const newDocRef = doc(igrejasCollectionRef);
-                                batch.set(newDocRef, {
-                                    nome: nome,
-                                    coords: [lat, lon],
-                                    bairro: addr.bairro,
-                                    endereco: addr.endereco,
-                                    pastor: '',
-                                    horarios: [],
-                                    contato: '',
-                                    whatsapp: '',
-                                    redes_sociais: ''
-                                });
-                            });
-                            promises.push(promise);
-                        }
+                    });
+
+                    if (newElements.length === 0) {
+                         UI.setupConfirmModal({
+                            title: 'Escaneamento Concluído',
+                            message: 'Nenhuma igreja nova foi encontrada em Blumenau.',
+                            actionText: 'OK',
+                            actionClass: 'bg-blue-600 hover:bg-blue-700',
+                            onConfirm: () => {},
+                            showCancelButton: false
+                        });
+                        UI.hideLoading();
+                        return;
                     }
 
-                    await Promise.all(promises);
+                    UI.showLoading(`Encontrados ${newElements.length} novos locais. Buscando endereços... (Isso pode demorar)`);
+
+                    const batch = writeBatch(db);
+                    let newChurchesCount = 0;
+
+                    for (const element of newElements) {
+                        const lat = element.center ? element.center.lat : element.lat;
+                        const lon = element.center ? element.center.lon : element.lon;
+                        const nome = element.tags.name || "Local sem nome";
+
+                        const addr = await API.fetchAddressForCoords(lat, lon);
+                        
+                        newChurchesCount++;
+                        const newDocRef = doc(igrejasCollectionRef);
+                        batch.set(newDocRef, {
+                            nome: nome,
+                            coords: [lat, lon],
+                            bairro: addr.bairro,
+                            endereco: addr.endereco,
+                            pastor: '',
+                            horarios: [],
+                            contato: '',
+                            whatsapp: '',
+                            redes_sociais: ''
+                        });
+                        
+                        // Pausa para não sobrecarregar a API de geocodificação
+                        await new Promise(resolve => setTimeout(resolve, 1100));
+                    }
 
                     if (newChurchesCount > 0) {
                         await batch.commit();
@@ -767,20 +786,11 @@
                             onConfirm: () => {},
                             showCancelButton: false
                         });
-                    } else {
-                        UI.setupConfirmModal({
-                            title: 'Escaneamento Concluído',
-                            message: 'Nenhuma igreja nova foi encontrada na área visível do mapa.',
-                            actionText: 'OK',
-                            actionClass: 'bg-blue-600 hover:bg-blue-700',
-                            onConfirm: () => {},
-                            showCancelButton: false
-                        });
                     }
                 } catch(e) {
                     UI.setupConfirmModal({
                         title: 'Erro',
-                        message: 'Ocorreu um erro ao escanear o mapa. Tente novamente.',
+                        message: 'Ocorreu um erro ao escanear o mapa. A API pode estar sobrecarregada. Tente novamente mais tarde.',
                         actionText: 'OK',
                         actionClass: 'bg-red-600 hover:bg-red-700',
                         onConfirm: () => {},
@@ -965,5 +975,6 @@
     </script>
 </body>
 </html>
+
 
 
