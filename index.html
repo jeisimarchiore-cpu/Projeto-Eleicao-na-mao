@@ -296,7 +296,24 @@
 
         const UI = {
             showLoading: (message) => {
-// ... existing code ... -->
+                DOMElements.loadingOverlay.classList.remove('hidden');
+                DOMElements.loadingOverlay.querySelector('p').textContent = message || 'Carregando...';
+            },
+            hideLoading: () => DOMElements.loadingOverlay.classList.add('hidden'),
+            openPanel: () => DOMElements.sidePanel.classList.remove('closed'),
+            closePanel: () => DOMElements.sidePanel.classList.add('closed'),
+            showMessage: (element, message, isError = false) => {
+                element.textContent = message;
+                element.className = `mt-1 text-xs h-4 ${isError ? 'text-red-500' : 'text-green-600'}`;
+            },
+            updateChurchCount: () => {
+                const count = displayedChurches.length;
+                const total = allChurches.length;
+                let text = `<i class="fa fa-church text-gray-600 mr-2"></i><strong class="text-gray-900">${count}</strong> de <strong class="text-gray-900">${total}</strong> igreja(s)`;
+                if (count !== total) {
+                    text += ` (filtrado)`;
+                }
+                DOMElements.churchCounter.innerHTML = text;
             },
             showModal: (id) => document.getElementById(id)?.classList.replace('hidden', 'flex'),
             hideModal: (id) => document.getElementById(id)?.classList.replace('flex', 'hidden'),
@@ -572,6 +589,28 @@
         // --- FUNÇÕES DE API EXTERNA ---
 
         const API = {
+            fetchAddressForCoords: async (lat, lon) => {
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    if (data && data.address) {
+                        const addr = data.address;
+                        const rua = addr.road || '';
+                        const numero = addr.house_number || '';
+                        const bairro = addr.suburb || addr.city_district || '';
+                        return {
+                            endereco: numero ? `${rua}, ${numero}` : rua,
+                            bairro: bairro,
+                            rua: rua,
+                            numero: numero
+                        };
+                    }
+                } catch (error) {
+                    console.error("Erro no reverse geocode:", error);
+                }
+                return { endereco: '', bairro: '', rua: '', numero: '' };
+            },
             fetchCEP: async (cep) => {
                 UI.showMessage(DOMElements.cepMessageArea, 'Buscando CEP...');
                 try {
@@ -608,23 +647,11 @@
                 }
             },
             reverseGeocode: async (lat, lon) => {
-                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    if (data && data.address) {
-                        const addr = data.address;
-                        const rua = addr.road || '';
-                        const numero = addr.house_number || '';
-                        const bairro = addr.suburb || addr.city_district || '';
-                        DOMElements.fields.bairro.value = bairro;
-                        currentStreet = rua;
-                        DOMElements.fields.numero.value = numero;
-                        DOMElements.fields.endereco.value = `${rua}, ${numero}`;
-                    }
-                } catch (error) {
-                    console.error("Erro no reverse geocode:", error);
-                }
+                const addrDetails = await API.fetchAddressForCoords(lat, lon);
+                DOMElements.fields.bairro.value = addrDetails.bairro;
+                currentStreet = addrDetails.rua;
+                DOMElements.fields.numero.value = addrDetails.numero;
+                DOMElements.fields.endereco.value = addrDetails.endereco;
             }
         };
 
@@ -697,6 +724,7 @@
                     const data = await response.json();
                     let newChurchesCount = 0;
                     const batch = writeBatch(db);
+                    const promises = [];
 
                     for (const element of data.elements) {
                         const lat = element.center ? element.center.lat : element.lat;
@@ -708,19 +736,32 @@
                         );
                         
                         if (!isDuplicate) {
-                            newChurchesCount++;
-                            const newDocRef = doc(igrejasCollectionRef);
-                            batch.set(newDocRef, {
-                                nome: nome, coords: [lat, lon], bairro: '', endereco: '', pastor: '',
-                                horarios: [], contato: '', whatsapp: '', redes_sociais: ''
+                            const promise = API.fetchAddressForCoords(lat, lon).then(addr => {
+                                newChurchesCount++;
+                                const newDocRef = doc(igrejasCollectionRef);
+                                batch.set(newDocRef, {
+                                    nome: nome,
+                                    coords: [lat, lon],
+                                    bairro: addr.bairro,
+                                    endereco: addr.endereco,
+                                    pastor: '',
+                                    horarios: [],
+                                    contato: '',
+                                    whatsapp: '',
+                                    redes_sociais: ''
+                                });
                             });
+                            promises.push(promise);
                         }
                     }
+
+                    await Promise.all(promises);
+
                     if (newChurchesCount > 0) {
                         await batch.commit();
                         UI.setupConfirmModal({
                             title: 'Escaneamento Concluído',
-                            message: `${newChurchesCount} nova(s) igreja(s) foram adicionada(s).`,
+                            message: `${newChurchesCount} nova(s) igreja(s) foram adicionada(s) com endereço.`,
                             actionText: 'OK',
                             actionClass: 'bg-blue-600 hover:bg-blue-700',
                             onConfirm: () => {},
@@ -752,5 +793,177 @@
             }
         };
         
-// ... existing code ... -->
+        // --- EVENT LISTENERS E INICIALIZAÇÃO ---
+
+        function initializeEventListeners() {
+            // Painel Lateral
+            DOMElements.togglePanelBtn.addEventListener('click', () => {
+                FormLogic.reset();
+                UI.openPanel();
+            });
+            DOMElements.closePanelBtn.addEventListener('click', UI.closePanel);
+            DOMElements.saveBtn.addEventListener('click', FormLogic.save);
+            DOMElements.cancelEditBtn.addEventListener('click', FormLogic.reset);
+
+            // Mapa
+            map.on('click', (e) => {
+                if (editingId) return; // Não muda o ponto ao editar
+                MapLogic.setLocationOnMap(e.latlng.lat, e.latlng.lng);
+                API.reverseGeocode(e.latlng.lat, e.latlng.lng);
+            });
+            
+            // Popups
+            map.on('popupopen', (e) => {
+                const popupNode = e.popup.getElement();
+                popupNode.querySelector('.popup-edit-btn')?.addEventListener('click', (ev) => {
+                    FormLogic.startEdit(ev.target.dataset.id);
+                });
+                popupNode.querySelector('.popup-delete-btn')?.addEventListener('click', (ev) => {
+                    const { id, name } = ev.target.dataset;
+                    Admin.confirmDelete(id, name);
+                });
+            });
+
+            // CEP
+            let cepTimeout;
+            DOMElements.fields.cep.addEventListener('input', function() {
+                clearTimeout(cepTimeout);
+                const cep = this.value.replace(/\D/g, '');
+                if (cep.length === 8) {
+                    cepTimeout = setTimeout(() => API.fetchCEP(cep), 500);
+                } else {
+                    UI.showMessage(DOMElements.cepMessageArea, '');
+                }
+            });
+
+            DOMElements.fields.numero.addEventListener('input', function() {
+                const numero = this.value.trim();
+                if (currentStreet) {
+                    DOMElements.fields.endereco.value = numero ? `${currentStreet}, ${numero}` : currentStreet;
+                }
+            });
+
+            // Importar Google Maps
+            document.getElementById('import-gmaps-btn').addEventListener('click', () => {
+                const url = DOMElements.gmapsUrlInput.value;
+                const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+                const match = url.match(regex);
+                if (match && match[1] && match[2]) {
+                    const lat = parseFloat(match[1]);
+                    const lng = parseFloat(match[2]);
+                    MapLogic.setLocationOnMap(lat, lng);
+                    API.reverseGeocode(lat, lng);
+                    UI.showMessage(DOMElements.importMessageArea, 'Coordenadas importadas com sucesso!');
+                } else {
+                    UI.showMessage(DOMElements.importMessageArea, 'URL inválida ou não contém coordenadas.', true);
+                }
+            });
+
+            // Lista de Igrejas
+            DOMElements.churchCounter.addEventListener('click', () => {
+                const contentDiv = DOMElements.churchListContent;
+                contentDiv.innerHTML = '';
+                const grouped = allChurches.reduce((acc, church) => {
+                    const bairro = church.bairro || 'Sem Bairro';
+                    if (!acc[bairro]) acc[bairro] = [];
+                    acc[bairro].push(church);
+                    return acc;
+                }, {});
+                
+                Object.keys(grouped).sort().forEach(bairro => {
+                    contentDiv.insertAdjacentHTML('beforeend', `<h4 class="text-lg font-bold text-blue-700 mt-4 first:mt-0 mb-2 border-b-2 border-blue-200 pb-1">${bairro}</h4>`);
+                    const list = document.createElement('ul');
+                    list.className = 'space-y-1';
+                    grouped[bairro].sort((a,b) => a.nome.localeCompare(b.nome)).forEach(church => {
+                        const li = document.createElement('li');
+                        li.className = 'p-2 rounded-md hover:bg-gray-100 cursor-pointer text-gray-700';
+                        li.textContent = church.nome;
+                        li.onclick = () => {
+                            const marker = allMarkers.find(m => m.churchId === church.id);
+                            if (marker) {
+                                map.setView(marker.getLatLng(), 18);
+                                marker.openPopup();
+                            }
+                            UI.hideModal('church-list-modal');
+                        };
+                        list.appendChild(li);
+                    });
+                    contentDiv.appendChild(list);
+                });
+                
+                UI.showModal('church-list-modal');
+            });
+            document.querySelectorAll('.modal-close-btn').forEach(btn => btn.addEventListener('click', () => UI.hideModal(btn.closest('.fixed').id)));
+            
+            // Funções Admin
+            document.getElementById('clear-map-btn').addEventListener('click', Admin.confirmClearMap);
+            document.getElementById('scan-map-btn').addEventListener('click', Admin.confirmScanMap);
+
+            // Pesquisa
+            DOMElements.searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                DOMElements.clearSearchBtn.classList.toggle('hidden', query.length === 0);
+                
+                displayedChurches = allChurches.filter(c => 
+                    c.nome.toLowerCase().includes(query) ||
+                    (c.pastor && c.pastor.toLowerCase().includes(query)) ||
+                    (c.bairro && c.bairro.toLowerCase().includes(query))
+                );
+                MapLogic.redrawAllMarkers();
+            });
+
+            DOMElements.clearSearchBtn.addEventListener('click', () => {
+                DOMElements.searchInput.value = '';
+                DOMElements.clearSearchBtn.classList.add('hidden');
+                displayedChurches = [...allChurches];
+                MapLogic.redrawAllMarkers();
+            });
+
+            // Geolocalização
+            document.getElementById('user-location-btn').addEventListener('click', MapLogic.findUserLocation);
+        }
+
+        async function main() {
+            UI.showLoading('Autenticando...');
+            try {
+                // Autenticação anônima do Firebase
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                UI.showLoading('Carregando dados das igrejas...');
+                
+                // Listener de dados do Firestore
+                onSnapshot(igrejasCollectionRef, (snapshot) => {
+                    allChurches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    // Sincroniza a lista filtrada se não houver filtro ativo
+                    if (DOMElements.searchInput.value.trim() === '') {
+                        displayedChurches = [...allChurches];
+                    }
+                    MapLogic.redrawAllMarkers();
+                    UI.hideLoading();
+                }, (error) => {
+                    console.error("Erro ao buscar dados: ", error);
+                    DOMElements.churchCounter.innerHTML = `<strong class="text-red-500">ERRO AO CARREGAR DADOS</strong>`;
+                    UI.hideLoading();
+                });
+
+            } catch (error) {
+                console.error("Erro na autenticação:", error);
+                DOMElements.churchCounter.innerHTML = `<strong class="text-red-500">FALHA NA AUTENTICAÇÃO</strong>`;
+                UI.hideLoading();
+            }
+        }
+        
+        // --- PONTO DE ENTRADA ---
+        document.addEventListener('DOMContentLoaded', () => {
+            FormLogic.setupHorarios();
+            initializeEventListeners();
+            main();
+        });
+    </script>
+</body>
+</html>
+
 
