@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v9.7 - Análise de Legenda com IA</title>
+    <title>Sala de Guerra Eleitoral v9.8 - Análise de Legenda com IA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -178,7 +178,7 @@
                  </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v9.7</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v9.8</span>
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
                 </div>
@@ -881,60 +881,8 @@
     }
     
     // =================================================================================
-    // API KEY MANAGEMENT
+    // API KEY MANAGEMENT - NO LONGER NEEDED, KEY IS HARDCODED
     // =================================================================================
-    function linkApiKey() {
-        const apiKey = document.getElementById('ai-api-key-input').value;
-        const statusEl = document.getElementById('api-key-status');
-        
-        if (apiKey.trim()) {
-            localStorage.setItem('geminiApiKey', apiKey.trim());
-            if (statusEl) {
-                clearTimeout(apiKeySaveTimer);
-                statusEl.textContent = 'Chave Vinculada!';
-                statusEl.classList.remove('opacity-0', 'text-danger');
-                statusEl.classList.add('text-success');
-                apiKeySaveTimer = setTimeout(() => {
-                    statusEl.classList.add('opacity-0');
-                }, 2000);
-            }
-        } else {
-            localStorage.removeItem('geminiApiKey');
-             if (statusEl) {
-                clearTimeout(apiKeySaveTimer);
-                statusEl.textContent = 'Chave Removida!';
-                statusEl.classList.remove('opacity-0', 'text-success');
-                statusEl.classList.add('text-danger');
-                apiKeySaveTimer = setTimeout(() => {
-                    statusEl.classList.add('opacity-0');
-                }, 2000);
-            }
-        }
-    }
-    
-    function handleApiKeyEnter(event) {
-        if (event.key === 'Enter') {
-            linkApiKey();
-        }
-    }
-
-    function loadApiKey() {
-        // This function is no longer used with hardcoded API key
-    }
-
-    function toggleApiKeyVisibility() {
-        const input = document.getElementById('ai-api-key-input');
-        const icon = document.getElementById('api-key-toggle-icon');
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
 
     // =================================================================================
     // ALLIANCE SIMULATOR LOGIC
@@ -1347,8 +1295,8 @@
         const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[20rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
         showModal(modalContent);
         
-        const apiKey = "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74"; // <-- COLE SUA CHAVE DE API AQUI
-        if (!apiKey || apiKey === "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74") {
+        const apiKey = ""; // <-- COLE SUA CHAVE DE API AQUI, ENTRE AS ASPAS
+        if (!apiKey) {
             document.getElementById('ai-slate-result').innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API da IA diretamente no código para usar este recurso.</p>`;
             return;
         }
@@ -1433,8 +1381,8 @@
         const generateBtn = document.getElementById('ai-generate-btn');
         if (!partyName) return;
 
-        const apiKey = "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74"; // <-- COLE SUA CHAVE DE API AQUI
-        if (!apiKey || apiKey === "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74") {
+        const apiKey = ""; // <-- COLE SUA CHAVE DE API AQUI, ENTRE AS ASPAS
+        if (!apiKey) {
             resultContainer.innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API do Gemini diretamente no código para gerar a análise.</p>`;
             return;
         }
@@ -2140,6 +2088,7 @@
     </script>
 </body>
 </html>
+
 
 
 
