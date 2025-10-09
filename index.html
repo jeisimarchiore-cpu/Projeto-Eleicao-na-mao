@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v9.0 - Análise de Legenda com IA</title>
+    <title>Sala de Guerra Eleitoral v9.5 - Análise de Legenda com IA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -112,6 +112,7 @@
             opacity: 0;
             transition: opacity 0.2s;
             color: #f9fafb;
+            z-index: 60; /* Ensure tooltip is above modal */
         }
 
         /* Ensure all text is white */
@@ -167,24 +168,24 @@
         <header class="bg-card/50 backdrop-blur-sm sticky top-0 z-20 border-b border-border">
             <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
                  <div id="logo-container" class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-                        <span class="font-playfair font-bold text-2xl text-white">SM</span>
-                    </div>
-                    <div>
-                        <p class="font-playfair font-bold text-lg text-text-main leading-tight">Silmara Miguel</p>
-                        <p class="text-xs text-text-light leading-tight">Análise Estratégica</p>
-                    </div>
-                </div>
+                     <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                         <span class="font-playfair font-bold text-2xl text-white">SM</span>
+                     </div>
+                     <div>
+                         <p class="font-playfair font-bold text-lg text-text-main leading-tight">Silmara Miguel</p>
+                         <p class="text-xs text-text-light leading-tight">Análise Estratégica</p>
+                     </div>
+                 </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v9.0</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v9.5</span>
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
                 </div>
                 <div class="w-48 text-right"> <!-- Placeholder for alignment -->
                      <button onclick="window.print()" class="bg-primary/20 text-primary hover:bg-primary hover:text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm transition-colors duration-200 no-print">
-                        <i class="fa-solid fa-print mr-2"></i> Imprimir Relatório
-                    </button>
+                         <i class="fa-solid fa-print mr-2"></i> Imprimir Relatório
+                     </button>
                 </div>
             </div>
             <!-- Main Navigation Tabs -->
@@ -259,7 +260,7 @@
                                      <div class="flex justify-between items-center mt-1">
                                         <span class="text-xs text-text-light">Base 2022: <span id="base-electorate-display" class="font-mono"></span></span>
                                         <span class="text-sm font-mono text-primary"><span id="electorate-growth-value">0.0</span>%</span>
-                                    </div>
+                                     </div>
                                 </div>
                             </div>
                         </div>
@@ -307,22 +308,36 @@
                     <!-- NEW AI ANALYSIS SECTION -->
                     <div id="ai-analysis-section" class="bg-card p-6 rounded-lg border border-border">
                          <div class="flex flex-col md:flex-row justify-between md:items-center mb-4">
-                            <div>
-                                <h2 class="text-2xl font-bold text-secondary"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Análise Estratégica com IA</h2>
-                                <p class="text-text-light mt-1">Gere insights e recomendações para um partido com base no cenário simulado atual.</p>
-                            </div>
+                             <div>
+                                 <h2 class="text-2xl font-bold text-secondary"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Análise Estratégica com IA</h2>
+                                 <p class="text-text-light mt-1">Gere insights e recomendações para um partido com base no cenário simulado atual.</p>
+                             </div>
+                        </div>
+                         <div class="mb-4">
+                             <label for="ai-api-key-input" class="block text-sm font-medium text-text-light mb-1">Chave de API (Gemini) <span id="api-key-status" class="text-xs text-success ml-2 opacity-0 transition-opacity">Chave Vinculada!</span></label>
+                             <div class="flex gap-2">
+                                 <div class="relative flex-grow">
+                                     <input type="password" id="ai-api-key-input" placeholder="Cole sua chave de API aqui" class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition pr-10" onkeyup="handleApiKeyEnter(event)">
+                                     <button class="absolute inset-y-0 right-0 px-3 flex items-center text-text-light hover:text-text-main" onclick="toggleApiKeyVisibility()">
+                                         <i id="api-key-toggle-icon" class="fa-solid fa-eye"></i>
+                                     </button>
+                                 </div>
+                                 <button onclick="linkApiKey()" class="bg-secondary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-teal-400 transition-colors duration-200 flex items-center">
+                                     <i class="fa-solid fa-link mr-2"></i> Vincular Chave
+                                 </button>
+                             </div>
                          </div>
                          <div class="flex items-end gap-4">
-                            <div class="flex-grow">
-                                <label for="ai-party-select" class="block text-sm font-medium text-text-light mb-1">Selecione o Partido</label>
-                                <select id="ai-party-select" class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></select>
-                            </div>
-                            <button id="ai-generate-btn" onclick="generateAIAnalysis()" class="bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-violet-500 transition-colors duration-200 flex items-center">
-                                <i class="fa-solid fa-brain mr-2"></i> Gerar Análise
-                            </button>
+                             <div class="flex-grow">
+                                 <label for="ai-party-select" class="block text-sm font-medium text-text-light mb-1">Selecione o Partido</label>
+                                 <select id="ai-party-select" class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></select>
+                             </div>
+                             <button id="ai-generate-btn" onclick="generateAIAnalysis()" class="bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-violet-500 transition-colors duration-200 flex items-center">
+                                 <i class="fa-solid fa-brain mr-2"></i> Gerar Análise
+                             </button>
                          </div>
                          <div id="ai-result-container" class="mt-6 bg-background p-4 rounded-lg min-h-[10rem] border border-border">
-                            <p class="text-center text-text-light">A análise da IA aparecerá aqui.</p>
+                             <p class="text-center text-text-light">A análise da IA aparecerá aqui.</p>
                          </div>
                     </div>
 
@@ -365,7 +380,6 @@
                     
                     <!-- Interactive Map -->
                     <div id="map-container" class="w-full aspect-video mb-8">
-                        <div id="map-tooltip"></div>
                     </div>
 
                     <!-- 2024 Elected Summary Panel -->
@@ -387,6 +401,10 @@
             <!-- Modal content will be injected here -->
         </div>
     </div>
+    
+    <!-- Tooltip for D3 visualizations -->
+    <div id="map-tooltip"></div>
+
 
     <script>
     // =================================================================================
@@ -427,6 +445,7 @@
     let currentSimulatedScenario = {};
     let baseSummary2022 = {};
     let totalSupportVotes = 0;
+    let apiKeySaveTimer;
 
     // =================================================================================
     // MAIN LOGIC
@@ -434,6 +453,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         baseScenario = prepareBaseScenario();
         loadLegendasFromStorage(); // Load saved lists before initializing
+        loadApiKey();
         initializeControls();
         initializeGerenciarLegendasTab();
         initializeAnaliseTab();
@@ -850,8 +870,9 @@
         
         const ultimoEleitoBase = partyData.eleitos2022 && partyData.eleitos2022.length > 0 ? partyData.eleitos2022[partyData.eleitos2022.length - 1] : null;
 
-        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div class="flex items-center"><div class="w-8 h-8 rounded-full mr-3" style="background-color: ${color}"></div><div><h2 class="text-2xl font-bold text-text-main">${partyName}</h2><p>Dossiê do Partido</p></div></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main">Votos</h3><ul class="text-sm space-y-2 font-mono"><li class="flex justify-between"><span>Base (2022):</span> <span>${(partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li><li class="flex justify-between"><span>Impulso (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li><li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li></ul></div><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main">Nota de Corte</h3><ul class="text-sm space-y-2 font-mono"><li class="flex justify-between"><span>Último Eleito (Base):</span> <span>${ultimoEleitoBase ? ultimoEleitoBase.votos.toLocaleString('pt-BR') : 'N/A'}</span></li><li class="flex justify-between"><span>Impulso:</span> <span>${(partyData.boost * 100).toFixed(0)}%</span></li><li class="flex justify-between border-t border-border pt-2 mt-2"><strong>META:</strong> <strong class="text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</strong></li></ul></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-bolt text-primary mr-1"></i>Diretas (${diretas.length})</h3><ul class="text-sm space-y-2">${diretasHtml}</ul></div><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-shuffle text-warning mr-1"></i>Sobras (${sobras.length})</h3><ul class="text-sm space-y-2">${sobrasHtml}</ul></div></div></div>`;
+        const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div class="flex items-center"><div class="w-8 h-8 rounded-full mr-3" style="background-color: ${color}"></div><div><h2 class="text-2xl font-bold text-text-main">${partyName}</h2><p>Dossiê do Partido</p></div></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main">Votos</h3><ul class="text-sm space-y-2 font-mono"><li class="flex justify-between"><span>Base (2022):</span> <span>${(partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li><li class="flex justify-between"><span>Impulso (${(partyData.boost * 100).toFixed(0)}%):</span> <span class="${partyData.boost > 0 ? 'text-success' : partyData.boost < 0 ? 'text-danger' : ''}">${(partyData.votos - partyData.votosProjetadosBase).toLocaleString('pt-BR')}</span></li><li class="flex justify-between border-t border-border pt-2 mt-2"><strong>TOTAL:</strong> <strong>${partyData.votos.toLocaleString('pt-BR')}</strong></li></ul></div><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main">Nota de Corte</h3><ul class="text-sm space-y-2 font-mono"><li class="flex justify-between"><span>Último Eleito (Base):</span> <span>${ultimoEleitoBase ? ultimoEleitoBase.votos.toLocaleString('pt-BR') : 'N/A'}</span></li><li class="flex justify-between"><span>Impulso:</span> <span>${(partyData.boost * 100).toFixed(0)}%</span></li><li class="flex justify-between border-t border-border pt-2 mt-2"><strong>META:</strong> <strong class="text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</strong></li></ul></div></div><div class="bg-background p-4 rounded-lg mb-4"><h3 class="font-bold mb-2 text-text-main text-center">Distribuição de Votos (Top 5 + Outros)</h3><div id="party-chart-container" class="flex justify-center items-center"></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-bolt text-primary mr-1"></i>Diretas (${diretas.length})</h3><ul class="text-sm space-y-2">${diretasHtml}</ul></div><div class="bg-background p-4 rounded-lg"><h3 class="font-bold mb-2 text-text-main"><i class="fa-solid fa-shuffle text-warning mr-1"></i>Sobras (${sobras.length})</h3><ul class="text-sm space-y-2">${sobrasHtml}</ul></div></div></div>`;
         showModal(modalHtml);
+        drawPartyVoteDistributionChart(partyData, '#party-chart-container');
     }
 
     function showRiskModal(logIndex) {
@@ -874,6 +895,66 @@
         showModal(modalHtml);
     }
     
+    // =================================================================================
+    // API KEY MANAGEMENT
+    // =================================================================================
+    function linkApiKey() {
+        const apiKey = document.getElementById('ai-api-key-input').value;
+        const statusEl = document.getElementById('api-key-status');
+        
+        if (apiKey.trim()) {
+            localStorage.setItem('geminiApiKey', apiKey.trim());
+            if (statusEl) {
+                clearTimeout(apiKeySaveTimer);
+                statusEl.textContent = 'Chave Vinculada!';
+                statusEl.classList.remove('opacity-0', 'text-danger');
+                statusEl.classList.add('text-success');
+                apiKeySaveTimer = setTimeout(() => {
+                    statusEl.classList.add('opacity-0');
+                }, 2000);
+            }
+        } else {
+            localStorage.removeItem('geminiApiKey');
+             if (statusEl) {
+                clearTimeout(apiKeySaveTimer);
+                statusEl.textContent = 'Chave Removida!';
+                statusEl.classList.remove('opacity-0', 'text-success');
+                statusEl.classList.add('text-danger');
+                apiKeySaveTimer = setTimeout(() => {
+                    statusEl.classList.add('opacity-0');
+                }, 2000);
+            }
+        }
+    }
+    
+    function handleApiKeyEnter(event) {
+        if (event.key === 'Enter') {
+            linkApiKey();
+        }
+    }
+
+    function loadApiKey() {
+        const apiKey = localStorage.getItem('geminiApiKey');
+        const input = document.getElementById('ai-api-key-input');
+        if (apiKey && input) {
+            input.value = apiKey;
+        }
+    }
+
+    function toggleApiKeyVisibility() {
+        const input = document.getElementById('ai-api-key-input');
+        const icon = document.getElementById('api-key-toggle-icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
     // =================================================================================
     // ALLIANCE SIMULATOR LOGIC
     // =================================================================================
@@ -1012,7 +1093,7 @@
                 if (partyName.includes(searchTerm)) {
                     partyVisible = true;
                      partyAccordion.querySelectorAll('.candidate-row').forEach(row => {
-                        row.style.display = 'grid';
+                         row.style.display = 'grid';
                     });
                 } else {
                     partyAccordion.querySelectorAll('.candidate-row').forEach(row => {
@@ -1239,23 +1320,60 @@
         if (!partyAccordion) return;
 
         const candidateRows = partyAccordion.querySelectorAll('.candidate-row');
-        const candidateNames = Array.from(candidateRows).map(row => {
-            return row.querySelector('.candidate-name-input').value.trim();
-        }).filter(name => name);
+        const candidatesData = Array.from(candidateRows).map(row => {
+            const name = row.querySelector('.candidate-name-input').value.trim();
+            const projectedVotes = parseInt(row.querySelector('.projected-votes').textContent.replace(/\./g, '')) || 0;
+            return { name, projectedVotes };
+        }).filter(c => c.name);
 
-        if (candidateNames.length === 0) {
+        if (candidatesData.length === 0) {
             showInfoModal("A legenda está vazia. Adicione candidatos antes de solicitar a análise.");
             return;
         }
 
+        const candidateNames = candidatesData.map(c => c.name);
+        
+        // --- NEW: Calculate numerical summary ---
+        const totalVotosLegenda = candidatesData.reduce((sum, c) => sum + c.projectedVotes, 0);
+        const numeroCandidatos = candidatesData.length;
+        const votosPuxador = candidatesData.length > 0 ? Math.max(...candidatesData.map(c => c.projectedVotes)) : 0;
+        const qeThreshold = currentSimulatedScenario.QE * 0.1;
+        const candidatosCompetitivos = candidatesData.filter(c => c.projectedVotes >= qeThreshold).length;
+
+        const summaryHtml = `
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-center">
+                <div class="bg-background p-3 rounded-lg">
+                    <p class="text-xs font-semibold text-text-light uppercase">Votos Totais</p>
+                    <p class="text-2xl font-bold text-primary">${totalVotosLegenda.toLocaleString('pt-BR')}</p>
+                </div>
+                <div class="bg-background p-3 rounded-lg">
+                    <p class="text-xs font-semibold text-text-light uppercase">Candidatos</p>
+                    <p class="text-2xl font-bold text-primary">${numeroCandidatos}</p>
+                </div>
+                <div class="bg-background p-3 rounded-lg">
+                    <p class="text-xs font-semibold text-text-light uppercase">Puxador de Voto</p>
+                    <p class="text-2xl font-bold text-primary">${votosPuxador.toLocaleString('pt-BR')}</p>
+                </div>
+                <div class="bg-background p-3 rounded-lg">
+                    <p class="text-xs font-semibold text-text-light uppercase">Competitivos*</p>
+                    <p class="text-2xl font-bold text-primary">${candidatosCompetitivos}</p>
+                </div>
+            </div>
+            <p class="text-xs text-text-neutral text-center mb-6 -mt-4">*Candidatos com projeção >10% do Quociente (${(qeThreshold).toLocaleString('pt-BR', {maximumFractionDigits: 0})}).</p>
+        `;
+
         const modalTitle = `Análise Estratégica da Legenda: ${partyName}`;
-        const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div id="ai-slate-result" class="min-h-[20rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
+        const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[20rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
         showModal(modalContent);
         
-        const systemPrompt = "Você é um consultor político experiente, especializado em eleições legislativas em Santa Catarina. Sua tarefa é analisar uma lista de candidatos (uma 'legenda') de um partido e fornecer uma avaliação estratégica concisa. Identifique pontos fortes, possíveis lacunas (geográficas, setoriais, etc.) e sugira perfis de candidatos que poderiam fortalecer a lista. Seja objetivo e direto. Use formato de tópicos (markdown). Responda em português do Brasil.";
+        const apiKey = "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74"; // <-- SUBSTITUA AQUI
+        if (!apiKey || apiKey === "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74") {
+            document.getElementById('ai-slate-result').innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API da IA diretamente no código para usar este recurso.</p>`;
+            return;
+        }
+        const systemPrompt = "Você é um consultor político experiente, especializado em eleições legislativas em Santa Catarina. Sua tarefa é analisar uma lista de candidatos (uma 'legenda') de um partido e fornecer uma avaliação estratégica concisa. Identifique pontos fortes, possíveis lacunas (geográficas, setoriais, etc.) e sugira perfis de candidatos que poderiam fortalecer a lista. Seja objetivo e direto. Use formato de tópicos (markdown) com os títulos exatos: **Pontos Fortes**, **Fraquezas e Lacunas**, e **Sugestões Estratégicas**. Responda em português do Brasil.";
         const userQuery = `Analise a seguinte legenda de candidatos para o partido **${partyName}** em Santa Catarina:\n\n- ${candidateNames.join('\n- ')}\n\nAvalie os pontos fortes, as fraquezas/lacunas e sugira 1 ou 2 perfis de candidatos que poderiam complementar esta legenda para maximizar o potencial de votos.`;
         
-        const apiKey = ""; // Provided by environment
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         const payload = {
             contents: [{ parts: [{ text: userQuery }] }],
@@ -1273,13 +1391,50 @@
             const result = await response.json();
             const text = result.candidates[0].content.parts[0].text;
 
-            let html = text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n\s*-\s/g, '</li><li>')
-                .replace(/\n/g, '<br>');
-            html = html.replace(/<br>(#+\s*.*?)(<br>|$)/g, '</ul><h4 class="font-bold text-secondary mt-4 mb-2">$1</h4><ul>');
-            html = `<ul>${html}</li></ul>`.replace('<ul><br>', '<ul>').replace(/<\/ul>$/, '');
+            const sections = {
+                fortes: { title: "Pontos Fortes", icon: "fa-thumbs-up", color: "text-success", content: "" },
+                fracos: { title: "Fraquezas e Lacunas", icon: "fa-triangle-exclamation", color: "text-warning", content: "" },
+                sugestoes: { title: "Sugestões Estratégicas", icon: "fa-lightbulb", color: "text-secondary", content: "" }
+            };
 
+            const fortesMatch = text.match(/\*\*(Pontos Fortes)\*\*\s*([\s\S]*?)(?=\*\*|$)/);
+            const fracosMatch = text.match(/\*\*(Fraquezas e Lacunas|Fraquezas|Lacunas)\*\*\s*([\s\S]*?)(?=\*\*|$)/);
+            const sugestoesMatch = text.match(/\*\*(Sugestões Estratégicas|Sugestões|Recomendações)\*\*\s*([\s\S]*?)(?=$)/);
+
+            if (fortesMatch) sections.fortes.content = fortesMatch[2].trim();
+            if (fracosMatch) sections.fracos.content = fracosMatch[2].trim();
+            if (sugestoesMatch) sections.sugestoes.content = sugestoesMatch[2].trim();
+            
+            if (!fortesMatch && !fracosMatch && !sugestoesMatch) {
+                let fallbackHtml = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                document.getElementById('ai-slate-result').innerHTML = fallbackHtml;
+                return;
+            }
+
+            let html = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
+            
+            for (const key in sections) {
+                const section = sections[key];
+                let contentHtml = section.content
+                    .replace(/\n\s*-\s/g, '</li><li class="mb-1">')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .trim();
+
+                if (contentHtml.startsWith('</li>')) {
+                     contentHtml = contentHtml.substring(5);
+                }
+                
+                html += `
+                    <div class="bg-background p-4 rounded-lg border border-border">
+                        <h4 class="font-bold ${section.color} mb-3 flex items-center"><i class="fa-solid ${section.icon} mr-2"></i>${section.title}</h4>
+                        <ul class="text-sm list-disc pl-5 space-y-2">
+                            ${contentHtml ? `<li>${contentHtml}</li>` : '<li class="list-none">Nenhuma informação gerada.</li>'}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
 
             document.getElementById('ai-slate-result').innerHTML = html;
 
@@ -1295,6 +1450,12 @@
         const resultContainer = document.getElementById('ai-result-container');
         const generateBtn = document.getElementById('ai-generate-btn');
         if (!partyName) return;
+
+        const apiKey = "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74"; // <-- SUBSTITUA AQUI
+        if (!apiKey || apiKey === "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74") {
+            resultContainer.innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API do Gemini diretamente no código para gerar a análise.</p>`;
+            return;
+        }
 
         resultContainer.innerHTML = `<div class="flex justify-center items-center h-full"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary"></i><p class="ml-3">Gerando análise estratégica...</div>`;
         generateBtn.disabled = true;
@@ -1333,7 +1494,6 @@
             3.  **Recomendações Estratégicas:** Ações práticas para maximizar o número de cadeiras e mitigar riscos.
         `;
 
-        const apiKey = ""; // Provided by environment
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
         const payload = {
             contents: [{ parts: [{ text: userQuery }] }],
@@ -1454,6 +1614,90 @@
         };
     }
 
+    // =================================================================================
+    // D3 CHARTING FUNCTIONS
+    // =================================================================================
+    function drawPartyVoteDistributionChart(partyData, containerSelector) {
+        const container = d3.select(containerSelector);
+        if (container.empty()) return;
+
+        // 1. Prepare data
+        const candidates = partyData.currentCandidateList;
+        const topN = 5;
+        const sortedCandidates = [...candidates].sort((a, b) => b.votos - a.votos);
+        const topCandidates = sortedCandidates.slice(0, topN);
+        const otherVotes = sortedCandidates.slice(topN).reduce((sum, cand) => sum + cand.votos, 0);
+
+        let chartData = topCandidates.map(c => ({ name: c.nome.split(' ')[0], value: c.votos }));
+        if (otherVotes > 0) {
+            chartData.push({ name: 'Outros', value: otherVotes });
+        }
+        
+        if (chartData.length === 0 || chartData.every(d => d.value === 0)) {
+            container.html('<p class="text-text-light text-sm text-center">Não há votos para exibir.</p>');
+            return;
+        }
+
+        // 2. Setup SVG
+        const width = 250;
+        const height = 250;
+        const radius = Math.min(width, height) / 2 - 10;
+        
+        container.html(''); // Clear previous chart
+
+        const svg = container.append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+        // 3. Colors
+        const color = d3.scaleOrdinal(d3.schemeTableau10);
+
+        // 4. Pie generator
+        const pie = d3.pie()
+            .value(d => d.value)
+            .sort(null);
+
+        const arc = d3.arc()
+            .innerRadius(radius * 0.5) // Donut chart
+            .outerRadius(radius);
+
+        // 5. Draw arcs
+        const path = svg.selectAll("path")
+            .data(pie(chartData))
+            .enter().append("path")
+            .attr("d", arc)
+            .attr("fill", (d, i) => color(i))
+            .attr("stroke", "#1f2937") // card color for separation
+            .style("stroke-width", "2px");
+        
+        // Tooltip
+        path.on("mouseover", (event, d) => {
+            const total = d3.sum(chartData, d => d.value);
+            const percent = Math.round(100 * d.data.value / total);
+            d3.select("#map-tooltip")
+                .style("opacity", 1)
+                .html(`${d.data.name}<br>${d.data.value.toLocaleString('pt-BR')} votos (${percent}%)`);
+        })
+        .on("mousemove", (event) => {
+            d3.select("#map-tooltip")
+                .style("left", (event.pageX + 15) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", () => {
+            d3.select("#map-tooltip").style("opacity", 0);
+        });
+
+        // Center text
+        svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .text("Votos")
+            .style("font-size", "16px")
+            .style("fill", "#f9fafb")
+            .style("font-weight", "bold");
+    }
 
     // =================================================================================
     // ELECTED IN 2024 TAB LOGIC
@@ -1476,7 +1720,7 @@
         "1ª REGIÃO": [{"CIDADE": "ARMAZEM", "NOME CANDIDATO": "CENARIO MONTEIRO MARCELINO", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "374"}, {"CIDADE": "BRAÇO DO NORTE", "NOME CANDIDATO": "REGINALDO DEMÉTRIO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "807"}, {"CIDADE": "GAROPABA", "NOME CANDIDATO": "JAIRO PEREIRA DOS SANTOS", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "1328"}, {"CIDADE": "IMBITUBA", "NOME CANDIDATO": "THIAGO ROSA", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "1065"}, {"CIDADE": "SANGÃO", "NOME CANDIDATO": "GENTIL TEIXEIRA SALVALAIO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "500"}, {"CIDADE": "SÃO LUDGERO", "NOME CANDIDATO": "LAUDY DA SILVA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "342"}],
         "2ª REGIÃO": [{"CIDADE": "BALN. CAMBORIU", "NOME CANDIDATO": "ASINIL MEDEIROS", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "1831"}, {"CIDADE": "BOMBINHAS", "NOME CANDIDATO": "LEANDRO GRACIA", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "662"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "JOSUÉ PEREIRA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "958"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "POLICIAL SILVIO WOLFF", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "1216"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "EWERSON UMBELINO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "760"}, {"CIDADE": "CAMBORIU", "NOME CANDIDATO": "IRMÃO MAYER", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "888"}, {"CIDADE": "FLORIANOPOLIS", "NOME CANDIDATO": "PR. GILIARD TORQUATO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "3675"}, {"CIDADE": "GOV. CELSO RAMOS", "NOME CANDIDATO": "PB. RAFAEL ZEFERINO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "427"}, {"CIDADE": "ITAPEMA", "NOME CANDIDATO": "IRMÃ RUTI", "CARGO": "VEREADORA", "PARTIDO": "REPU", "VOTOS": "754"}, {"CIDADE": "PALHOÇA", "NOME CANDIDATO": "MESTRE VANDERLEI", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "1143"}, {"CIDADE": "PAULO LOPES", "NOME CANDIDATO": "PRISCILA ROGÉRIO", "CARGO": "VEREADORA", "PARTIDO": "UNIÃO", "VOTOS": "215"}, {"CIDADE": "PAULO LOPES", "NOME CANDIDATO": "CELINHO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "365"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "ALTINO JUNIOR", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "597"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "JOSIMAR JOSÉ", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "323"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "ONÉSIO RAMOS", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "715"}, {"CIDADE": "PORTO BELO", "NOME CANDIDATO": "AILTON NECKEL", "CARGO": "VICE PREFEITO", "PARTIDO": "MDB", "VOTOS": "10700"}, {"CIDADE": "SANTO AMARO DA IM", "NOME CANDIDATO": "JOAQUIM CUNHA", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "344"}, {"CIDADE": "SANTO AMARO DA IM", "NOME CANDIDATO": "ANDRÉ LUIZ AMARAL DAUFENBACH", "CARGO": "VEREADOR", "PARTIDO": "", "VOTOS": "286"}, {"CIDADE": "SÃO JOSÉ", "NOME CANDIDATO": "PR. ADAIR TESSARI", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "3176"}, {"CIDADE": "SÃO JOÃO BATISTA", "NOME CANDIDATO": "GUSTAVO GRIM", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "710"}],
         "3ª REGIÃO": [{"CIDADE": "ASCURRA", "NOME CANDIDATO": "MARCIO DA COSTA", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "189"}, {"CIDADE": "BLUMENAU", "NOME CANDIDATO": "JOVINO CARDOSO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "4506"}, {"CIDADE": "BLUMENAU", "NOME CANDIDATO": "SILMARA MIGUEL", "CARGO": "VEREADORA", "PARTIDO": "PSD", "VOTOS": "4131"}, {"CIDADE": "BRUSQUE", "NOME CANDIDATO": "ANTÔNIO ROBERTO SILVA", "CARGO": "VEREADOR", "PARTIDO": "PRD", "VOTOS": "854"}, {"CIDADE": "DOUTOR PEDRINHO", "NOME CANDIDATO": "GELEADE GADIEL WOLLERT", "CARGO": "PREFEITO", "PARTIDO": "MDB", "VOTOS": "1183"}, {"CIDADE": "DOUTOR PEDRINHO", "NOME CANDIDATO": "ELIAS MARAFIGO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "113"}, {"CIDADE": "ILHOTA", "NOME CANDIDATO": "VANDERLEI COSTA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "570"}, {"CIDADE": "INDAIAL", "NOME CANDIDATO": "VALMIR JORDANI", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "1036"}, {"CIDADE": "ITAJAI", "NOME CANDIDATO": "ADÃO BITENCOURT", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "2165"}],
-        "4ª REGIÃO": [{"CIDADE": "ARAQUARI", "NOME CANDIDATO": "AZEVEDO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "385"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "ADEMAR BORGES", "CARGO": "PREFEITO", "PARTIDO": "PSD", "VOTOS": "4345"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "RUAN CUNHA", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "478"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "WESLLEY FREITAS", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "447"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "JONATHAS LOPES", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "424"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "NELINHO BORGES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "422"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "KEMPO", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "402"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "MARA", "CARGO": "VEREADORA", "PARTIDO": "PODEMO", "VOTOS": "341"}, {"CIDADE": "BALN. PIÇARRAS", "NOME CANDIDATO": "GLEBER SILVEIRA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "310"}, {"CIDADE": "BALN. PIÇARRAS", "NOME CANDIDATO": "ADRIANA LINHARES", "CARGO": "VEREADORA", "PARTIDO": "PSDB", "VOTOS": "615"}, {"CIDADE": "BARRA VELHA", "NOME CANDIDATO": "MARCIEL BERLIN", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "598"}, {"CIDADE": "BARRA VELHA", "NOME CANDIDATO": "CAIO PINHEIRO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "591"}, {"CIDADE": "CAMPO ALEGRE", "NOME CANDIDATO": "PROFESSOR ERNANI", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "446"}, {"CIDADE": "CORUPÁ", "NOME CANDIDATO": "ALAOR DUARTE JAE", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "225"}, {"CIDADE": "GARUVA", "NOME CANDIDATO": "KLAUS EDUARDO LENNETZ", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "767"}, {"CIDADE": "GUARAMIRIM", "NOME CANDIDATO": "EMERSON FLORES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "657"}, {"CIDADE": "JARAGUA DO SUL", "NOME CANDIDATO": "ISRAEL CANI", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "2082"}, {"CIDADE": "JOINVILLE", "NOME CANDIDATO": "ADILSON GIRARDI", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "6447"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "DC. LUIZINHO AMÉRICO", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "6200"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "PB. MARIO MARQUETT", "CARGO": "VICE PREFEITO", "PARTIDO": "PL", "VOTOS": "6200"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "EV. ADRIANO TIBECO", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "883"}, {"CIDADE": "SÃO FRANSCISCO DO", "NOME CANDIDATO": "SODA", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "680"}, {"CIDADE": "SÃO FRANSCISCO DO SMARYAN", "NOME CANDIDATO": "", "CARGO": "VEREADORA", "PARTIDO": "PL", "VOTOS": "556"}, {"CIDADE": "SÃO JOÃO DO ITAPERI", "NOME CANDIDATO": "OZEIAS ALVES", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "313"}, {"CIDADE": "SCHROEDER", "NOME CANDIDATO": "JAIR BRIDAROLI", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "3816"}],
+        "4ª REGIÃO": [{"CIDADE": "ARAQUARI", "NOME CANDIDATO": "AZEVEDO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "385"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "ADEMAR BORGES", "CARGO": "PREFEITO", "PARTIDO": "PSD", "VOTOS": "4345"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "RUAN CUNHA", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "478"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "WESLLEY FREITAS", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "447"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "JONATHAS LOPES", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "424"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "NELINHO BORGES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "422"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "KEMPO", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "402"}, {"CIDADE": "BALN. BARRA DO SUL", "NOME CANDIDATO": "MARA", "CARGO": "VEREADORA", "PARTIDO": "PODEMO", "VOTOS": "341"}, {"CIDADE": "BALN. PIÇARRAS", "NOME CANDIDATO": "GLEBER SILVEIRA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "310"}, {"CIDADE": "BALN. PIÇARRAS", "NOME CANDIDATO": "ADRIANA LINHARES", "CARGO": "VEREADORA", "PARTIDO": "PSDB", "VOTOS": "615"}, {"CIDADE": "BARRA VELHA", "NOME CANDIDATO": "MARCIEL BERLIN", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "598"}, {"CIDADE": "BARRA VELHA", "NOME CANDIDATO": "CAIO PINHEIRO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "591"}, {"CIDADE": "CAMPO ALEGRE", "NOME CANDIDATO": "PROFESSOR ERNANI", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "446"}, {"CIDADE": "CORUPÁ", "NOME CANDIDATO": "ALAOR DUARTE JAE", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "225"}, {"CIDADE": "GARUVA", "NOME CANDIDATO": "KLAUS EDUARDO LENNETZ", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "767"}, {"CIDADE": "GUARAMIRIM", "NOME CANDIDATO": "EMERSON FLORES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "657"}, {"CIDADE": "JARAGUA DO SUL", "NOME CANDIDATO": "ISRAEL CANI", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "2082"}, {"CIDADE": "JOINVILLE", "NOME CANDIDATO": "ADILSON GIRARDI", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "6447"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "DC. LUIZINHO AMÉRICO", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "6200"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "PB. MARIO MARQUETT", "CARGO": "VICE PREFEITO", "PARTIDO": "PL", "VOTOS": "6200"}, {"CIDADE": "PENHA", "NOME CANDIDATO": "EV. ADRIANO TIBECO", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "883"}, {"CIDADE": "SÃO FRANCISCO DO SUL", "NOME CANDIDATO": "SODA", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "680"}, {"CIDADE": "SÃO FRANCISCO DO SUL", "NOME CANDIDATO": "SMARYAN", "CARGO": "VEREADORA", "PARTIDO": "PL", "VOTOS": "556"}, {"CIDADE": "SÃO JOÃO DO ITAPERI", "NOME CANDIDATO": "OZEIAS ALVES", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "313"}, {"CIDADE": "SCHROEDER", "NOME CANDIDATO": "JAIR BRIDAROLI", "CARGO": "PREFEITO", "PARTIDO": "PL", "VOTOS": "3816"}],
         "5ª REGIÃO": [{"CIDADE": "FREI ROGÉRIO", "NOME CANDIDATO": "PB. VORLI SCHAFFER", "CARGO": "VEREADOR", "PARTIDO": "UNIÃO", "VOTOS": "93"}, {"CIDADE": "LAGES", "NOME CANDIDATO": "GABRIEL CÓRDOVA", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "2060"}, {"CIDADE": "SANTA CECILIA", "NOME CANDIDATO": "PB. JOSIAS RODRIGUES", "CARGO": "VEREADOR", "PARTIDO": "PSD", "VOTOS": "250"}, {"CIDADE": "SÃO CRISTÓVÃO", "NOME CANDIDATO": "PB. JOÃO PAULO GROBE", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "218"}, {"CIDADE": "SÃO CRISTÓVÃO", "NOME CANDIDATO": "PB. RAFAEL BRANCO", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "143"}, {"CIDADE": "SÃO JOAQUIM", "NOME CANDIDATO": "PR. SEBASTIÃO", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "596"}],
         "6ª REGIÃO": [{"CIDADE": "BITURUNA", "NOME CANDIDATO": "CLEITON DE BASTIANI", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "367"}, {"CIDADE": "GENERAL CARNEIRO", "NOME CANDIDATO": "JOARILSO", "CARGO": "VEREADOR", "PARTIDO": "REPU", "VOTOS": "305"}, {"CIDADE": "MAFRA", "NOME CANDIDATO": "DIRCILENE DITRICH PIΝΤΟ", "CARGO": "VEREADORA", "PARTIDO": "REPU", "VOTOS": "742"}, {"CIDADE": "PAPANDUVA", "NOME CANDIDATO": "MARLI DE LUCA", "CARGO": "VEREADORA", "PARTIDO": "PP", "VOTOS": "562"}, {"CIDADE": "PAULO FRONTIN", "NOME CANDIDATO": "JAIRO BERTUSSI", "CARGO": "VEREADOR", "PARTIDO": "PSDB", "VOTOS": "137"}, {"CIDADE": "PAULO FRONTIN", "NOME CANDIDATO": "MELQUIZEDEKE VERISSIMO", "CARGO": "VEREADOR", "PARTIDO": "PMB", "VOTOS": "165"}, {"CIDADE": "PAULO FRONTIN", "NOME CANDIDATO": "SEBASTIÃO DA SILVA", "CARGO": "VICE-PREFEITO", "PARTIDO": "PSD", "VOTOS": "1720"}],
         "7ª REGIÃO": [{"CIDADE": "CORONEL FREITAS", "NOME CANDIDATO": "EDILVO BAGIO", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "491"}, {"CIDADE": "LAGEADO GRANDE", "NOME CANDIDATO": "EVANDRO DE OLIVEIRA", "CARGO": "VEREADOR", "PARTIDO": "PP", "VOTOS": "62"}, {"CIDADE": "PALMITOS", "NOME CANDIDATO": "RODEMAR LEOCIR KUSSLER", "CARGO": "VEREADOR", "PARTIDO": "MDB", "VOTOS": "614"}, {"CIDADE": "PAIAL", "NOME CANDIDATO": "JOSEMAR REIS DA SILVA", "CARGO": "VEREADOR", "PARTIDO": "PL", "VOTOS": "105"}],
@@ -1914,4 +2158,5 @@
     </script>
 </body>
 </html>
+
 
