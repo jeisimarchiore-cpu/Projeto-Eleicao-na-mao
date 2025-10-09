@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v9.6 - Análise de Legenda com IA</title>
+    <title>Sala de Guerra Eleitoral v9.7 - Análise de Legenda com IA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -178,7 +178,7 @@
                  </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v9.6</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v9.7</span>
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
                 </div>
@@ -439,7 +439,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         baseScenario = prepareBaseScenario();
         loadLegendasFromStorage(); // Load saved lists before initializing
-        loadApiKey();
         initializeControls();
         initializeGerenciarLegendasTab();
         initializeAnaliseTab();
@@ -920,11 +919,7 @@
     }
 
     function loadApiKey() {
-        const apiKey = localStorage.getItem('geminiApiKey');
-        const input = document.getElementById('ai-api-key-input');
-        if (apiKey && input) {
-            input.value = apiKey;
-        }
+        // This function is no longer used with hardcoded API key
     }
 
     function toggleApiKeyVisibility() {
@@ -1357,6 +1352,7 @@
             document.getElementById('ai-slate-result').innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API da IA diretamente no código para usar este recurso.</p>`;
             return;
         }
+
         const systemPrompt = "Você é um consultor político experiente, especializado em eleições legislativas em Santa Catarina. Sua tarefa é analisar uma lista de candidatos (uma 'legenda') de um partido e fornecer uma avaliação estratégica concisa. Identifique pontos fortes, possíveis lacunas (geográficas, setoriais, etc.) e sugira perfis de candidatos que poderiam fortalecer a lista. Seja objetivo e direto. Use formato de tópicos (markdown) com os títulos exatos: **Pontos Fortes**, **Fraquezas e Lacunas**, e **Sugestões Estratégicas**. Responda em português do Brasil.";
         const userQuery = `Analise a seguinte legenda de candidatos para o partido **${partyName}** em Santa Catarina:\n\n- ${candidateNames.join('\n- ')}\n\nAvalie os pontos fortes, as fraquezas/lacunas e sugira 1 ou 2 perfis de candidatos que poderiam complementar esta legenda para maximizar o potencial de votos.`;
         
@@ -2144,6 +2140,7 @@
     </script>
 </body>
 </html>
+
 
 
 
