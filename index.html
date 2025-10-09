@@ -1347,8 +1347,8 @@
         const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[20rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
         showModal(modalContent);
         
-        const apiKey = "SUA_CHAVE_API_VAI_AQUI"; // <-- COLE SUA CHAVE DE API AQUI
-        if (!apiKey || apiKey === "SUA_CHAVE_API_VAI_AQUI") {
+        const apiKey = "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74"; // <-- COLE SUA CHAVE DE API AQUI
+        if (!apiKey || apiKey === "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74") {
             document.getElementById('ai-slate-result').innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API da IA diretamente no código para usar este recurso.</p>`;
             return;
         }
@@ -1433,8 +1433,8 @@
         const generateBtn = document.getElementById('ai-generate-btn');
         if (!partyName) return;
 
-        const apiKey = "SUA_CHAVE_API_VAI_AQUI"; // <-- COLE SUA CHAVE DE API AQUI
-        if (!apiKey || apiKey === "SUA_CHAVE_API_VAI_AQUI") {
+        const apiKey = "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74"; // <-- COLE SUA CHAVE DE API AQUI
+        if (!apiKey || apiKey === "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74") {
             resultContainer.innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API do Gemini diretamente no código para gerar a análise.</p>`;
             return;
         }
