@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v8.6 - Análise com Mapa</title>
+    <title>Sala de Guerra Eleitoral v8.7 - Análise com IA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -134,7 +134,7 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            header, aside, .no-print, #map-container { 
+            header, aside, .no-print, #map-container, #content-analise > .space-y-8 > div:first-child, #ai-analysis-section { 
                 display: none !important; 
             }
             main, div, section { 
@@ -165,25 +165,32 @@
     <div class="min-h-screen">
         <!-- Header Section -->
         <header class="bg-card/50 backdrop-blur-sm sticky top-0 z-20 border-b border-border">
-            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 relative flex justify-center items-center">
-                 <div id="logo-container" class="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center w-28">
-                    <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-                        <span class="font-playfair font-bold text-3xl text-white">SM</span>
+            <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+                 <div id="logo-container" class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                        <span class="font-playfair font-bold text-2xl text-white">SM</span>
                     </div>
-                    <p class="font-playfair font-bold text-sm text-text-main mt-2 text-center">Silmara Miguel</p>
+                    <div>
+                        <p class="font-playfair font-bold text-lg text-text-main leading-tight">Silmara Miguel</p>
+                        <p class="text-xs text-text-light leading-tight">Análise Estratégica</p>
+                    </div>
                 </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v8.6</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v8.7</span>
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
+                </div>
+                <div class="w-48 text-right"> <!-- Placeholder for alignment -->
+                     <button onclick="window.print()" class="bg-primary/20 text-primary hover:bg-primary hover:text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm transition-colors duration-200 no-print">
+                        <i class="fa-solid fa-print mr-2"></i> Imprimir Relatório
+                    </button>
                 </div>
             </div>
             <!-- Main Navigation Tabs -->
             <nav class="max-w-screen-2xl mx-auto flex justify-center items-center space-x-4 sm:space-x-8" id="main-tabs">
                 <button class="tab-button active font-semibold py-3 px-2 sm:px-4" onclick="changeTab('simulador')"><i class="fa-solid fa-sliders mr-2"></i>Simulador de Cenário</button>
                 <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('candidatos')"><i class="fa-solid fa-users mr-2"></i>Base de Candidatos</button>
-                <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('editarLegenda')"><i class="fa-solid fa-user-pen mr-2"></i>Editar Legenda</button>
                 <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('analise')"><i class="fa-solid fa-brain mr-2"></i>Análise Estratégica</button>
                 <button class="tab-button font-semibold py-3 px-2 sm:px-4 text-text-light" onclick="changeTab('eleitos2024')"><i class="fa-solid fa-map-location-dot mr-2"></i>Regiões CIADESCP</button>
             </nav>
@@ -289,48 +296,42 @@
                 </div>
             </div>
             
-            <!-- TAB: CANDIDATE DATABASE -->
+            <!-- TAB: CANDIDATE DATABASE / EDITOR -->
             <div id="content-candidatos" class="hidden">
-                 <div class="bg-card p-6 rounded-lg border border-border">
-                    <h2 class="text-2xl font-bold mb-4">Base de Candidatos (Eleições 2022)</h2>
-                    <div class="mb-6">
-                        <input type="text" id="candidato-search" placeholder="Pesquisar por nome do candidato..." class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
-                    </div>
-                    <div id="candidatos-accordion-container" class="space-y-2">
-                        <!-- Accordion will be generated here -->
-                    </div>
-                </div>
+                <!-- This content is now fully generated by initializeCandidatosTab() -->
             </div>
             
-            <!-- TAB: EDITAR LEGENDA -->
-            <div id="content-editarLegenda" class="hidden">
-                 <div class="bg-card p-6 rounded-lg border border-border">
-                    <div class="flex justify-between items-center mb-6">
-                         <h2 class="text-2xl font-bold text-secondary">Editor de Legendas Completo</h2>
-                         <div>
-                             <button class="bg-danger text-white font-bold py-2 px-4 rounded-lg mr-2" onclick="resetAllLegendas()">Restaurar Padrão</button>
-                             <button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveAllLegendas()">Salvar Todas as Alterações</button>
-                         </div>
-                    </div>
-                    <p class="text-text-light mb-6">Edite as listas de candidatos de todos os partidos. As alterações serão usadas nas simulações após serem salvas.</p>
-                    <div id="full-legenda-editor-container" class="space-y-2">
-                        <!-- Accordions will be generated here -->
-                    </div>
-                </div>
-            </div>
-
             <!-- TAB: STRATEGIC ANALYSIS -->
             <div id="content-analise" class="hidden">
                 <div class="space-y-8">
+                    <!-- NEW AI ANALYSIS SECTION -->
+                    <div id="ai-analysis-section" class="bg-card p-6 rounded-lg border border-border">
+                         <div class="flex flex-col md:flex-row justify-between md:items-center mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-secondary"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Análise Estratégica com IA</h2>
+                                <p class="text-text-light mt-1">Gere insights e recomendações para um partido com base no cenário simulado atual.</p>
+                            </div>
+                         </div>
+                         <div class="flex items-end gap-4">
+                            <div class="flex-grow">
+                                <label for="ai-party-select" class="block text-sm font-medium text-text-light mb-1">Selecione o Partido</label>
+                                <select id="ai-party-select" class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></select>
+                            </div>
+                            <button id="ai-generate-btn" onclick="generateAIAnalysis()" class="bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-violet-500 transition-colors duration-200 flex items-center">
+                                <i class="fa-solid fa-brain mr-2"></i> Gerar Análise
+                            </button>
+                         </div>
+                         <div id="ai-result-container" class="mt-6 bg-background p-4 rounded-lg min-h-[10rem] border border-border">
+                            <p class="text-center text-text-light">A análise da IA aparecerá aqui.</p>
+                         </div>
+                    </div>
+
                     <div class="bg-card p-6 rounded-lg border border-border">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h2 class="text-2xl font-bold">Análise de Puxadores de Voto (Base 2022)</h2>
                                 <p class="text-text-light mt-1">Identifica a concentração de votos nos principais candidatos de cada partido.</p>
                             </div>
-                            <button onclick="resetAllData()" class="bg-danger hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm">
-                                <i class="fa-solid fa-undo mr-2"></i> Restaurar Dados Originais
-                            </button>
                         </div>
                         <div id="analise-puxadores-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             <!-- Vote puller analysis cards will be generated here -->
@@ -432,9 +433,9 @@
     // =================================================================================
     document.addEventListener('DOMContentLoaded', () => {
         baseScenario = prepareBaseScenario();
+        loadLegendasFromStorage(); // Load saved lists before initializing
         initializeControls();
         initializeCandidatosTab();
-        initializeEditarLegendaTab();
         initializeAnaliseTab();
         initializeEleitos2024Tab();
         calculateBaseSummary2022();
@@ -492,14 +493,16 @@
             
             // Boost controls
             const boostItem = document.createElement('div');
+            const isDisabled = p.customCandidatos ? 'disabled' : '';
+            const title = p.customCandidatos ? 'Desabilitado com legenda personalizada' : '';
             boostItem.innerHTML = `
-                <label for="boost-${p.nome}" class="flex items-center text-sm font-medium text-text-light mb-1">
+                <label for="boost-${p.nome}" class="flex items-center text-sm font-medium text-text-light mb-1 ${isDisabled ? 'opacity-50' : ''}">
                     <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color}"></div>
                     ${p.nome}
                 </label>
                 <div class="flex items-center space-x-2">
-                    <input type="range" id="boost-${p.nome}" min="-20" max="20" value="0" step="1" class="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()">
-                    <span id="boost-value-${p.nome}" class="font-mono text-xs w-12 text-right">0%</span>
+                    <input type="range" id="boost-${p.nome}" min="-20" max="20" value="0" step="1" class="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer" oninput="updateScenario()" ${isDisabled} title="${title}">
+                    <span id="boost-value-${p.nome}" class="font-mono text-xs w-12 text-right ${isDisabled ? 'opacity-50' : ''}">${p.boost * 100}%</span>
                 </div>
             `;
             boostContainer.appendChild(boostItem);
@@ -559,31 +562,27 @@
             let notaCorte;
             let eleitos;
             let votosProjetadosBase;
+            let currentCandidateList = p.customCandidatos || p.candidatos;
 
+            votosProjetadosBase = currentCandidateList.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
+            
             if (p.customCandidatos) {
-                votosProjetadosBase = p.customCandidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
-                votosFinais = votosProjetadosBase;
-                eleitos = p.customCandidatos.slice();
-                const ultimoEleito = eleitos.length > 0 ? eleitos[Math.min(eleitos.length, 40) - 1] : null;
-                notaCorte = ultimoEleito ? ultimoEleito.votos : 0;
+                 votosFinais = votosProjetadosBase;
             } else {
-                votosProjetadosBase = p.candidatos.reduce((sum, cand) => {
-                    return sum + Math.floor(cand.votos * (1 + (cand.growth || 0)));
-                }, 0);
-                
-                votosFinais = Math.floor(votosProjetadosBase * (1 + p.boost));
-                eleitos = p.candidatos.filter(c => c.isEleito);
-                const ultimoEleitoBase = eleitos[eleitos.length - 1];
-                notaCorte = ultimoEleitoBase ? Math.floor(ultimoEleitoBase.votos * (1 + p.boost)) : 0;
+                 votosFinais = Math.floor(votosProjetadosBase * (1 + p.boost));
             }
+            
+            eleitos = p.candidatos.filter(c => c.isEleito);
+            const ultimoEleitoBase = eleitos.length > 0 ? eleitos[eleitos.length - 1] : { votos: 0 };
+            notaCorte = p.customCandidatos ? Math.ceil(votosFinais * 0.05) : Math.floor(ultimoEleitoBase.votos * (1 + p.boost));
             
             const notaCorteFinal = Math.max(notaCorte, (QE > 0 ? Math.ceil(QE * 0.10) : 0));
 
-            return { ...p, votos: votosFinais, notaCorte: notaCorteFinal, eleitos2022: eleitos, votosProjetadosBase };
+            return { ...p, votos: votosFinais, notaCorte: notaCorteFinal, eleitos2022: p.candidatos.filter(c => c.isEleito), votosProjetadosBase, currentCandidateList };
         });
 
         if (allianceParties.length > 1) {
-            const allianceData = { nome: `ALIANÇA (${allianceParties.join('+')})`, votos: 0, notaCorte: 0, boost: 0, eleitos2022: [], votosProjetadosBase: 0 };
+            const allianceData = { nome: `ALIANÇA (${allianceParties.join('+')})`, votos: 0, notaCorte: 0, boost: 0, eleitos2022: [], votosProjetadosBase: 0, currentCandidateList: [] };
             const remainingParties = [];
             
             partidosSimulados.forEach(p => {
@@ -592,11 +591,13 @@
                     allianceData.votosProjetadosBase += p.votosProjetadosBase;
                     allianceData.notaCorte = Math.max(allianceData.notaCorte, p.notaCorte);
                     allianceData.eleitos2022.push(...p.eleitos2022);
+                    allianceData.currentCandidateList.push(...p.currentCandidateList);
                 } else {
                     remainingParties.push(p);
                 }
             });
             allianceData.eleitos2022.sort((a,b) => b.votos - a.votos);
+            allianceData.currentCandidateList.sort((a,b) => b.votos - a.votos);
             partidosSimulados = [allianceData, ...remainingParties];
         }
 
@@ -742,7 +743,7 @@
             const item = document.createElement('div');
             item.className = 'p-2 rounded-lg clickable';
             item.setAttribute('onclick', `showPartyModal('${p.nome}')`);
-            const customIcon = p.customCandidatos ? '<i class="fa-solid fa-user-pen text-secondary text-xs ml-2"></i>' : '';
+            const customIcon = p.customCandidatos ? '<i class="fa-solid fa-user-pen text-secondary text-xs ml-2" title="Legenda Personalizada"></i>' : '';
             item.innerHTML = `
                 <div class="flex justify-between items-center mb-1">
                     <div class="flex items-center">
@@ -835,11 +836,11 @@
         const sobras = Array.from({ length: partyData.vagasSobras }, (_, i) => i + partyData.vagasDiretas);
 
         const generateCandidateHtml = (index) => {
-            const candidato = partyData.eleitos2022[index];
+            const candidato = partyData.currentCandidateList[index];
             if (!candidato) {
                 return `<li class="bg-background p-2 rounded-md opacity-70"><div class="flex justify-between items-center"><span class="font-bold text-sm">${index + 1}. Nova Liderança</span><span class="font-bold text-lg text-warning">${partyData.notaCorte.toLocaleString('pt-BR')}</span></div><div class="text-xs text-text-light flex justify-between items-center mt-1"><span>Votos Base: N/A</span><span>Meta Mínima</span></div></li>`;
             }
-            const votosProjetados = partyData.customCandidatos ? candidato.votos : Math.floor(candidato.votos * (1 + partyData.boost));
+            const votosProjetados = Math.floor(candidato.votos * (1 + (candidato.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
             const diff = votosProjetados - partyData.notaCorte;
             return `<li class="bg-background p-2 rounded-md"><div class="flex justify-between items-center"><span class="font-bold text-sm">${index + 1}. ${candidato.nome}</span><span class="font-bold text-lg text-primary">${votosProjetados.toLocaleString('pt-BR')}</span></div><div class="text-xs text-text-light flex justify-between items-center mt-1"><span>Votos Base: ${candidato.votos.toLocaleString('pt-BR')}</span><span class="${diff >= 0 ? 'text-success' : 'text-danger'}">${diff >= 0 ? '+' : ''}${diff.toLocaleString('pt-BR')} vs. NC</span></div></li>`;
         };
@@ -917,31 +918,37 @@
     }
     
     // =================================================================================
-    // CUSTOM LIST EDITOR (TAB) LOGIC
+    // UNIFIED CANDIDATE EDITOR (TAB) LOGIC & LOCALSTORAGE
     // =================================================================================
-    function initializeEditarLegendaTab() {
-        const container = document.getElementById('content-editarLegenda');
+    function initializeCandidatosTab() {
+        const container = document.getElementById('content-candidatos');
         container.innerHTML = `
             <div class="bg-card p-6 rounded-lg border border-border">
-                <div class="flex justify-between items-center mb-6">
-                     <h2 class="text-2xl font-bold text-secondary">Editor de Legendas Completo</h2>
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-secondary">Base de Candidatos e Legendas</h2>
+                        <p class="text-text-light mt-1">Visualize, edite e simule com a base de candidatos.</p>
+                    </div>
                      <div>
-                         <button class="bg-danger text-white font-bold py-2 px-4 rounded-lg mr-2" onclick="resetAllLegendas()">Restaurar Padrão</button>
-                         <button class="bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveAllLegendas()">Salvar Todas as Alterações</button>
+                         <button class="w-full sm:w-auto bg-danger text-white font-bold py-2 px-4 rounded-lg mr-2" onclick="resetAllLegendas()">Restaurar Padrão 2022</button>
+                         <button class="w-full sm:w-auto mt-2 sm:mt-0 bg-success text-white font-bold py-2 px-4 rounded-lg" onclick="saveAllLegendas()">Salvar Alterações</button>
                      </div>
                 </div>
-                <p class="text-text-light mb-6">Edite as listas de candidatos de todos os partidos. As alterações serão usadas nas simulações após serem salvas.</p>
-                <div id="full-legenda-editor-container" class="space-y-2">
+                <p class="text-text-light mb-6">As alterações salvas serão usadas nas simulações e persistirão entre as sessões. O 'Impulso de Campanha' é desativado para partidos com legendas personalizadas.</p>
+                <div class="mb-6">
+                    <input type="text" id="candidato-search" placeholder="Pesquisar por nome do candidato ou partido..." class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
+                </div>
+                <div id="candidatos-accordion-container" class="space-y-2">
                     <!-- Accordions will be generated here -->
                 </div>
             </div>
         `;
 
-        const editorContainer = document.getElementById('full-legenda-editor-container');
+        const editorContainer = document.getElementById('candidatos-accordion-container');
         baseScenario.partidos.sort((a, b) => b.votosBase2022 - a.votosBase2022).forEach(party => {
             const color = PARTY_COLORS[party.nome] || '#64748b';
             const accordionItem = document.createElement('div');
-            accordionItem.className = 'bg-gray-900/50 rounded-lg';
+            accordionItem.className = 'bg-gray-900/50 rounded-lg party-accordion-item';
             const partyId = party.nome.replace(/[^a-zA-Z0-9]/g, '');
             accordionItem.id = `legenda-accordion-${partyId}`;
 
@@ -950,15 +957,17 @@
 
             let candidatesHtml = candidates.map((cand, index) => `
                 <div class="grid grid-cols-12 items-center gap-2 mb-2 candidate-row" data-original-index="${index}">
-                    <input type="text" placeholder="Nome" value="${cand.nome}" class="col-span-5 bg-background p-2 rounded-lg border border-border">
+                    <input type="text" placeholder="Nome" value="${cand.nome}" class="col-span-5 bg-background p-2 rounded-lg border border-border candidate-name-input">
                     <input type="number" placeholder="Votos" value="${cand.votos}" class="col-span-2 bg-background p-2 rounded-lg border border-border" oninput="updateProjectedVotesInEditor(this, '${partyId}')">
                     <div class="col-span-3 flex items-center gap-2">
                         <input type="number" placeholder="% Cresc." value="${(cand.growth || 0) * 100}" class="w-24 bg-background p-2 rounded-lg border border-border text-right" oninput="updateProjectedVotesInEditor(this, '${partyId}')">
                         <span class="text-sm text-text-light">%</span>
                     </div>
-                    <strong class="col-span-2 text-primary text-right projected-votes">${Math.floor(cand.votos * (1 + (cand.growth || 0))).toLocaleString('pt-BR')}</strong>
-                    <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRowFromParty(this, '${partyId}')">&times;</button>
-                    <button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidateFromParty(this, '${party.nome}')"><i class="fa-solid fa-right-left"></i></button>
+                    <strong class="col-span-1 text-primary text-right projected-votes">${Math.floor(cand.votos * (1 + (cand.growth || 0))).toLocaleString('pt-BR')}</strong>
+                    <div class="col-span-1 flex items-center justify-end gap-2">
+                        <button class="bg-secondary text-white px-2 py-1 rounded-lg text-xs" title="Migrar" onclick="migrateCandidateFromParty(this, '${party.nome}')"><i class="fa-solid fa-right-left"></i></button>
+                        <button class="bg-danger text-white px-2 py-1 rounded-lg text-xs" onclick="removeCandidateRowFromParty(this, '${partyId}')">&times;</button>
+                    </div>
                 </div>
             `).join('');
 
@@ -966,7 +975,7 @@
                 <button class="w-full p-4 text-left font-bold flex justify-between items-center text-text-main" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
                     <div class="flex items-center">
                         <div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div>
-                        <span>${party.nome}</span>
+                        <span class="party-name">${party.nome}</span>
                     </div>
                     <div class="flex items-center gap-4">
                         <span class="text-sm font-normal text-text-light">${candidates.length} cands.</span>
@@ -979,13 +988,37 @@
                         <div class="col-span-5">Nome do Candidato</div>
                         <div class="col-span-2">Votos Base</div>
                         <div class="col-span-3">Crescimento</div>
-                        <div class="col-span-2 text-right">Votos Projetados</div>
+                        <div class="col-span-1 text-right">Projetado</div>
+                        <div class="col-span-1 text-right">Ações</div>
                     </div>
                     <div class="candidate-list-container space-y-2">${candidatesHtml}</div>
                     <button class="mt-4 text-sm text-primary" onclick="addCandidateRowToParty('${partyId}')"><i class="fa-solid fa-plus mr-2"></i>Adicionar Candidato</button>
                 </div>
             `;
             editorContainer.appendChild(accordionItem);
+        });
+
+        document.getElementById('candidato-search').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.party-accordion-item').forEach(partyItem => {
+                const partyName = partyItem.querySelector('.party-name').textContent.toLowerCase();
+                let partyVisible = false;
+
+                if (partyName.includes(searchTerm)) {
+                    partyVisible = true;
+                    partyItem.querySelectorAll('.candidate-row').forEach(row => {
+                        row.style.display = 'grid';
+                    });
+                } else {
+                    partyItem.querySelectorAll('.candidate-row').forEach(row => {
+                        const candidateName = row.querySelector('.candidate-name-input').value.toLowerCase();
+                        const isVisible = candidateName.includes(searchTerm);
+                        row.style.display = isVisible ? 'grid' : 'none';
+                        if (isVisible) partyVisible = true;
+                    });
+                }
+                partyItem.style.display = partyVisible ? 'block' : 'none';
+            });
         });
     }
 
@@ -1026,15 +1059,17 @@
         const newRow = document.createElement('div');
         newRow.className = 'grid grid-cols-12 items-center gap-2 mb-2 candidate-row';
         newRow.innerHTML = `
-            <input type="text" placeholder="Nome do Novo Candidato" class="col-span-5 bg-background p-2 rounded-lg border border-border">
+            <input type="text" placeholder="Nome do Novo Candidato" class="col-span-5 bg-background p-2 rounded-lg border border-border candidate-name-input">
             <input type="number" placeholder="Votos" value="0" class="col-span-2 bg-background p-2 rounded-lg border border-border" oninput="updateProjectedVotesInEditor(this, '${partyId}')">
             <div class="col-span-3 flex items-center gap-2">
                 <input type="number" placeholder="% Cresc." value="0" class="w-24 bg-background p-2 rounded-lg border border-border text-right" oninput="updateProjectedVotesInEditor(this, '${partyId}')">
                 <span class="text-sm text-text-light">%</span>
             </div>
-            <strong class="col-span-2 text-primary text-right projected-votes">0</strong>
-            <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRowFromParty(this, '${partyId}')">&times;</button>
-            <button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidateFromParty(this, '${partyId}')"><i class="fa-solid fa-right-left"></i></button>
+            <strong class="col-span-1 text-primary text-right projected-votes">0</strong>
+            <div class="col-span-1 flex items-center justify-end gap-2">
+                <button class="bg-secondary text-white px-2 py-1 rounded-lg text-xs" title="Migrar" onclick="migrateCandidateFromParty(this, '${partyId.replace(/[^a-zA-Z0-9]/g, '')}')"><i class="fa-solid fa-right-left"></i></button>
+                <button class="bg-danger text-white px-2 py-1 rounded-lg text-xs" onclick="removeCandidateRowFromParty(this, '${partyId}')">&times;</button>
+            </div>
         `;
         container.appendChild(newRow);
     }
@@ -1062,15 +1097,17 @@
             const newRow = document.createElement('div');
             newRow.className = 'grid grid-cols-12 items-center gap-2 mb-2 candidate-row';
             newRow.innerHTML = `
-                <input type="text" placeholder="Nome" value="${candidateName}" class="col-span-5 bg-background p-2 rounded-lg border border-border">
+                <input type="text" placeholder="Nome" value="${candidateName}" class="col-span-5 bg-background p-2 rounded-lg border border-border candidate-name-input">
                 <input type="number" placeholder="Votos" value="${candidateVotes}" class="col-span-2 bg-background p-2 rounded-lg border border-border" oninput="updateProjectedVotesInEditor(this, '${toPartyId}')">
                 <div class="col-span-3 flex items-center gap-2">
                     <input type="number" placeholder="% Cresc." value="${candidateGrowth}" class="w-24 bg-background p-2 rounded-lg border border-border text-right" oninput="updateProjectedVotesInEditor(this, '${toPartyId}')">
                     <span class="text-sm text-text-light">%</span>
                 </div>
-                <strong class="col-span-2 text-primary text-right projected-votes">${Math.floor(parseInt(candidateVotes) * (1 + parseFloat(candidateGrowth)/100)).toLocaleString('pt-BR')}</strong>
-                <button class="bg-danger text-white px-3 py-2 rounded-lg" onclick="removeCandidateRowFromParty(this, '${toPartyId}')">&times;</button>
-                <button class="bg-secondary text-white px-3 py-2 rounded-lg" title="Migrar" onclick="migrateCandidateFromParty(this, '${toPartyName}')"><i class="fa-solid fa-right-left"></i></button>
+                <strong class="col-span-1 text-primary text-right projected-votes">${Math.floor(parseInt(candidateVotes) * (1 + parseFloat(candidateGrowth)/100)).toLocaleString('pt-BR')}</strong>
+                 <div class="col-span-1 flex items-center justify-end gap-2">
+                    <button class="bg-secondary text-white px-2 py-1 rounded-lg text-xs" title="Migrar" onclick="migrateCandidateFromParty(this, '${toPartyName}')"><i class="fa-solid fa-right-left"></i></button>
+                    <button class="bg-danger text-white px-2 py-1 rounded-lg text-xs" onclick="removeCandidateRowFromParty(this, '${toPartyId}')">&times;</button>
+                </div>
             `;
             toContainer.appendChild(newRow);
             row.remove();
@@ -1083,6 +1120,7 @@
     }
 
     function saveAllLegendas() {
+        let savedLegendas = {};
         baseScenario.partidos.forEach(party => {
             const partyId = party.nome.replace(/[^a-zA-Z0-9]/g, '');
             const container = document.getElementById(`legenda-accordion-${partyId}`);
@@ -1097,8 +1135,8 @@
                 const votes = parseInt(row.querySelector('input[type="number"]').value, 10) || 0;
                 const growth = parseFloat(row.querySelector('input[type="number"][placeholder="% Cresc."]').value) / 100 || 0;
                 
-                if (name && votes > 0) {
-                    newCandidatos.push({ nome: name, votos: votes, growth: growth });
+                if (name && votes >= 0) {
+                    newCandidatos.push({ nome: name, votos: votes, growth: growth, isEleito: false });
                     totalVotes += Math.floor(votes * (1 + growth));
                 }
             });
@@ -1106,15 +1144,20 @@
             newCandidatos.sort((a, b) => b.votos - a.votos);
             party.customCandidatos = newCandidatos;
             party.votosBase2022 = totalVotes;
+            savedLegendas[party.nome] = newCandidatos;
             
             const boostInput = document.getElementById(`boost-${party.nome}`);
             if(boostInput) {
                 boostInput.value = 0;
                 boostInput.disabled = true;
+                boostInput.parentElement.parentElement.querySelector('label').classList.add('opacity-50');
+                boostInput.parentElement.parentElement.querySelector('label').title = 'Desabilitado com legenda personalizada';
                 document.getElementById(`boost-value-${party.nome}`).textContent = '0%';
+                document.getElementById(`boost-value-${party.nome}`).classList.add('opacity-50');
             }
         });
 
+        localStorage.setItem('salaDeGuerraLegendas_v1', JSON.stringify(savedLegendas));
         showInfoModal('Todas as legendas foram salvas e aplicadas nas simulações!');
         updateScenario();
         initializeAnaliseTab(); // Refresh analysis with new data
@@ -1122,72 +1165,32 @@
 
     function resetAllLegendas() {
         showConfirmationModal("Tem a certeza que quer restaurar todas as legendas para o padrão de 2022?", () => {
-            baseScenario.partidos.forEach(p => {
-                p.customCandidatos = null;
-                p.votosBase2022 = DADOS_ELEICOES.SC.de.historico[0].partidos[p.nome].votos;
-                const boostInput = document.getElementById(`boost-${p.nome}`);
-                if (boostInput) boostInput.disabled = false;
-            });
-            initializeEditarLegendaTab();
+            localStorage.removeItem('salaDeGuerraLegendas_v1');
+            baseScenario = prepareBaseScenario(); // Re-prepare from original data
+            initializeCandidatosTab();
+            initializeControls(); // Re-init controls to re-enable boost sliders
             updateScenario();
             initializeAnaliseTab();
             showInfoModal("Todas as legendas foram restauradas.");
         });
     }
 
-
-    // =================================================================================
-    // CANDIDATE TAB LOGIC
-    // =================================================================================
-    function initializeCandidatosTab() {
-        const container = document.getElementById('candidatos-accordion-container');
-        container.innerHTML = '';
-
-        baseScenario.partidos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(party => {
-            const color = PARTY_COLORS[party.nome] || '#64748b';
-            const totalVotosPartido = party.candidatos.reduce((sum, cand) => sum + cand.votos, 0);
-            
-            let candidatesHtml = party.candidatos.map((cand, index) => `<div class="grid grid-cols-2 md:grid-cols-5 gap-4 p-3 border-t border-border candidate-row items-center" data-name="${cand.nome.toLowerCase()}"><div class="font-bold text-text-main col-span-2">${cand.nome} ${cand.isEleito ? '<i class="fa-solid fa-check-circle text-success text-xs"></i>' : ''}</div><div class="flex items-center gap-2 justify-end md:justify-start"><input type="number" value="${(cand.growth || 0) * 100}" oninput="updateCandidateGrowth('${party.nome}', ${index}, this.value)" class="w-20 bg-gray-900 p-1 rounded-lg border border-border text-right" placeholder="0"><span class="text-sm text-text-light">%</span></div><div class="text-text-light text-right"><strong class="text-main">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Base</span></div><div class="text-text-light text-right"><strong class="text-primary" id="proj-votos-${party.nome.replace(/\s/g, '')}-${index}">${cand.votos.toLocaleString('pt-BR')}</strong><span class="hidden md:inline"> Votos Proj.</span></div></div>`).join('');
-
-            const accordionItem = document.createElement('div');
-            accordionItem.className = 'bg-gray-900/50 rounded-lg party-accordion-item';
-            accordionItem.innerHTML = `<button class="w-full p-4 text-left font-bold flex justify-between items-center text-text-main" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')"><div class="flex items-center"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${color}"></div><span>${party.nome}</span></div><div class="flex items-center"><span class="text-sm font-normal text-text-light mr-4">${party.candidatos.length} cands.</span><span class="text-sm font-normal text-text-light mr-4">Total: <strong class="text-main" id="total-legenda-${party.nome}">${totalVotosPartido.toLocaleString('pt-BR')}</strong></span><i class="fa-solid fa-chevron-down transition-transform"></i></div></button><div class="p-2 hidden"><div class="space-y-1">${candidatesHtml}</div></div>`;
-            container.appendChild(accordionItem);
-        });
-
-        document.getElementById('candidato-search').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            document.querySelectorAll('.party-accordion-item').forEach(partyItem => {
-                let partyVisible = false;
-                partyItem.querySelectorAll('.candidate-row').forEach(row => {
-                    const isVisible = row.dataset.name.includes(searchTerm);
-                    row.style.display = isVisible ? 'grid' : 'none';
-                    if (isVisible) partyVisible = true;
-                });
-                partyItem.style.display = partyVisible ? 'block' : 'none';
+    function loadLegendasFromStorage() {
+        const savedLegendasJSON = localStorage.getItem('salaDeGuerraLegendas_v1');
+        if (savedLegendasJSON) {
+            const savedLegendas = JSON.parse(savedLegendasJSON);
+            baseScenario.partidos.forEach(p => {
+                if (savedLegendas[p.nome]) {
+                    p.customCandidatos = savedLegendas[p.nome];
+                    p.votosBase2022 = p.customCandidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
+                    p.boost = 0;
+                }
             });
-        });
-    }
-
-    function updateCandidateGrowth(partyName, candidateIndex, growthValue) {
-        const party = baseScenario.partidos.find(p => p.nome === partyName);
-        if (!party) return;
-
-        const candidate = party.candidatos[candidateIndex];
-        candidate.growth = parseFloat(growthValue) / 100 || 0;
-
-        const projectedVotes = Math.floor(candidate.votos * (1 + candidate.growth));
-        document.getElementById(`proj-votos-${party.nome.replace(/\s/g, '')}-${candidateIndex}`).textContent = projectedVotes.toLocaleString('pt-BR');
-
-        const newPartyTotal = party.candidatos.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
-        party.votosBase2022 = newPartyTotal;
-        document.getElementById(`total-legenda-${party.nome}`).textContent = newPartyTotal.toLocaleString('pt-BR');
-
-        updateScenario();
+        }
     }
 
     function changeTab(tabName) {
-        ['simulador', 'candidatos', 'analise', 'eleitos2024', 'editarLegenda'].forEach(id => {
+        ['simulador', 'candidatos', 'analise', 'eleitos2024'].forEach(id => {
             document.getElementById(`content-${id}`).classList.toggle('hidden', id !== tabName);
         });
         document.querySelectorAll('#main-tabs button').forEach(button => {
@@ -1201,12 +1204,108 @@
     }
     
     // =================================================================================
-    // ANALYSIS TAB LOGIC
+    // ANALYSIS TAB LOGIC (Including AI)
     // =================================================================================
     function initializeAnaliseTab() {
+        populateAIPartySelect();
         initializePuxadoresAnalise();
         initializeEficienciaAnalise();
     }
+    
+    function populateAIPartySelect() {
+        const select = document.getElementById('ai-party-select');
+        select.innerHTML = '';
+        baseScenario.partidos
+            .filter(p => p.votosBase2022 > 0)
+            .sort((a,b) => a.nome.localeCompare(b.nome))
+            .forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.nome;
+                option.textContent = p.nome;
+                select.appendChild(option);
+            });
+    }
+
+    async function generateAIAnalysis() {
+        const partyName = document.getElementById('ai-party-select').value;
+        const resultContainer = document.getElementById('ai-result-container');
+        const generateBtn = document.getElementById('ai-generate-btn');
+        if (!partyName) return;
+
+        resultContainer.innerHTML = `<div class="flex justify-center items-center h-full"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary"></i><p class="ml-3">Gerando análise estratégica...</div>`;
+        generateBtn.disabled = true;
+
+        const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
+        const competitors = currentSimulatedScenario.cenarios
+            .filter(p => p.nome !== partyName)
+            .sort((a,b) => b.votos - a.votos)
+            .slice(0, 3)
+            .map(p => `${p.nome} (${p.totalVagas} vagas)`);
+            
+        const atRiskSeats = currentSimulatedScenario.sobrasLog
+            .filter(log => log.vencedor === partyName || log.perdedor === partyName)
+            .map(log => `Vaga #${log.vaga}: ${log.vencedor === partyName ? 'Ganhando contra ' + log.perdedor : 'Perdendo para ' + log.vencedor} por ~${Math.ceil(Math.abs(log.mediaVencedor - log.mediaPerdedor))} votos de média.`);
+
+        const systemPrompt = "Você é um estrategista político sênior, especializado em eleições proporcionais no Brasil para o cargo de Deputado Estadual em Santa Catarina. Sua análise deve ser objetiva, baseada em dados e focada em estratégias práticas. Forneça insights em formato de bullet points concisos, usando markdown. Responda em português do Brasil.";
+        
+        const userQuery = `
+            Analise o cenário eleitoral para o partido **${partyName}** em Santa Catarina para 2026.
+            
+            **Dados da Simulação Atual:**
+            - **Votos Totais Projetados:** ${partyData.votos.toLocaleString('pt-BR')}
+            - **Cadeiras Conquistadas:** ${partyData.totalVagas} (${partyData.vagasDiretas} diretas, ${partyData.vagasSobras} de sobra)
+            - **Nota de Corte Mínima (individual):** ${partyData.notaCorte.toLocaleString('pt-BR')} votos
+            - **Quociente Eleitoral (QE) do Cenário:** ${currentSimulatedScenario.QE.toLocaleString('pt-BR')}
+            
+            **Análise de Risco (Disputa por Vagas de Sobra):**
+            ${atRiskSeats.length > 0 ? atRiskSeats.map(s => `- ${s}`).join('\n') : "- Nenhuma disputa direta por sobras identificada."}
+            
+            **Principais Concorrentes (no cenário geral):**
+            ${competitors.map(c => `- ${c}`).join('\n')}
+
+            Com base nestes dados, forneça um relatório estratégico contendo:
+            1.  **Pontos Fortes:** Principais vantagens do partido neste cenário.
+            2.  **Pontos Fracos e Riscos:** Vulnerabilidades e ameaças imediatas.
+            3.  **Recomendações Estratégicas:** Ações práticas para maximizar o número de cadeiras e mitigar riscos.
+        `;
+
+        const apiKey = ""; // Provided by environment
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const payload = {
+            contents: [{ parts: [{ text: userQuery }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                throw new Error(`API error: ${response.statusText}`);
+            }
+            const result = await response.json();
+            const text = result.candidates[0].content.parts[0].text;
+
+            // Simple markdown to HTML
+            let html = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\s*-\s/g, '</li><li>')
+                .replace(/\n/g, '<br>');
+            html = html.replace(/<br>(\d\.)/g, '</ul><h4 class="font-bold text-secondary mt-4 mb-2">$1</h4><ul><li>');
+            html = `<ul>${html}</li></ul>`.replace('<ul><br>', '<ul>').replace('<ul></ul>', '');
+
+
+            resultContainer.innerHTML = html;
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            resultContainer.innerHTML = `<p class="text-center text-danger">Ocorreu um erro ao gerar a análise. Por favor, tente novamente.</p>`;
+        } finally {
+            generateBtn.disabled = false;
+        }
+    }
+
 
     function initializePuxadoresAnalise() {
         const container = document.getElementById('analise-puxadores-container');
@@ -1236,8 +1335,8 @@
         container.innerHTML = '';
         const partidosComEleitos = baseScenario.partidos.map(party => {
             const candidates = party.customCandidatos || party.candidatos;
-            const eleitos = candidates.filter(c => c.isEleito).length;
-            const totalVotos = candidates.reduce((sum, cand) => sum + cand.votos, 0);
+            const eleitos = DADOS_ELEICOES.SC.de.historico[0].partidos[party.nome].candidatos.filter(c => c.isEleito).length;
+            const totalVotos = DADOS_ELEICOES.SC.de.historico[0].partidos[party.nome].votos;
             return eleitos > 0 ? { nome: party.nome, custoPorCadeira: totalVotos / eleitos, totalVotos: totalVotos, totalEleitos: eleitos } : null;
         }).filter(p => p !== null).sort((a, b) => a.custoPorCadeira - b.custoPorCadeira);
         
@@ -1251,55 +1350,7 @@
             container.appendChild(item);
         });
     }
-
-    function openTransferModal(sourcePartyName, candidateName) {
-        const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
-        const candidate = (sourceParty.customCandidatos || sourceParty.candidatos).find(c => c.nome === candidateName);
-        
-        showPartySelectModal(`Transferir <strong>${candidate.nome}</strong> de <strong>${sourcePartyName}</strong> para:`, sourcePartyName, (destinationPartyName) => {
-             executeTransfer(sourcePartyName, candidateName, destinationPartyName);
-        });
-    }
-
-    function executeTransfer(sourcePartyName, candidateName, destinationPartyName) {
-        const sourceParty = baseScenario.partidos.find(p => p.nome === sourcePartyName);
-        const destParty = baseScenario.partidos.find(p => p.nome === destinationPartyName);
-        
-        if (!sourceParty.customCandidatos) sourceParty.customCandidatos = JSON.parse(JSON.stringify(sourceParty.candidatos));
-        if (!destParty.customCandidatos) destParty.customCandidatos = JSON.parse(JSON.stringify(destParty.candidatos));
-
-        const candidateIndex = sourceParty.customCandidatos.findIndex(c => c.nome === candidateName);
-        if (candidateIndex === -1) return;
-
-        const [candidateToMove] = sourceParty.customCandidatos.splice(candidateIndex, 1);
-        destParty.customCandidatos.push(candidateToMove);
-        destParty.customCandidatos.sort((a,b) => b.votos - a.votos);
-
-        sourceParty.votosBase2022 = sourceParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
-        destParty.votosBase2022 = destParty.customCandidatos.reduce((sum, cand) => sum + cand.votos, 0);
-        
-        [sourceParty, destParty].forEach(p => {
-             const boostInput = document.getElementById(`boost-${p.nome}`);
-             if(boostInput) boostInput.disabled = true;
-        });
-
-        closeModal();
-        initializeAnaliseTab();
-        updateScenario();
-    }
     
-    function resetAllData() {
-        showConfirmationModal("Restaurar todos os dados para o padrão de 2022? As alterações serão perdidas.", () => {
-            baseScenario = prepareBaseScenario();
-            initializeControls();
-            initializeCandidatosTab();
-            initializeEditarLegendaTab();
-            initializeAnaliseTab();
-            updateScenario();
-            showInfoModal("Todos os dados foram restaurados.");
-        });
-    }
-
     function showInfoModal(message) {
         showModal(`<div class="p-6 text-center"><p class="text-lg">${message}</p></div>`);
         setTimeout(closeModal, 2000);
@@ -1798,3 +1849,4 @@
     </script>
 </body>
 </html>
+
