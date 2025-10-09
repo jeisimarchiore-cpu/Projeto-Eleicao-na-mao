@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sala de Guerra Eleitoral v9.5 - Análise de Legenda com IA</title>
+    <title>Sala de Guerra Eleitoral v9.6 - Análise de Legenda com IA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -178,7 +178,7 @@
                  </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
-                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v9.5</span>
+                        <i class="fa-solid fa-chess-rook text-primary mr-2" title="Sala de Guerra Eleitoral"></i>Sala de Guerra Eleitoral <span class="text-primary text-sm font-mono">v9.6</span>
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
                 </div>
@@ -313,20 +313,6 @@
                                  <p class="text-text-light mt-1">Gere insights e recomendações para um partido com base no cenário simulado atual.</p>
                              </div>
                         </div>
-                         <div class="mb-4">
-                             <label for="ai-api-key-input" class="block text-sm font-medium text-text-light mb-1">Chave de API (Gemini) <span id="api-key-status" class="text-xs text-success ml-2 opacity-0 transition-opacity">Chave Vinculada!</span></label>
-                             <div class="flex gap-2">
-                                 <div class="relative flex-grow">
-                                     <input type="password" id="ai-api-key-input" placeholder="Cole sua chave de API aqui" class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition pr-10" onkeyup="handleApiKeyEnter(event)">
-                                     <button class="absolute inset-y-0 right-0 px-3 flex items-center text-text-light hover:text-text-main" onclick="toggleApiKeyVisibility()">
-                                         <i id="api-key-toggle-icon" class="fa-solid fa-eye"></i>
-                                     </button>
-                                 </div>
-                                 <button onclick="linkApiKey()" class="bg-secondary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-teal-400 transition-colors duration-200 flex items-center">
-                                     <i class="fa-solid fa-link mr-2"></i> Vincular Chave
-                                 </button>
-                             </div>
-                         </div>
                          <div class="flex items-end gap-4">
                              <div class="flex-grow">
                                  <label for="ai-party-select" class="block text-sm font-medium text-text-light mb-1">Selecione o Partido</label>
@@ -1366,8 +1352,8 @@
         const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[20rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
         showModal(modalContent);
         
-        const apiKey = "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74"; // <-- SUBSTITUA AQUI
-        if (!apiKey || apiKey === "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74") {
+        const apiKey = "SUA_CHAVE_API_VAI_AQUI"; // <-- COLE SUA CHAVE DE API AQUI
+        if (!apiKey || apiKey === "SUA_CHAVE_API_VAI_AQUI") {
             document.getElementById('ai-slate-result').innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API da IA diretamente no código para usar este recurso.</p>`;
             return;
         }
@@ -1451,8 +1437,8 @@
         const generateBtn = document.getElementById('ai-generate-btn');
         if (!partyName) return;
 
-        const apiKey = "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74"; // <-- SUBSTITUA AQUI
-        if (!apiKey || apiKey === "AIzaSyDHu6lBIlKrflAI2eJaFMKRtj3iho6-M74") {
+        const apiKey = "SUA_CHAVE_API_VAI_AQUI"; // <-- COLE SUA CHAVE DE API AQUI
+        if (!apiKey || apiKey === "SUA_CHAVE_API_VAI_AQUI") {
             resultContainer.innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API do Gemini diretamente no código para gerar a análise.</p>`;
             return;
         }
@@ -2158,5 +2144,6 @@
     </script>
 </body>
 </html>
+
 
 
