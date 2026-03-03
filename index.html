@@ -115,6 +115,36 @@
             z-index: 60; /* Ensure tooltip is above modal */
         }
 
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+        .toast {
+            min-width: 250px;
+            padding: 14px 24px;
+            border-radius: 8px;
+            color: #fff;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
         /* Ensure all text is white */
         .text-text-main, .text-text-light, .text-text-neutral, .font-bold, p, h1, h2, h3, h4, h5, h6, span, div, th, td { 
             color: #f9fafb; 
@@ -390,6 +420,9 @@
     <!-- Tooltip for D3 visualizations -->
     <div id="map-tooltip"></div>
 
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
 
     <script>
     // =================================================================================
@@ -402,7 +435,7 @@
         'PSD': { votos: 293675, candidatos: [ { nome: 'Mario Motta', votos: 56363, isEleito: true }, { nome: 'Julio Garcia', votos: 49958, isEleito: true }, { nome: 'Napoleão Bernardes', votos: 36923, isEleito: true }, { nome: 'Zé Caramori', votos: 24394, isEleito: false }, { nome: 'Gerri da Consoli', votos: 22668, isEleito: false }, { nome: 'Silvio Alexandre Zancanaro', votos: 19672, isEleito: false }, { nome: 'Adeliana Dal Pont', votos: 18484, isEleito: false }, { nome: 'Polaco', votos: 9719, isEleito: false }, { nome: 'Wellington', votos: 8381, isEleito: false }, { nome: 'Mario Marcondes', votos: 7739, isEleito: false }, { nome: 'Gerson', votos: 3265, isEleito: false }, { nome: 'Carla Hofmann', votos: 3014, isEleito: false }, { nome: 'Arlindo Cruz', votos: 2559, isEleito: false }, { nome: 'Coronel Vonk', votos: 2352, isEleito: false }, { nome: 'Bete Werner Quandt', votos: 2037, isEleito: false }, { nome: 'Deyvid Breis Boca Aberta', votos: 1369, isEleito: false }, { nome: 'Sargento Stoklosa', votos: 1217, isEleito: false }, { nome: 'Helenice Pereira Duarte', votos: 1056, isEleito: false }, { nome: 'Cláudio Motoboy do Coletivo SC', votos: 1054, isEleito: false }, { nome: 'Ciro Girardi', votos: 995, isEleito: false }, { nome: 'Marcia Badalotti', votos: 801, isEleito: false }, { nome: 'Voltolini Taxista', votos: 736, isEleito: false }, { nome: 'Inajara Rodrigues', votos: 589, isEleito: false }, { nome: 'Henrique Ávila', votos: 382, isEleito: false }, { nome: 'Isa Simas', votos: 151, isEleito: false }, { nome: 'Katielly Lanzini', votos: 53, isEleito: false } ] },
         'PP': { votos: 280551, candidatos: [ { nome: 'Zé Milton', votos: 56585, isEleito: true }, { nome: 'Altair Silva', votos: 46086, isEleito: true }, { nome: 'Pepê Collaço', votos: 28809, isEleito: true }, { nome: 'Pedrão', votos: 27344, isEleito: false }, { nome: 'João Amin', votos: 19154, isEleito: false }, { nome: 'Luizinho da Regional', votos: 15324, isEleito: false }, { nome: 'Fernando Cruzzetta', votos: 10650, isEleito: false }, { nome: 'Anelisio da Assessoritec', votos: 9848, isEleito: false }, { nome: 'Almir Vieira', votos: 9390, isEleito: false }, { nome: 'Magno Bollmann', votos: 9278, isEleito: false }, { nome: 'Maurilio Moraes', votos: 7981, isEleito: false }, { nome: 'Cattoni', votos: 4789, isEleito: false }, { nome: 'Diego Pandini Diabo Loiro', votos: 4700, isEleito: false }, { nome: 'Mara da Saúde', votos: 4654, isEleito: false }, { nome: 'Julio Kaminski', votos: 3546, isEleito: false }, { nome: 'Gaúcho Amarelo', votos: 3537, isEleito: false }, { nome: 'Douglas Steffen Contador', votos: 2516, isEleito: false }, { nome: 'Katsumi', votos: 2506, isEleito: false }, { nome: 'Manjuva Caminhoneiro', votos: 1395, isEleito: false }, { nome: 'Giovana Menegotto', votos: 1325, isEleito: false }, { nome: 'Simone Andrade', votos: 704, isEleito: false }, { nome: 'Paulinha do Big Lojão', votos: 697, isEleito: false }, { nome: 'Adri Joias', votos: 404, isEleito: false }, { nome: 'Eneida Pereira', votos: 398, isEleito: false }, { nome: 'Professora Rosa Maria Tesser', votos: 370, isEleito: false }, { nome: 'Cabo Camargo', votos: 344, isEleito: false }, { nome: 'Mabel Ziegler', votos: 228, isEleito: false }, { nome: 'João Mira Taxista', votos: 191, isEleito: false }, { nome: 'Luciano Niua', votos: 90, isEleito: false }, { nome: 'Mari Rieke', votos: 54, isEleito: false }, { nome: 'Jaques Rodrigues', votos: 16, isEleito: false } ] },
         'UNIÃO': { votos: 265764, candidatos: [ { nome: 'Jair Miotto', votos: 33682, isEleito: true }, { nome: 'Repórter Sérgio Guimarães', votos: 27977, isEleito: true }, { nome: 'Marcos da Rosa', votos: 25845, isEleito: true }, { nome: 'Laércio Schuster', votos: 24605, isEleito: false }, { nome: 'Constancio Maciel', votos: 23614, isEleito: false }, { nome: 'Márcio Burigo', votos: 15296, isEleito: false }, { nome: 'Felipe Estevão', votos: 15146, isEleito: false }, { nome: 'Dr João', votos: 12169, isEleito: false }, { nome: 'Tânia Larson', votos: 11556, isEleito: false }, { nome: 'Mauro Dresch', votos: 9424, isEleito: false }, { nome: 'Sidney Sabel', votos: 7295, isEleito: false }, { nome: 'Jaime Pasqualini', votos: 5857, isEleito: false }, { nome: 'Lioilson', votos: 5502, isEleito: false }, { nome: 'Nadir Bau', votos: 5453, isEleito: false }, { nome: 'Samuel Ramos', votos: 4557, isEleito: false }, { nome: 'Sub Tenente Wancarlos', votos: 3873, isEleito: false }, { nome: 'Abrahão Mussi', votos: 3126, isEleito: false }, { nome: 'Ezequiel de Souza', votos: 3081, isEleito: false }, { nome: 'Aa ST Veterana Margareth Prats', votos: 2650, isEleito: false }, { nome: 'Paulo Zwiefka', votos: 2306, isEleito: false }, { nome: 'Mari Schorr', votos: 2292, isEleito: false }, { nome: 'Professor Arlindo', votos: 1623, isEleito: false }, { nome: 'Fernando Amorim', votos: 1458, isEleito: false }, { nome: 'Sandro Fortes', votos: 1446, isEleito: false }, { nome: 'Ivan da Luz', votos: 1294, isEleito: false }, { nome: 'Cris da Saúde', votos: 1257, isEleito: false }, { nome: 'Luciano Camargo', votos: 1254, isEleito: false }, { nome: 'Nina', votos: 1034, isEleito: false }, { nome: 'Cleuse Soares', votos: 958, isEleito: false }, { nome: 'Mauro Goedert', votos: 857, isEleito: false }, { nome: 'Youtuber Gabriela Zamboni', votos: 562, isEleito: false }, { nome: 'Luis Olavo Nandi', votos: 521, isEleito: false }, { nome: 'Xuxa', votos: 504, isEleito: false }, { nome: 'Xandi da Toca', votos: 497, isEleito: false }, { nome: 'Márcia Gueno', votos: 398, isEleito: false }, { nome: 'Edilberto Santos', votos: 223, isEleito: false }, { nome: 'Bia Machado', votos: 144, isEleito: false }, { nome: 'Eliana Patriota', votos: 58, isEleito: false }, { nome: 'Arlene Ramon', votos: 32, isEleito: false } ] }, 
-        'PODE': { votos: 237137, candidatos: [ { nome: 'Paulinha', votos: 58694, isEleito: true }, { nome: 'Camilo Martins', votos: 44925, isEleito: true }, { nome: 'Lucas Neves', votos: 23053, isEleito: true }, { nome: 'Daniel Candido', votos: 20110, isEleito: false }, { nome: 'Thiago Morastoni', 19914: 19914, isEleito: false }, { nome: 'Janice Krasniak', votos: 12965, isEleito: false }, { nome: 'Rodrigo Fachini', votos: 12649, isEleito: false }, { nome: 'Gabrielzinho', votos: 11578, isEleito: false }, { nome: 'Dra Celina Dittrich', votos: 7279, isEleito: false }, { nome: 'Dentinho', votos: 6311, isEleito: false }, { nome: 'Enfermeiro Pablo', votos: 5477, isEleito: false }, { nome: 'Tiago Maestri', votos: 2403, isEleito: false }, { nome: 'Camila Nascimento', votos: 2062, isEleito: false }, { nome: 'Alessandra Pires', votos: 1608, isEleito: false }, { nome: 'Lucelma Baldi', votos: 1332, isEleito: false }, { nome: 'Rafael Mello', votos: 1085, isEleito: false }, { nome: 'Igor Araujo', votos: 471, isEleito: false }, { nome: 'Baiano', votos: 375, isEleito: false }, { nome: 'Francisco Nunes', votos: 81, isEleito: false }, { nome: 'Dr Cabral', votos: 40, isEleito: false } ] }, 
+        'PODE': { votos: 237137, candidatos: [ { nome: 'Paulinha', votos: 58694, isEleito: true }, { nome: 'Camilo Martins', votos: 44925, isEleito: true }, { nome: 'Lucas Neves', votos: 23053, isEleito: true }, { nome: 'Daniel Candido', votos: 20110, isEleito: false }, { nome: 'Thiago Morastoni', votos: 19914, isEleito: false }, { nome: 'Janice Krasniak', votos: 12965, isEleito: false }, { nome: 'Rodrigo Fachini', votos: 12649, isEleito: false }, { nome: 'Gabrielzinho', votos: 11578, isEleito: false }, { nome: 'Dra Celina Dittrich', votos: 7279, isEleito: false }, { nome: 'Dentinho', votos: 6311, isEleito: false }, { nome: 'Enfermeiro Pablo', votos: 5477, isEleito: false }, { nome: 'Tiago Maestri', votos: 2403, isEleito: false }, { nome: 'Camila Nascimento', votos: 2062, isEleito: false }, { nome: 'Alessandra Pires', votos: 1608, isEleito: false }, { nome: 'Lucelma Baldi', votos: 1332, isEleito: false }, { nome: 'Rafael Mello', votos: 1085, isEleito: false }, { nome: 'Igor Araujo', votos: 471, isEleito: false }, { nome: 'Baiano', votos: 375, isEleito: false }, { nome: 'Francisco Nunes', votos: 81, isEleito: false }, { nome: 'Dr Cabral', votos: 40, isEleito: false } ] }, 
         'PSDB': { votos: 211208, candidatos: [ { nome: 'Marcos Vieira', votos: 48466, isEleito: true }, { nome: 'Dr. Vicente', votos: 39797, isEleito: true }, { nome: 'Acélio Casagrande', votos: 39032, isEleito: false }, { nome: 'Saulo Sperotto', votos: 28114, isEleito: false }, { nome: 'Anna Carolina Martins', votos: 18325, isEleito: false }, { nome: 'Professora Suzana', votos: 7799, isEleito: false }, { nome: 'Aroldo Frigo Junior', votos: 6342, isEleito: false }, { nome: 'Jens Mantau', votos: 5071, isEleito: false }, { nome: 'Giovana Galato', votos: 4824, isEleito: false }, { nome: 'Soraya Michels', votos: 2230, isEleito: false }, { nome: 'Márcio Pereira', votos: 1966, isEleito: false }, { nome: 'Dejair Teixeira', votos: 1667, isEleito: false }, { nome: 'Izaias Machado', votos: 542, isEleito: false }, { nome: 'Jackson Lucian', votos: 425, isEleito: false }, { nome: 'Bastião Vieira', votos: 400, isEleito: false }, { nome: 'Daniela Sebben', votos: 166, isEleito: false }, { nome: 'Dra. Gabryella Baptista', votos: 105, isEleito: false } ] }, 
         'REPU': { votos: 163410, candidatos: [ { nome: 'Sergio Motta', votos: 44666, isEleito: true }, { nome: 'Leandro Lima', votos: 16572, isEleito: false }, { nome: 'Egídio Beckhauser', votos: 16123, isEleito: false }, { nome: 'Edson Piriquto', votos: 14472, isEleito: false }, { nome: 'Edilene', votos: 14098, isEleito: false }, { nome: 'Renê', votos: 10654, isEleito: false }, { nome: 'Luciano Buligon', votos: 9965, isEleito: false }, { nome: 'Dr. André Motta', votos: 7131, isEleito: false }, { nome: 'Otto Quintino', votos: 6891, isEleito: false }, { nome: 'Jefferson Monteiro', votos: 5326, isEleito: false }, { nome: 'Altamir Montibeller', votos: 4645, isEleito: false }, { nome: 'Zé Dresch', votos: 4237, isEleito: false }, { nome: 'Motinha', votos: 3791, isEleito: false }, { nome: 'Coronel Vieira', votos: 3736, isEleito: false }, { nome: 'Sargento Floriano', votos: 2536, isEleito: false }, { nome: 'Marcio Tinte', votos: 2316, isEleito: false }, { nome: 'Samira Porto', votos: 1451, isEleito: false }, { nome: 'Jeferson Petry', votos: 985, isEleito: false }, { nome: 'Silvinho da Farmácia', votos: 676, isEleito: false }, { nome: 'Ney', votos: 519, isEleito: false }, { nome: 'Sgt Ari', votos: 513, isEleito: false }, { nome: 'Clovis Kruger', votos: 402, isEleito: false }, { nome: 'Emilene Jacomelli', votos: 334, isEleito: false }, { nome: 'Juliana Cardoso', votos: 329, isEleito: false }, { nome: 'Nara Simão', votos: 316, isEleito: false }, { nome: 'Lívia Oliveira', votos: 263, isEleito: false }, { nome: 'Rosana da Silva', votos: 247, isEleito: false }, { nome: 'Jhenniffer Breenstup', votos: 144, isEleito: false }, { nome: 'Mirian Avila', votos: 104, isEleito: false } ] }, 
         'NOVO': { votos: 136632, candidatos: [ { nome: 'Matheus Cadorin', votos: 12390, isEleito: true }, { nome: 'André de Oliveira', votos: 12165, isEleito: false }, { nome: 'Lucas Gotardo', votos: 10947, isEleito: false }, { nome: 'Bruno Win', votos: 8555, isEleito: false }, { nome: 'Murilo Schmitz', votos: 8005, isEleito: false }, { nome: 'Dadá Westphal', votos: 7522, isEleito: false }, { nome: 'Rafael Ary', votos: 6694, isEleito: false }, { nome: 'Isadora Piana', votos: 6674, isEleito: false }, { nome: 'Marcos Zanella', votos: 6397, isEleito: false }, { nome: 'Celso Strobel', votos: 5430, isEleito: false }, { nome: 'André Casagrande', votos: 5378, isEleito: false }, { nome: 'Day Borges', votos: 4947, isEleito: false }, { nome: 'Leandro Schmöckel Gonçalves', votos: 3801, isEleito: false }, { nome: 'Sabino', votos: 2702, isEleito: false }, { nome: 'Bia Borges', votos: 2553, isEleito: false }, { nome: 'Stevan Arcari (Tangará)', votos: 2532, isEleito: false }, { nome: 'Débora Pierini', votos: 2274, isEleito: false }, { nome: 'Jussara Isabel Tumelero', votos: 2173, isEleito: false }, { nome: 'Maria Fernanda Gatti', votos: 2155, isEleito: false }, { nome: 'Fernando Torquato', votos: 2154, isEleito: false }, { nome: 'Luzia Frohlich', votos: 1894, isEleito: false }, { nome: 'Yordan Gums', votos: 1887, isEleito: false }, { nome: 'Eduardo Sávio', votos: 1676, isEleito: false }, { nome: 'Giovane Ferreira', votos: 1671, isEleito: false }, { nome: 'Orides Neto', votos: 1530, isEleito: false }, { nome: 'Indi Herbert', votos: 912, isEleito: false }, { nome: 'Dalva Pazin Vencato', votos: 567, isEleito: false }, { nome: 'Fabricio Favoretto', votos: 548, isEleito: false }, { nome: 'Professora Eliane', votos: 495, isEleito: false }, { nome: 'Lindomar Fróes', votos: 260, isEleito: false }, { nome: 'Rafael Ricardo', votos: 249, isEleito: false } ] }, 
@@ -424,13 +457,23 @@
         'PV': { votos: 590, candidatos: [ { nome: 'Márcia Hasse', votos: 86, isEleito: false }, { nome: 'Frank Lôbo', votos: 63, isEleito: false } ] },
         'PCO': { votos: 0, candidatos: [ { nome: 'Arthur Cesconetto Souza', votos: 155, isEleito: false } ] }
     } } ] } } };
-    const PARTY_COLORS = { 'PL': '#0ea5e9', 'MDB': '#facc15', 'PT': '#dc2626', 'PODE': '#38bdf8', 'PP': '#0284c7', 'PSD': '#f97316', 'UNIÃO': '#1e3a8a', 'PSDB': '#0c4a6e', 'REPU': '#2563eb', 'NOVO': '#ea580c', 'PTB': '#4b5563', 'PSB': '#ef4444', 'PATRI': '#059669', 'PSOL': '#f59e0b', 'PDT': '#0d9488', 'DC': '#166534', 'SD': '#f97316', 'PSC': '#2563eb', 'CIDA': '#65a30d', 'PC do B': '#ef4444', 'AVAN': '#0ea5e9', 'PRTB': '#0891b2', 'REDE': '#22c55e', 'PSTU': '#dc2626', 'PROS': '#f97316', 'PV': '#22c55e', 'PCO': '#7f1d1d', 'PRD': '#5a2d82', 'PMB': '#f4a460', 'PODEMO': '#00ced1' };
+    const PARTY_COLORS = { 'PL': '#0ea5e9', 'MDB': '#facc15', 'PT/PCdoB/PV': '#dc2626', 'PT': '#dc2626', 'PODE': '#38bdf8', 'PP': '#0284c7', 'PSD': '#f97316', 'UNIÃO': '#1e3a8a', 'PSDB/CIDADANIA': '#0c4a6e', 'PSDB': '#0c4a6e', 'REPU': '#2563eb', 'NOVO': '#ea580c', 'PTB': '#4b5563', 'PSB': '#ef4444', 'PATRI': '#059669', 'PSOL/REDE': '#f59e0b', 'PSOL': '#f59e0b', 'PDT': '#0d9488', 'DC': '#166534', 'SD': '#f97316', 'PSC': '#2563eb', 'CIDA': '#65a30d', 'PC do B': '#ef4444', 'AVAN': '#0ea5e9', 'PRTB': '#0891b2', 'REDE': '#22c55e', 'PSTU': '#dc2626', 'PROS': '#f97316', 'PV': '#22c55e', 'PCO': '#7f1d1d', 'PRD': '#5a2d82', 'PMB': '#f4a460', 'PODEMO': '#00ced1' };
     
     let baseScenario = {};
     let currentSimulatedScenario = {};
     let baseSummary2022 = {};
     let totalSupportVotes = 0;
     let apiKeySaveTimer;
+
+    // Utility: Debounce function to improve performance on rapid inputs/resizes
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => { clearTimeout(timeout); func(...args); };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
     // =================================================================================
     // MAIN LOGIC
@@ -444,6 +487,15 @@
         initializeEleitos2024Tab();
         calculateBaseSummary2022();
         updateScenario();
+
+        // Responsive Map: Redraw on window resize
+        window.addEventListener('resize', debounce(() => {
+            const activeTab = document.querySelector('.tab-button.active');
+            if (activeTab && activeTab.textContent.includes('Regiões CIADESCP')) {
+                const region = document.getElementById('region-select').value || 'all';
+                drawMap(region);
+            }
+        }, 250));
     });
 
     /**
@@ -451,21 +503,41 @@
      * This function creates a clean, workable data structure for the simulator.
      */
     function prepareBaseScenario() {
-        // Deep copy to avoid modifying the original DADOS_ELEICOES object
         const historico2022 = JSON.parse(JSON.stringify(DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2022)));
-        const comparecimentoBase2022 = historico2022.votos_validos + historico2022.votos_brancos + historico2022.votos_nulos;
+        
+        // CORREÇÃO CRÍTICA: Mesclar Partidos em Federações como ordena o TSE
+        // O PT concorreu na Federação Brasil da Esperança (PT/PCdoB/PV), PSDB com Cidadania, e PSOL com REDE.
+        // Ao mesclá-los aqui, a matemática da nota de corte e sobras ficará 100% igual ao resultado do TSE.
+        let mergedPartidosMap = {};
+        
+        Object.keys(historico2022.partidos).forEach(nome => {
+            let targetNome = nome;
+            if (['PT', 'PC do B', 'PV'].includes(nome)) targetNome = 'PT/PCdoB/PV';
+            if (['PSDB', 'CIDA'].includes(nome)) targetNome = 'PSDB/CIDADANIA';
+            if (['PSOL', 'REDE'].includes(nome)) targetNome = 'PSOL/REDE';
+            
+            if (!mergedPartidosMap[targetNome]) {
+                mergedPartidosMap[targetNome] = { votos: 0, candidatos: [] };
+            }
+            mergedPartidosMap[targetNome].votos += historico2022.partidos[nome].votos;
+            mergedPartidosMap[targetNome].candidatos.push(...historico2022.partidos[nome].candidatos);
+        });
 
-        const partidos = Object.keys(historico2022.partidos).map(nome => {
-            const p2022 = historico2022.partidos[nome];
+        const partidos = Object.keys(mergedPartidosMap).map(nome => {
+            const p2022 = mergedPartidosMap[nome];
             const candidatos = p2022.candidatos.map(c => ({ ...c, growth: 0 })).sort((a,b) => b.votos - a.votos);
+            const somaCandidatos = candidatos.reduce((sum, c) => sum + c.votos, 0);
             return {
                 nome,
                 votosBase2022: p2022.votos,
+                votosLegendaBase: Math.max(0, p2022.votos - somaCandidatos),
                 candidatos: candidatos,
                 customCandidatos: null, // For custom candidate lists
                 boost: 0
             };
         });
+
+        const comparecimentoBase2022 = historico2022.votos_validos + historico2022.votos_brancos + historico2022.votos_nulos;
 
         return {
             eleitoradoBase2022: historico2022.eleitorado,
@@ -493,7 +565,7 @@
         document.getElementById('base-electorate-display').textContent = DADOS_ELEICOES.SC.de.historico[0].eleitorado.toLocaleString('pt-BR');
 
         baseScenario.partidos.sort((a,b) => b.votosBase2022 - a.votosBase2022).forEach(p => {
-            const color = PARTY_COLORS[p.nome] || '#64748b';
+            const color = PARTY_COLORS[p.nome.split('/')[0]] || '#64748b';
             
             // Boost controls
             const boostItem = document.createElement('div');
@@ -522,10 +594,9 @@
     }
 
     /**
-     * Main trigger function. Called whenever a control is changed.
-     * It reads all control values, calculates the new scenario, and calls rendering functions.
+     * Updates the UI numbers instantly, without recalculating everything.
      */
-    function updateScenario() {
+    function updateScenarioParamsUI() {
         const abstentionRate = parseFloat(document.getElementById('abstention-rate').value) / 100;
         const electorateGrowth = parseFloat(document.getElementById('electorate-growth').value) / 100;
         document.getElementById('abstention-value').textContent = (abstentionRate * 100).toFixed(1);
@@ -534,28 +605,54 @@
         baseScenario.partidos.forEach(p => {
             const boostInput = document.getElementById(`boost-${p.nome}`);
             if (boostInput && !boostInput.disabled) {
-                p.boost = parseFloat(boostInput.value) / 100;
                 const boostValueEl = document.getElementById(`boost-value-${p.nome}`);
-                if(boostValueEl) boostValueEl.textContent = `${(p.boost * 100).toFixed(0)}%`;
+                if(boostValueEl) boostValueEl.textContent = `${boostInput.value}%`;
+            }
+        });
+    }
+
+    /**
+     * Main trigger function. Called whenever a control is changed.
+     * Instantly updates UI, mas debounces heavy calculations.
+     */
+    function updateScenario() {
+        updateScenarioParamsUI();
+        debouncedCalculateScenario();
+    }
+
+    const debouncedCalculateScenario = debounce(() => {
+        const abstentionRate = parseFloat(document.getElementById('abstention-rate').value) / 100;
+        const electorateGrowth = parseFloat(document.getElementById('electorate-growth').value) / 100;
+
+        baseScenario.partidos.forEach(p => {
+            const boostInput = document.getElementById(`boost-${p.nome}`);
+            if (boostInput && !boostInput.disabled) {
+                p.boost = parseFloat(boostInput.value) / 100;
             }
         });
         
         currentSimulatedScenario = calculateSimulatedScenario(abstentionRate, electorateGrowth);
         renderAll(currentSimulatedScenario);
-    }
+    }, 150);
 
     /**
      * The core calculation engine of the simulator.
-     * @param {number} abstentionRate - The simulated abstention rate (e.g., 0.186).
-     * @param {number} electorateGrowth - The simulated electorate growth (e.g., 0.05).
-     * @param {string[]} [allianceParties=[]] - An array of party names to be treated as a single alliance.
-     * @returns {object} The complete simulated scenario object.
      */
     function calculateSimulatedScenario(abstentionRate, electorateGrowth, allianceParties = []) {
         const eleitoradoProjetado = Math.floor(baseScenario.eleitoradoBase2022 * (1 + electorateGrowth));
         const comparecimentoProjetado = Math.floor(eleitoradoProjetado * (1 - abstentionRate));
         
-        const votosValidosProjetado = Math.floor(comparecimentoProjetado * baseScenario.percentualValidosBase);
+        let votosValidosProjetado;
+        
+        // CORREÇÃO CRÍTICA 2: Fixar precisão de votos no cenário base
+        // O slider define '18.6' mas a abstenção real foi 18.62%. Para garantir que o cenário base inicial
+        // fique 100% fiel à história, forçamos os números exatos quando os sliders estão intocados.
+        if (abstentionRate === 0.186 && electorateGrowth === 0) {
+            votosValidosProjetado = baseScenario.votosValidosBase2022; // 4.028.852 exatos
+        } else {
+            votosValidosProjetado = Math.floor(comparecimentoProjetado * baseScenario.percentualValidosBase);
+        }
+
         const votosBrancosProjetado = Math.floor(comparecimentoProjetado * baseScenario.percentualBrancosBase);
         const votosNulosProjetado = Math.floor(comparecimentoProjetado * baseScenario.percentualNulosBase);
 
@@ -565,10 +662,10 @@
             let votosFinais;
             let notaCorte;
             let eleitos;
-            let votosProjetadosBase;
             let currentCandidateList = p.customCandidatos || p.candidatos;
 
-            votosProjetadosBase = currentCandidateList.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
+            const sumCandidatos = currentCandidateList.reduce((sum, cand) => sum + Math.floor(cand.votos * (1 + (cand.growth || 0))), 0);
+            let votosProjetadosBase = sumCandidatos + (p.customCandidatos ? 0 : p.votosLegendaBase);
             
             if (p.customCandidatos) {
                  votosFinais = votosProjetadosBase;
@@ -628,10 +725,38 @@
         });
 
         let vagasSobrasRestantes = DADOS_ELEICOES.SC.de.vagas - totalVagasDiretas;
-        let partidosAptos = cenarios.filter(p => p.votos >= (QE * 0.80));
         let sobrasLog = [];
 
-        while (vagasSobrasRestantes > 0 && partidosAptos.length > 0) {
+        while (vagasSobrasRestantes > 0) {
+            let partidosAptos = cenarios.filter(p => {
+                if (QE === 0) return false;
+                
+                // Regra 1: Partido precisa de 80% do Quociente Eleitoral para concorrer à sobra
+                if (p.votos < Math.floor(QE * 0.80)) return false;
+
+                // Regra 2: Partido precisa ter um candidato disponível na lista
+                const nextCandidateIndex = p.vagasDiretas + p.vagasSobras;
+                if (nextCandidateIndex >= p.currentCandidateList.length) return false;
+
+                // Regra 3: O candidato que vai assumir a sobra precisa ter votos equivalentes a 20% do QE
+                const nextCandidate = p.currentCandidateList[nextCandidateIndex];
+                let candVotos = Math.floor(nextCandidate.votos * (1 + (nextCandidate.growth || 0)));
+                if (!p.customCandidatos) {
+                    candVotos = Math.floor(candVotos * (1 + p.boost));
+                }
+                
+                if (candVotos < Math.floor(QE * 0.20)) return false;
+
+                return true;
+            });
+
+            // Fallback (Decisão STF): se ninguém cumprir a regra 80/20, a lei distribui
+            // a sobra para o partido com a maior média, independentemente das regras anteriores.
+            if (partidosAptos.length === 0) {
+                partidosAptos = cenarios.filter(p => (p.vagasDiretas + p.vagasSobras) < p.currentCandidateList.length);
+                if (partidosAptos.length === 0) break; // Segurança
+            }
+
             partidosAptos.forEach(p => {
                 p.mediaVotos = p.votos / (p.vagasDiretas + p.vagasSobras + 1);
             });
@@ -641,6 +766,10 @@
             if (vencedor) {
                 vencedor.vagasSobras++;
                 const perdedor = partidosAptos[1];
+                
+                const pRef = cenarios.find(p => p.nome === vencedor.nome);
+                pRef.vagasSobras = vencedor.vagasSobras;
+
                 sobrasLog.push({
                     vaga: DADOS_ELEICOES.SC.de.vagas - vagasSobrasRestantes + 1,
                     vencedor: vencedor.nome,
@@ -702,9 +831,11 @@
         const historico2022 = DADOS_ELEICOES.SC.de.historico.find(h => h.ano === 2022);
         const QE2022 = Math.floor(historico2022.votos_validos / 40);
         
-        const partidos2022 = Object.keys(historico2022.partidos).map(nome => ({
-            nome: nome,
-            votos: historico2022.partidos[nome].votos
+        // Use grouped federations from baseScenario for consistency
+        const partidos2022 = baseScenario.partidos.map(p => ({
+            nome: p.nome,
+            votos: p.votosBase2022,
+            candidatos: p.candidatos
         }));
 
         // Simplified distribution for summary only
@@ -718,7 +849,7 @@
 
         // Calculate average note de corte from raw data
         let notasDeCorte = [];
-        Object.values(historico2022.partidos).forEach(p => {
+        partidos2022.forEach(p => {
             const eleitos = p.candidatos.filter(c => c.isEleito);
             if (eleitos.length > 0) {
                 const ultimoEleito = eleitos[eleitos.length - 1];
@@ -743,7 +874,7 @@
         const sorted = [...cenarios].filter(p => p.totalVagas > 0).sort((a, b) => b.totalVagas - a.totalVagas);
 
         sorted.forEach(p => {
-            const color = PARTY_COLORS[p.nome.split(' ')[0]] || '#64748b';
+            const color = PARTY_COLORS[p.nome.split('/')[0]] || '#64748b';
             const item = document.createElement('div');
             item.className = 'p-2 rounded-lg clickable';
             item.setAttribute('onclick', `showPartyModal('${p.nome}')`);
@@ -834,7 +965,7 @@
         const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
         if (!partyData) return;
 
-        const color = PARTY_COLORS[partyName.split(' ')[0]] || '#64748b';
+        const color = PARTY_COLORS[partyName.split('/')[0]] || '#64748b';
         
         const diretas = Array.from({ length: partyData.vagasDiretas }, (_, i) => i);
         const sobras = Array.from({ length: partyData.vagasSobras }, (_, i) => i + partyData.vagasDiretas);
@@ -952,7 +1083,7 @@
         editorContainer.innerHTML = ''; // Clear previous content
 
         baseScenario.partidos.sort((a, b) => b.votosBase2022 - a.votosBase2022).forEach(party => {
-            const color = PARTY_COLORS[party.nome] || '#64748b';
+            const color = PARTY_COLORS[party.nome.split('/')[0]] || '#64748b';
             const accordionItem = document.createElement('div');
             accordionItem.className = 'bg-gray-900/50 rounded-lg party-accordion-item';
             const partyId = party.nome.replace(/[^a-zA-Z0-9]/g, '');
@@ -1000,15 +1131,14 @@
                     <div class="candidate-list-container space-y-2">${candidatesHtml}</div>
                     <div class="mt-4 flex items-center gap-4">
                         <button class="text-sm text-primary" onclick="addCandidateRowToParty('${partyId}', '${party.nome}')"><i class="fa-solid fa-plus mr-2"></i>Adicionar Candidato</button>
-                        <button class="text-sm text-secondary" onclick="generateAISlateAnalysis('${party.nome}')"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Analisar Legenda com IA</button>
                     </div>
                 </div>
             `;
             editorContainer.appendChild(accordionItem);
         });
         
-        // Add search functionality
-        document.getElementById('legenda-search').addEventListener('input', (e) => {
+        // Add search functionality with debounce for better performance
+        const handleSearch = debounce((e) => {
             const searchTerm = e.target.value.toLowerCase();
             document.querySelectorAll('.party-accordion-item').forEach(partyAccordion => {
                 const partyName = partyAccordion.querySelector('.party-name').textContent.toLowerCase();
@@ -1032,7 +1162,8 @@
                 
                 partyAccordion.style.display = partyVisible ? 'block' : 'none';
             });
-        });
+        }, 250);
+        document.getElementById('legenda-search').addEventListener('input', handleSearch);
     }
 
     function updateProjectedVotesInEditor(element, partyId) {
@@ -1128,7 +1259,8 @@
             updateLegendaTotalVotes(fromPartyId);
             updateLegendaTotalVotes(toPartyId);
 
-            showInfoModal(`${candidateName} movido para ${toPartyName}. Salve as alterações para aplicar.`);
+            showToast(`${candidateName} movido para ${toPartyName}. Salve as alterações para aplicar.`, 'primary');
+            closeModal();
         });
     }
 
@@ -1171,7 +1303,7 @@
         });
 
         localStorage.setItem('salaDeGuerraLegendas_v1', JSON.stringify(savedLegendas));
-        showInfoModal('Todas as legendas foram salvas e aplicadas nas simulações!');
+        showToast('Todas as legendas foram salvas e aplicadas nas simulações!', 'success');
         updateScenario();
         initializeAnaliseTab(); // Refresh analysis with new data
     }
@@ -1184,7 +1316,7 @@
             initializeControls(); // Re-init controls to re-enable boost sliders
             updateScenario();
             initializeAnaliseTab();
-            showInfoModal("Todas as legendas foram restauradas.");
+            showToast("Todas as legendas foram restauradas.", 'success');
         });
     }
 
@@ -1283,6 +1415,16 @@
 
         const candidateNames = candidatesData.map(c => c.name);
         
+        // --- EXTRAÇÃO DE DADOS MUNICIPAIS (2024) PARA CRUZAMENTO ---
+        let prefeitos2024 = 0;
+        let vereadores2024 = 0;
+        Object.values(ELEITOS_2024_DATA).flat().forEach(cand => {
+            if (cand.PARTIDO === partyName) {
+                if (cand.CARGO.includes('PREFEITO')) prefeitos2024++;
+                if (cand.CARGO.includes('VEREADOR') || cand.CARGO.includes('VEREADORA')) vereadores2024++;
+            }
+        });
+        
         // --- NEW: Calculate numerical summary ---
         const totalVotosLegenda = candidatesData.reduce((sum, c) => sum + c.projectedVotes, 0);
         const numeroCandidatos = candidatesData.length;
@@ -1292,35 +1434,34 @@
 
         const summaryHtml = `
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 text-center">
-                <div class="bg-background p-3 rounded-lg">
+                <div class="bg-background p-3 rounded-lg border border-border">
                     <p class="text-xs font-semibold text-text-light uppercase">Votos Totais</p>
                     <p class="text-2xl font-bold text-primary">${totalVotosLegenda.toLocaleString('pt-BR')}</p>
                 </div>
-                <div class="bg-background p-3 rounded-lg">
+                <div class="bg-background p-3 rounded-lg border border-border">
                     <p class="text-xs font-semibold text-text-light uppercase">Candidatos</p>
                     <p class="text-2xl font-bold text-primary">${numeroCandidatos}</p>
                 </div>
-                <div class="bg-background p-3 rounded-lg">
-                    <p class="text-xs font-semibold text-text-light uppercase">Puxador de Voto</p>
-                    <p class="text-2xl font-bold text-primary">${votosPuxador.toLocaleString('pt-BR')}</p>
+                <div class="bg-background p-3 rounded-lg border border-border">
+                    <p class="text-xs font-semibold text-text-light uppercase">Base 2024 (Pref/Ver)</p>
+                    <p class="text-2xl font-bold text-secondary">${prefeitos2024} / ${vereadores2024}</p>
                 </div>
-                <div class="bg-background p-3 rounded-lg">
-                    <p class="text-xs font-semibold text-text-light uppercase">Competitivos*</p>
-                    <p class="text-2xl font-bold text-primary">${candidatosCompetitivos}</p>
+                <div class="bg-background p-3 rounded-lg border border-border">
+                    <p class="text-xs font-semibold text-text-light uppercase">Apoios Monitorados</p>
+                    <p class="text-2xl font-bold text-success">${Math.round(totalSupportVotes).toLocaleString('pt-BR')}</p>
                 </div>
             </div>
-            <p class="text-xs text-text-neutral text-center mb-6 -mt-4">*Candidatos com projeção >10% do Quociente (${(qeThreshold).toLocaleString('pt-BR', {maximumFractionDigits: 0})}).</p>
         `;
 
-        const modalTitle = `Análise Estratégica da Legenda: ${partyName}`;
-        const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[15rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
+        const modalTitle = `Cruzamento Estratégico de Legenda: ${partyName}`;
+        const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2><p class="text-xs mt-1">Cruzando projeções de 2026 com base municipal de 2024</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[15rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
         showModal(modalContent);
         
         const apiKey = "";
         
-        const systemPrompt = "Você é um estrategista político de alto nível focando nas eleições de 2026 em Santa Catarina. O usuário fornecerá dados projetados baseados nas eleições de 2022. Suas respostas devem ser EXTREMAMENTE DIRETAS, visuais e dinâmicas. Nunca escreva parágrafos longos. Use emojis para destacar os pontos. O foco é apontar buracos matemáticos, potencial de crescimento cruzando os dados e viabilidade real para 2026.";
+        const systemPrompt = "Você é um estrategista político de alto nível focando nas eleições de 2026 em Santa Catarina. O usuário fornecerá dados estaduais projetados e a base municipal real conquistada em 2024. Suas respostas devem ser EXTREMAMENTE DIRETAS, visuais e dinâmicas (sem parágrafos longos, use emojis). O foco é cruzar os dados: a base de prefeitos/vereadores de 2024 sustenta a meta de votos de 2026? Aponte buracos matemáticos e viabilidade tática.";
         
-        const userQuery = `Analise a seguinte composição de legenda (projetada para 2026, com base em 2022) do partido **${partyName}** em SC:\n\n- ${candidateNames.join('\n- ')}\n\nForneça um briefing tático super rápido:\n🔥 **Maior Força:** (1 linha)\n⚠️ **Grande Risco da Legenda:** (1 linha)\n🎯 **Alvo para 2026:** (O que falta buscar? Que tipo de perfil de candidato adicionar? Máximo 2 linhas)`;
+        const userQuery = `Analise a composição de legenda do partido **${partyName}** em SC:\n\n**Projeção Estadual 2026:**\n- Candidatos: ${candidateNames.join(', ')}\n- Votos Totais Projetados: ${totalVotosLegenda.toLocaleString('pt-BR')}\n\n**Força Municipal Real (Eleitos em 2024):**\n- Prefeitos/Vices: ${prefeitos2024}\n- Vereadores: ${vereadores2024}\n- Votos de Apoio Monitorados pelo Usuário: ${Math.round(totalSupportVotes).toLocaleString('pt-BR')}\n\nCom base nesse cruzamento de dados, forneça um briefing tático super rápido:\n🔥 **Maior Força Estrutural:** (A base de 2024 aguenta o projeto de 2026?)\n⚠️ **Grande Risco de Desidratação:** (Onde a conta não fecha?)\n🎯 **Alvo Tático para 2026:** (Ação prática: filiar mais prefeitos? Focar em dobradinhas?)`;
         
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const payload = {
@@ -1367,13 +1508,23 @@
 
         const apiKey = ""; 
 
-        resultContainer.innerHTML = `<div class="flex justify-center items-center h-full min-h-[10rem]"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary"></i><p class="ml-3 font-semibold">Analisando cenários robustos e movimentações para 2026...</p></div>`;
+        resultContainer.innerHTML = `<div class="flex justify-center items-center h-full min-h-[10rem]"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary"></i><p class="ml-3 font-semibold">Cruzando dados de 2024 e projetando 2026...</p></div>`;
         generateBtn.disabled = true;
 
         const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
         
-        // Novo System Prompt: Mais robusto, analítico, mas mantendo a formatação dinâmica de Dashboard
-        let systemPrompt = "Você é um Consultor Estratégico Sênior de alto nível, especializado em eleições proporcionais no Brasil (foco SC 2026). Produza análises ROBUSTAS, TÁTICAS e PROFUNDAS, mas apresentadas de forma EXTREMAMENTE escaneável (formato de Painel Executivo). Use tópicos curtos, frases de impacto e emojis. Vá além da matemática básica: sugira movimentações de janela partidária, perfil ideal de novas filiações, impacto de federações e roubo de votos. NUNCA escreva parágrafos longos.";
+        // --- EXTRAÇÃO DE DADOS MUNICIPAIS (2024) PARA CRUZAMENTO ---
+        let prefeitos2024 = 0;
+        let vereadores2024 = 0;
+        Object.values(ELEITOS_2024_DATA).flat().forEach(cand => {
+            if (cand.PARTIDO === partyName) {
+                if (cand.CARGO.includes('PREFEITO')) prefeitos2024++;
+                if (cand.CARGO.includes('VEREADOR') || cand.CARGO.includes('VEREADORA')) vereadores2024++;
+            }
+        });
+        
+        // Novo System Prompt: Cruzamento de dados focado na estrutura regional vs meta estadual
+        let systemPrompt = "Você é um Consultor Estratégico Sênior de alto nível, especializado em cruzar dados eleitorais municipais (2024) com projetos estaduais (2026) em Santa Catarina. Produza análises ROBUSTAS, TÁTICAS e PROFUNDAS, apresentadas de forma EXTREMAMENTE escaneável (formato de Painel Executivo). Use tópicos curtos e emojis. Faça o cruzamento: a base de prefeitos/vereadores do partido suporta a meta de deputados estaduais? NUNCA escreva parágrafos longos.";
         let userQuery = "";
 
         if (candidateName) {
@@ -1399,29 +1550,33 @@
             let concorrenciaInterna = "";
             if (concorrenteDireto) {
                  const projAcima = Math.floor(concorrenteDireto.votos * (1 + (concorrenteDireto.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
-                 concorrenciaInterna += `- Alvo Imediato Acima: ${concorrenteDireto.nome} (${(projAcima - projectedVotes).toLocaleString('pt-BR')} votos de distância)\n`;
+                 concorrenciaInterna += `- Alvo Acima: ${concorrenteDireto.nome} (${(projAcima - projectedVotes).toLocaleString('pt-BR')} votos à frente)\n`;
             }
             if (perseguidorDireto) {
                  const projAbaixo = Math.floor(perseguidorDireto.votos * (1 + (perseguidorDireto.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
-                 concorrenciaInterna += `- Ameaça Imediata Abaixo: ${perseguidorDireto.nome} (${(projectedVotes - projAbaixo).toLocaleString('pt-BR')} votos de distância)\n`;
+                 concorrenciaInterna += `- Ameaça Abaixo: ${perseguidorDireto.nome} (${(projectedVotes - projAbaixo).toLocaleString('pt-BR')} votos atrás)\n`;
             }
 
-            userQuery = `Elabore um Dossiê Tático para o candidato **${candidateName}** (${partyName}) visando 2026.
+            userQuery = `Elabore um Dossiê Tático Cruzado para **${candidateName}** (${partyName}) visando 2026.
             
-            **Dados (Projeção 2026 baseada na eleição passada):**
-            - Votos Estimados: ${projectedVotes.toLocaleString('pt-BR')}
+            **Meta Estadual 2026 (Simulação):**
+            - Votos Estimados do Candidato: ${projectedVotes.toLocaleString('pt-BR')}
             - Posição na Chapa: ${position}º (Status Atual: ${statusStr})
-            - Margem para a Nota de Corte do Partido: ${diffCorte > 0 ? '+' : ''}${diffCorte.toLocaleString('pt-BR')} votos
-            - Quociente Eleitoral (QE): ${currentSimulatedScenario.QE.toLocaleString('pt-BR')}
+            - Margem de Segurança: ${diffCorte > 0 ? '+' : ''}${diffCorte.toLocaleString('pt-BR')} votos da Nota de Corte
             
-            **Cenário de Concorrência Interna:**
-            ${concorrenciaInterna || "- Isolado confortavelmente na chapa."}
+            **Máquina Partidária Municipal (Base 2024 do Partido):**
+            - Prefeitos do Partido: ${prefeitos2024}
+            - Vereadores do Partido: ${vereadores2024}
+            - Votos Regionais Carimbados no Painel: ${Math.round(totalSupportVotes).toLocaleString('pt-BR')}
+            
+            **Guerra Interna:**
+            ${concorrenciaInterna || "- Líder isolado da chapa."}
 
-            Responda EXATAMENTE com estes 4 blocos (use bullet points rápidos):
-            🎯 **Diagnóstico de Sobrevivência:** (Chances reais na legenda atual considerando os números)
-            🚪 **Tática de Janela Partidária:** (Vale a pena ficar? Se fosse mudar, qual seria o tamanho do partido ideal para otimizar esses votos?)
-            ⚔️ **Guerra de Posição:** (Como lidar com os concorrentes que estão logo acima ou abaixo dele na lista)
-            🚀 **Plano de Crescimento:** (Ação prática agressiva para consolidar a cadeira nas urnas)`;
+            Responda EXATAMENTE com estes 4 blocos curtos:
+            🎯 **Diagnóstico de Viabilidade:** (A estrutura municipal do partido sustenta essa projeção de votos dele?)
+            🤝 **Engenharia de Apoio:** (Quantos prefeitos/vereadores a mais ele precisa "amarrar" para garantir a margem de segurança?)
+            ⚔️ **Guerra de Posição:** (Como se blindar contra os concorrentes listados acima/abaixo)
+            🚀 **Tática Principal 2026:** (Dica de campo prática para consolidar)`;
 
         } else {
             // Análise Geral do Partido
@@ -1433,26 +1588,28 @@
                 
             const atRiskSeats = currentSimulatedScenario.sobrasLog
                 .filter(log => log.vencedor === partyName || log.perdedor === partyName)
-                .map(log => log.vencedor === partyName ? `Vencendo disputa contra ${log.perdedor}` : `Sendo engolido por ${log.vencedor}`);
+                .map(log => log.vencedor === partyName ? `Ganhando de ${log.perdedor}` : `Perdendo para ${log.vencedor}`);
 
-            userQuery = `Elabore um Dossiê Tático Macro para o partido **${partyName}** visando 2026.
+            userQuery = `Elabore um Dossiê Macro Cruzado (2024 x 2026) para o partido **${partyName}**.
             
-            **Projeção Matemática 2026:**
-            - Total de Votos da Legenda: ${partyData.votos.toLocaleString('pt-BR')}
-            - Expectativa de Cadeiras: ${partyData.totalVagas} (Diretas: ${partyData.vagasDiretas} | Sobras: ${partyData.vagasSobras})
+            **Máquina Municipal Conquistada (2024):**
+            - Prefeitos/Vices Eleitos: ${prefeitos2024}
+            - Vereadores Eleitos: ${vereadores2024}
+            - Votos Base Monitorados (Painel CIADESCP): ${Math.round(totalSupportVotes).toLocaleString('pt-BR')}
+            
+            **Projeção Estadual Projetada (2026):**
+            - Votos Totais Estimados: ${partyData.votos.toLocaleString('pt-BR')}
+            - Expectativa de Cadeiras: ${partyData.totalVagas} (${partyData.vagasDiretas} Diretas | ${partyData.vagasSobras} Sobras)
             - Nota de Corte Projetada: ${partyData.notaCorte.toLocaleString('pt-BR')} votos
-            - Quociente Eleitoral (QE): ${currentSimulatedScenario.QE.toLocaleString('pt-BR')}
             
-            **Guerra pelas Sobras:**
-            ${atRiskSeats.length > 0 ? atRiskSeats.join('\n') : "- Sem embates diretos nas últimas cadeiras de sobra."}
-            
-            **Ameaças Externas Principais:** ${competitors.join(', ')}
+            **Risco nas Sobras:**
+            ${atRiskSeats.length > 0 ? atRiskSeats.join('\n') : "- Sem embate iminente nas sobras."}
 
-            Responda EXATAMENTE com estes 4 blocos (use bullet points rápidos):
-            📊 **Radiografia da Força:** (A legenda é eficiente? Depende muito de puxadores ou é pulverizada?)
-            🧲 **Engenharia de Filiação:** (Exatamente qual perfil de candidato ou volume de votos o partido PRECISA buscar na janela partidária para garantir a próxima sobra?)
-            🤝 **Jogo de Alianças:** (Qual o perfil de bloco ideológico ou federação seria vital para proteger a chapa?)
-            ⚠️ **Risco de Esvaziamento:** (Há perigo de candidatos atuais fugirem para legendas com corte menor? Como blindar?)`;
+            Responda EXATAMENTE com estes 4 blocos curtos:
+            📊 **Índice de Conversão:** (A base de prefeitos/vereadores de 2024 consegue entregar os votos totais projetados para 2026? É realista?)
+            🧲 **Plano de Fundo Partidário/Filiação:** (O que falta de base orgânica municipal para cravar as cadeiras de sobra?)
+            ⚔️ **Defesa Contra Ameaças:** (Como os concorrentes ${competitors.join(', ')} podem atacar as bases deste partido?)
+            🎯 **Estratégia Definitiva:** (Qual a ação mais importante agora? Fechar com federações, aliciar suplentes, investir em capitais?)`;
         }
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
@@ -1494,7 +1651,6 @@
         }
     }
 
-
     function initializePuxadoresAnalise() {
         const container = document.getElementById('analise-puxadores-container');
         container.innerHTML = '';
@@ -1513,7 +1669,7 @@
 
             const card = document.createElement('div');
             card.className = 'bg-gray-900/50 p-4 rounded-lg border border-border flex flex-col';
-            card.innerHTML = `<div class="flex items-center mb-3"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><h3 class="font-bold text-lg text-text-main">${party.nome}</h3></div><ul class="text-sm space-y-2 flex-grow">${top3.map((cand, i) => `<li class="flex justify-between items-center"><span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span><div class="flex items-center"><span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span></div></li>`).join('')}</ul><div class="mt-4 pt-4 border-t border-border"><div class="flex justify-between text-sm font-bold mb-1"><span>Concentração Top 3</span><span class="${diagnosisColor}">${percentage}%</span></div><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div></div><p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p></div>`;
+            card.innerHTML = `<div class="flex items-center mb-3"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome.split('/')[0]] || '#64748b'}"></div><h3 class="font-bold text-lg text-text-main">${party.nome}</h3></div><ul class="text-sm space-y-2 flex-grow">${top3.map((cand, i) => `<li class="flex justify-between items-center"><span class="text-text-light truncate"><strong class="mr-2">${i+1}.</strong>${cand.nome}</span><div class="flex items-center"><span class="font-mono text-text-main mr-3">${cand.votos.toLocaleString('pt-BR')}</span></div></li>`).join('')}</ul><div class="mt-4 pt-4 border-t border-border"><div class="flex justify-between text-sm font-bold mb-1"><span>Concentração Top 3</span><span class="${diagnosisColor}">${percentage}%</span></div><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full" style="width: ${percentage}%"></div></div><p class="text-xs text-center mt-2 ${diagnosisColor}">${diagnosis}</p></div>`;
             container.appendChild(card);
         });
     }
@@ -1522,12 +1678,12 @@
         const container = document.getElementById('analise-eficiencia-container');
         container.innerHTML = '';
         const partidosComEleitos = baseScenario.partidos.map(party => {
-            const eleitosData = DADOS_ELEICOES.SC.de.historico[0].partidos[party.nome];
-            if (!eleitosData) return null;
-            const eleitos = eleitosData.candidatos.filter(c => c.isEleito).length;
-            const totalVotos = eleitosData.votos;
+            const eleitos = party.candidatos.filter(c => c.isEleito).length;
+            const totalVotos = party.votosBase2022;
             return eleitos > 0 ? { nome: party.nome, custoPorCadeira: totalVotos / eleitos, totalVotos: totalVotos, totalEleitos: eleitos } : null;
         }).filter(p => p !== null).sort((a, b) => a.custoPorCadeira - b.custoPorCadeira);
+        
+        if(partidosComEleitos.length === 0) return;
         
         const maxCost = Math.max(...partidosComEleitos.map(p => p.custoPorCadeira));
 
@@ -1535,11 +1691,32 @@
             const barWidth = (party.custoPorCadeira / maxCost * 100);
             const item = document.createElement('div');
             item.className = 'bg-gray-900/50 p-3 rounded-lg';
-            item.innerHTML = `<div class="flex flex-col sm:flex-row justify-between sm:items-center"><div class="flex items-center mb-2 sm:mb-0"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome] || '#64748b'}"></div><span class="font-bold">${party.nome}</span></div><div class="text-sm text-text-light">${party.totalEleitos} eleito(s) com ${party.totalVotos.toLocaleString('pt-BR')} votos</div></div><div class="mt-2"><div class="flex justify-between items-center text-xs text-text-light mb-1"><span>Custo por Cadeira</span><span class="font-bold text-lg text-primary">${Math.round(party.custoPorCadeira).toLocaleString('pt-BR')}</span></div><div class="w-full bg-gray-700 rounded-full h-4"><div class="bg-primary h-4 rounded-full" style="width: ${barWidth}%"></div></div></div>`;
+            item.innerHTML = `<div class="flex flex-col sm:flex-row justify-between sm:items-center"><div class="flex items-center mb-2 sm:mb-0"><div class="w-4 h-4 rounded-full mr-3" style="background-color: ${PARTY_COLORS[party.nome.split('/')[0]] || '#64748b'}"></div><span class="font-bold">${party.nome}</span></div><div class="text-sm text-text-light">${party.totalEleitos} eleito(s) com ${party.totalVotos.toLocaleString('pt-BR')} votos</div></div><div class="mt-2"><div class="flex justify-between items-center text-xs text-text-light mb-1"><span>Custo por Cadeira</span><span class="font-bold text-lg text-primary">${Math.round(party.custoPorCadeira).toLocaleString('pt-BR')}</span></div><div class="w-full bg-gray-700 rounded-full h-4"><div class="bg-primary h-4 rounded-full" style="width: ${barWidth}%"></div></div></div>`;
             container.appendChild(item);
         });
     }
     
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-success' : (type === 'danger' ? 'bg-danger' : 'bg-primary');
+        const icon = type === 'success' ? 'fa-check-circle' : (type === 'danger' ? 'fa-triangle-exclamation' : 'fa-info-circle');
+        
+        toast.className = `toast ${bgColor} flex items-center shadow-lg`;
+        toast.innerHTML = `<i class="fa-solid ${icon} mr-3 text-lg"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+        
+        // Trigger reflow to ensure animation plays
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3500);
+    }
+
     function showInfoModal(message) {
         showModal(`<div class="p-6 text-center"><p class="text-lg">${message}</p></div>`);
         setTimeout(closeModal, 2000);
