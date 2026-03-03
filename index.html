@@ -167,14 +167,7 @@
         <!-- Header Section -->
         <header class="bg-card/50 backdrop-blur-sm sticky top-0 z-20 border-b border-border">
             <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-                 <div id="logo-container" class="flex items-center space-x-3">
-                     <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-                         <span class="font-playfair font-bold text-2xl text-white">SM</span>
-                     </div>
-                     <div>
-                         <p class="font-playfair font-bold text-lg text-text-main leading-tight">Silmara Miguel</p>
-                         <p class="text-xs text-text-light leading-tight">Análise Estratégica</p>
-                     </div>
+                 <div class="w-48"> <!-- Placeholder for left alignment to balance right button -->
                  </div>
                 <div class="text-center">
                     <h1 class="text-2xl font-bold text-text-main">
@@ -182,7 +175,7 @@
                     </h1>
                     <p class="text-text-light text-sm">Análise e Simulação de Cenários Eleitorais - SC 2026</p>
                 </div>
-                <div class="w-48 text-right"> <!-- Placeholder for alignment -->
+                <div class="w-48 text-right flex justify-end">
                      <button onclick="window.print()" class="bg-primary/20 text-primary hover:bg-primary hover:text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm transition-colors duration-200 no-print">
                          <i class="fa-solid fa-print mr-2"></i> Imprimir Relatório
                      </button>
@@ -313,12 +306,18 @@
                                  <p class="text-text-light mt-1">Gere insights e recomendações para um partido com base no cenário simulado atual.</p>
                              </div>
                         </div>
-                         <div class="flex items-end gap-4">
-                             <div class="flex-grow">
+                         <div class="flex flex-col lg:flex-row items-end gap-4">
+                             <div class="flex-grow w-full lg:w-auto">
                                  <label for="ai-party-select" class="block text-sm font-medium text-text-light mb-1">Selecione o Partido</label>
-                                 <select id="ai-party-select" class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"></select>
+                                 <select id="ai-party-select" class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition" onchange="populateAICandidateSelect()"></select>
                              </div>
-                             <button id="ai-generate-btn" onclick="generateAIAnalysis()" class="bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-violet-500 transition-colors duration-200 flex items-center">
+                             <div class="flex-grow w-full lg:w-auto">
+                                 <label for="ai-candidate-select" class="block text-sm font-medium text-text-light mb-1">Selecione o Candidato (Opcional)</label>
+                                 <select id="ai-candidate-select" class="w-full p-3 bg-gray-900/50 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition">
+                                     <option value="">-- Visão Geral do Partido --</option>
+                                 </select>
+                             </div>
+                             <button id="ai-generate-btn" onclick="generateAIAnalysis()" class="w-full lg:w-auto bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-violet-500 transition-colors duration-200 flex items-center justify-center h-[50px]">
                                  <i class="fa-solid fa-brain mr-2"></i> Gerar Análise
                              </button>
                          </div>
@@ -403,7 +402,7 @@
         'PSD': { votos: 293675, candidatos: [ { nome: 'Mario Motta', votos: 56363, isEleito: true }, { nome: 'Julio Garcia', votos: 49958, isEleito: true }, { nome: 'Napoleão Bernardes', votos: 36923, isEleito: true }, { nome: 'Zé Caramori', votos: 24394, isEleito: false }, { nome: 'Gerri da Consoli', votos: 22668, isEleito: false }, { nome: 'Silvio Alexandre Zancanaro', votos: 19672, isEleito: false }, { nome: 'Adeliana Dal Pont', votos: 18484, isEleito: false }, { nome: 'Polaco', votos: 9719, isEleito: false }, { nome: 'Wellington', votos: 8381, isEleito: false }, { nome: 'Mario Marcondes', votos: 7739, isEleito: false }, { nome: 'Gerson', votos: 3265, isEleito: false }, { nome: 'Carla Hofmann', votos: 3014, isEleito: false }, { nome: 'Arlindo Cruz', votos: 2559, isEleito: false }, { nome: 'Coronel Vonk', votos: 2352, isEleito: false }, { nome: 'Bete Werner Quandt', votos: 2037, isEleito: false }, { nome: 'Deyvid Breis Boca Aberta', votos: 1369, isEleito: false }, { nome: 'Sargento Stoklosa', votos: 1217, isEleito: false }, { nome: 'Helenice Pereira Duarte', votos: 1056, isEleito: false }, { nome: 'Cláudio Motoboy do Coletivo SC', votos: 1054, isEleito: false }, { nome: 'Ciro Girardi', votos: 995, isEleito: false }, { nome: 'Marcia Badalotti', votos: 801, isEleito: false }, { nome: 'Voltolini Taxista', votos: 736, isEleito: false }, { nome: 'Inajara Rodrigues', votos: 589, isEleito: false }, { nome: 'Henrique Ávila', votos: 382, isEleito: false }, { nome: 'Isa Simas', votos: 151, isEleito: false }, { nome: 'Katielly Lanzini', votos: 53, isEleito: false } ] },
         'PP': { votos: 280551, candidatos: [ { nome: 'Zé Milton', votos: 56585, isEleito: true }, { nome: 'Altair Silva', votos: 46086, isEleito: true }, { nome: 'Pepê Collaço', votos: 28809, isEleito: true }, { nome: 'Pedrão', votos: 27344, isEleito: false }, { nome: 'João Amin', votos: 19154, isEleito: false }, { nome: 'Luizinho da Regional', votos: 15324, isEleito: false }, { nome: 'Fernando Cruzzetta', votos: 10650, isEleito: false }, { nome: 'Anelisio da Assessoritec', votos: 9848, isEleito: false }, { nome: 'Almir Vieira', votos: 9390, isEleito: false }, { nome: 'Magno Bollmann', votos: 9278, isEleito: false }, { nome: 'Maurilio Moraes', votos: 7981, isEleito: false }, { nome: 'Cattoni', votos: 4789, isEleito: false }, { nome: 'Diego Pandini Diabo Loiro', votos: 4700, isEleito: false }, { nome: 'Mara da Saúde', votos: 4654, isEleito: false }, { nome: 'Julio Kaminski', votos: 3546, isEleito: false }, { nome: 'Gaúcho Amarelo', votos: 3537, isEleito: false }, { nome: 'Douglas Steffen Contador', votos: 2516, isEleito: false }, { nome: 'Katsumi', votos: 2506, isEleito: false }, { nome: 'Manjuva Caminhoneiro', votos: 1395, isEleito: false }, { nome: 'Giovana Menegotto', votos: 1325, isEleito: false }, { nome: 'Simone Andrade', votos: 704, isEleito: false }, { nome: 'Paulinha do Big Lojão', votos: 697, isEleito: false }, { nome: 'Adri Joias', votos: 404, isEleito: false }, { nome: 'Eneida Pereira', votos: 398, isEleito: false }, { nome: 'Professora Rosa Maria Tesser', votos: 370, isEleito: false }, { nome: 'Cabo Camargo', votos: 344, isEleito: false }, { nome: 'Mabel Ziegler', votos: 228, isEleito: false }, { nome: 'João Mira Taxista', votos: 191, isEleito: false }, { nome: 'Luciano Niua', votos: 90, isEleito: false }, { nome: 'Mari Rieke', votos: 54, isEleito: false }, { nome: 'Jaques Rodrigues', votos: 16, isEleito: false } ] },
         'UNIÃO': { votos: 265764, candidatos: [ { nome: 'Jair Miotto', votos: 33682, isEleito: true }, { nome: 'Repórter Sérgio Guimarães', votos: 27977, isEleito: true }, { nome: 'Marcos da Rosa', votos: 25845, isEleito: true }, { nome: 'Laércio Schuster', votos: 24605, isEleito: false }, { nome: 'Constancio Maciel', votos: 23614, isEleito: false }, { nome: 'Márcio Burigo', votos: 15296, isEleito: false }, { nome: 'Felipe Estevão', votos: 15146, isEleito: false }, { nome: 'Dr João', votos: 12169, isEleito: false }, { nome: 'Tânia Larson', votos: 11556, isEleito: false }, { nome: 'Mauro Dresch', votos: 9424, isEleito: false }, { nome: 'Sidney Sabel', votos: 7295, isEleito: false }, { nome: 'Jaime Pasqualini', votos: 5857, isEleito: false }, { nome: 'Lioilson', votos: 5502, isEleito: false }, { nome: 'Nadir Bau', votos: 5453, isEleito: false }, { nome: 'Samuel Ramos', votos: 4557, isEleito: false }, { nome: 'Sub Tenente Wancarlos', votos: 3873, isEleito: false }, { nome: 'Abrahão Mussi', votos: 3126, isEleito: false }, { nome: 'Ezequiel de Souza', votos: 3081, isEleito: false }, { nome: 'Aa ST Veterana Margareth Prats', votos: 2650, isEleito: false }, { nome: 'Paulo Zwiefka', votos: 2306, isEleito: false }, { nome: 'Mari Schorr', votos: 2292, isEleito: false }, { nome: 'Professor Arlindo', votos: 1623, isEleito: false }, { nome: 'Fernando Amorim', votos: 1458, isEleito: false }, { nome: 'Sandro Fortes', votos: 1446, isEleito: false }, { nome: 'Ivan da Luz', votos: 1294, isEleito: false }, { nome: 'Cris da Saúde', votos: 1257, isEleito: false }, { nome: 'Luciano Camargo', votos: 1254, isEleito: false }, { nome: 'Nina', votos: 1034, isEleito: false }, { nome: 'Cleuse Soares', votos: 958, isEleito: false }, { nome: 'Mauro Goedert', votos: 857, isEleito: false }, { nome: 'Youtuber Gabriela Zamboni', votos: 562, isEleito: false }, { nome: 'Luis Olavo Nandi', votos: 521, isEleito: false }, { nome: 'Xuxa', votos: 504, isEleito: false }, { nome: 'Xandi da Toca', votos: 497, isEleito: false }, { nome: 'Márcia Gueno', votos: 398, isEleito: false }, { nome: 'Edilberto Santos', votos: 223, isEleito: false }, { nome: 'Bia Machado', votos: 144, isEleito: false }, { nome: 'Eliana Patriota', votos: 58, isEleito: false }, { nome: 'Arlene Ramon', votos: 32, isEleito: false } ] }, 
-        'PODE': { votos: 237137, candidatos: [ { nome: 'Paulinha', votos: 58694, isEleito: true }, { nome: 'Camilo Martins', votos: 44925, isEleito: true }, { nome: 'Lucas Neves', votos: 23053, isEleito: true }, { nome: 'Daniel Candido', votos: 20110, isEleito: false }, { nome: 'Thiago Morastoni', votos: 19914, isEleito: false }, { nome: 'Janice Krasniak', votos: 12965, isEleito: false }, { nome: 'Rodrigo Fachini', votos: 12649, isEleito: false }, { nome: 'Gabrielzinho', votos: 11578, isEleito: false }, { nome: 'Dra Celina Dittrich', votos: 7279, isEleito: false }, { nome: 'Dentinho', votos: 6311, isEleito: false }, { nome: 'Enfermeiro Pablo', votos: 5477, isEleito: false }, { nome: 'Tiago Maestri', votos: 2403, isEleito: false }, { nome: 'Camila Nascimento', votos: 2062, isEleito: false }, { nome: 'Alessandra Pires', votos: 1608, isEleito: false }, { nome: 'Lucelma Baldi', votos: 1332, isEleito: false }, { nome: 'Rafael Mello', votos: 1085, isEleito: false }, { nome: 'Igor Araujo', votos: 471, isEleito: false }, { nome: 'Baiano', votos: 375, isEleito: false }, { nome: 'Francisco Nunes', votos: 81, isEleito: false }, { nome: 'Dr Cabral', votos: 40, isEleito: false } ] }, 
+        'PODE': { votos: 237137, candidatos: [ { nome: 'Paulinha', votos: 58694, isEleito: true }, { nome: 'Camilo Martins', votos: 44925, isEleito: true }, { nome: 'Lucas Neves', votos: 23053, isEleito: true }, { nome: 'Daniel Candido', votos: 20110, isEleito: false }, { nome: 'Thiago Morastoni', 19914: 19914, isEleito: false }, { nome: 'Janice Krasniak', votos: 12965, isEleito: false }, { nome: 'Rodrigo Fachini', votos: 12649, isEleito: false }, { nome: 'Gabrielzinho', votos: 11578, isEleito: false }, { nome: 'Dra Celina Dittrich', votos: 7279, isEleito: false }, { nome: 'Dentinho', votos: 6311, isEleito: false }, { nome: 'Enfermeiro Pablo', votos: 5477, isEleito: false }, { nome: 'Tiago Maestri', votos: 2403, isEleito: false }, { nome: 'Camila Nascimento', votos: 2062, isEleito: false }, { nome: 'Alessandra Pires', votos: 1608, isEleito: false }, { nome: 'Lucelma Baldi', votos: 1332, isEleito: false }, { nome: 'Rafael Mello', votos: 1085, isEleito: false }, { nome: 'Igor Araujo', votos: 471, isEleito: false }, { nome: 'Baiano', votos: 375, isEleito: false }, { nome: 'Francisco Nunes', votos: 81, isEleito: false }, { nome: 'Dr Cabral', votos: 40, isEleito: false } ] }, 
         'PSDB': { votos: 211208, candidatos: [ { nome: 'Marcos Vieira', votos: 48466, isEleito: true }, { nome: 'Dr. Vicente', votos: 39797, isEleito: true }, { nome: 'Acélio Casagrande', votos: 39032, isEleito: false }, { nome: 'Saulo Sperotto', votos: 28114, isEleito: false }, { nome: 'Anna Carolina Martins', votos: 18325, isEleito: false }, { nome: 'Professora Suzana', votos: 7799, isEleito: false }, { nome: 'Aroldo Frigo Junior', votos: 6342, isEleito: false }, { nome: 'Jens Mantau', votos: 5071, isEleito: false }, { nome: 'Giovana Galato', votos: 4824, isEleito: false }, { nome: 'Soraya Michels', votos: 2230, isEleito: false }, { nome: 'Márcio Pereira', votos: 1966, isEleito: false }, { nome: 'Dejair Teixeira', votos: 1667, isEleito: false }, { nome: 'Izaias Machado', votos: 542, isEleito: false }, { nome: 'Jackson Lucian', votos: 425, isEleito: false }, { nome: 'Bastião Vieira', votos: 400, isEleito: false }, { nome: 'Daniela Sebben', votos: 166, isEleito: false }, { nome: 'Dra. Gabryella Baptista', votos: 105, isEleito: false } ] }, 
         'REPU': { votos: 163410, candidatos: [ { nome: 'Sergio Motta', votos: 44666, isEleito: true }, { nome: 'Leandro Lima', votos: 16572, isEleito: false }, { nome: 'Egídio Beckhauser', votos: 16123, isEleito: false }, { nome: 'Edson Piriquto', votos: 14472, isEleito: false }, { nome: 'Edilene', votos: 14098, isEleito: false }, { nome: 'Renê', votos: 10654, isEleito: false }, { nome: 'Luciano Buligon', votos: 9965, isEleito: false }, { nome: 'Dr. André Motta', votos: 7131, isEleito: false }, { nome: 'Otto Quintino', votos: 6891, isEleito: false }, { nome: 'Jefferson Monteiro', votos: 5326, isEleito: false }, { nome: 'Altamir Montibeller', votos: 4645, isEleito: false }, { nome: 'Zé Dresch', votos: 4237, isEleito: false }, { nome: 'Motinha', votos: 3791, isEleito: false }, { nome: 'Coronel Vieira', votos: 3736, isEleito: false }, { nome: 'Sargento Floriano', votos: 2536, isEleito: false }, { nome: 'Marcio Tinte', votos: 2316, isEleito: false }, { nome: 'Samira Porto', votos: 1451, isEleito: false }, { nome: 'Jeferson Petry', votos: 985, isEleito: false }, { nome: 'Silvinho da Farmácia', votos: 676, isEleito: false }, { nome: 'Ney', votos: 519, isEleito: false }, { nome: 'Sgt Ari', votos: 513, isEleito: false }, { nome: 'Clovis Kruger', votos: 402, isEleito: false }, { nome: 'Emilene Jacomelli', votos: 334, isEleito: false }, { nome: 'Juliana Cardoso', votos: 329, isEleito: false }, { nome: 'Nara Simão', votos: 316, isEleito: false }, { nome: 'Lívia Oliveira', votos: 263, isEleito: false }, { nome: 'Rosana da Silva', votos: 247, isEleito: false }, { nome: 'Jhenniffer Breenstup', votos: 144, isEleito: false }, { nome: 'Mirian Avila', votos: 104, isEleito: false } ] }, 
         'NOVO': { votos: 136632, candidatos: [ { nome: 'Matheus Cadorin', votos: 12390, isEleito: true }, { nome: 'André de Oliveira', votos: 12165, isEleito: false }, { nome: 'Lucas Gotardo', votos: 10947, isEleito: false }, { nome: 'Bruno Win', votos: 8555, isEleito: false }, { nome: 'Murilo Schmitz', votos: 8005, isEleito: false }, { nome: 'Dadá Westphal', votos: 7522, isEleito: false }, { nome: 'Rafael Ary', votos: 6694, isEleito: false }, { nome: 'Isadora Piana', votos: 6674, isEleito: false }, { nome: 'Marcos Zanella', votos: 6397, isEleito: false }, { nome: 'Celso Strobel', votos: 5430, isEleito: false }, { nome: 'André Casagrande', votos: 5378, isEleito: false }, { nome: 'Day Borges', votos: 4947, isEleito: false }, { nome: 'Leandro Schmöckel Gonçalves', votos: 3801, isEleito: false }, { nome: 'Sabino', votos: 2702, isEleito: false }, { nome: 'Bia Borges', votos: 2553, isEleito: false }, { nome: 'Stevan Arcari (Tangará)', votos: 2532, isEleito: false }, { nome: 'Débora Pierini', votos: 2274, isEleito: false }, { nome: 'Jussara Isabel Tumelero', votos: 2173, isEleito: false }, { nome: 'Maria Fernanda Gatti', votos: 2155, isEleito: false }, { nome: 'Fernando Torquato', votos: 2154, isEleito: false }, { nome: 'Luzia Frohlich', votos: 1894, isEleito: false }, { nome: 'Yordan Gums', votos: 1887, isEleito: false }, { nome: 'Eduardo Sávio', votos: 1676, isEleito: false }, { nome: 'Giovane Ferreira', votos: 1671, isEleito: false }, { nome: 'Orides Neto', votos: 1530, isEleito: false }, { nome: 'Indi Herbert', votos: 912, isEleito: false }, { nome: 'Dalva Pazin Vencato', votos: 567, isEleito: false }, { nome: 'Fabricio Favoretto', votos: 548, isEleito: false }, { nome: 'Professora Eliane', votos: 495, isEleito: false }, { nome: 'Lindomar Fróes', votos: 260, isEleito: false }, { nome: 'Rafael Ricardo', votos: 249, isEleito: false } ] }, 
@@ -879,10 +878,6 @@
         const modalHtml = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-danger">Análise Tática: Vaga #${vaga}</h2><p>Disputa por uma cadeira de sobra.</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div><div class="grid grid-cols-2 gap-4"><div class="bg-success/10 p-4 rounded-lg border border-success/30"><p class="text-sm font-bold text-success">GANHANDO</p><p class="text-xl font-bold">${vencedor}</p><p class="font-mono text-lg">${Math.ceil(mediaVencedor).toLocaleString('pt-BR')} <span class="text-xs text-text-light"> Média</span></p></div><div class="bg-warning/10 p-4 rounded-lg border border-warning/30"><p class="text-sm font-bold text-warning">AMEAÇA</p><p class="text-xl font-bold">${perdedor || 'N/A'}</p><p class="font-mono text-lg">${perdedor ? Math.ceil(mediaPerdedor).toLocaleString('pt-BR') : '-'} <span class="text-xs text-text-light"> Média</span></p></div></div><div class="mt-4 text-center bg-background p-3 rounded-lg"><p class="text-sm text-text-light">Diferença de Média</p><p class="text-2xl font-bold text-secondary">${diff.toLocaleString('pt-BR')} Votos</p></div><div class="bg-background p-4 rounded-lg mt-4">${analise}</div></div>`;
         showModal(modalHtml);
     }
-    
-    // =================================================================================
-    // API KEY MANAGEMENT - NO LONGER NEEDED, KEY IS HARDCODED
-    // =================================================================================
 
     // =================================================================================
     // ALLIANCE SIMULATOR LOGIC
@@ -1242,6 +1237,32 @@
                 option.textContent = p.nome;
                 select.appendChild(option);
             });
+        populateAICandidateSelect();
+    }
+
+    function populateAICandidateSelect() {
+        const partyName = document.getElementById('ai-party-select').value;
+        const select = document.getElementById('ai-candidate-select');
+        select.innerHTML = '<option value="">-- Visão Geral do Partido --</option>';
+
+        if (!partyName || !currentSimulatedScenario.cenarios) return;
+
+        const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
+        if (!partyData || !partyData.currentCandidateList) return;
+
+        const sortedCandidates = [...partyData.currentCandidateList].sort((a, b) => {
+            const projA = Math.floor(a.votos * (1 + (a.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
+            const projB = Math.floor(b.votos * (1 + (b.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
+            return projB - projA;
+        });
+
+        sortedCandidates.forEach(c => {
+            const projectedVotes = Math.floor(c.votos * (1 + (c.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
+            const option = document.createElement('option');
+            option.value = c.nome;
+            option.textContent = `${c.nome} (~${projectedVotes.toLocaleString('pt-BR')} votos)`;
+            select.appendChild(option);
+        });
     }
 
     async function generateAISlateAnalysis(partyName) {
@@ -1292,139 +1313,16 @@
         `;
 
         const modalTitle = `Análise Estratégica da Legenda: ${partyName}`;
-        const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[20rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
+        const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[15rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
         showModal(modalContent);
         
-        const apiKey = ""; // <-- COLE SUA CHAVE DE API AQUI, ENTRE AS ASPAS
-        if (!apiKey) {
-            document.getElementById('ai-slate-result').innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API da IA diretamente no código para usar este recurso.</p>`;
-            return;
-        }
-
-        const systemPrompt = "Você é um consultor político experiente, especializado em eleições legislativas em Santa Catarina. Sua tarefa é analisar uma lista de candidatos (uma 'legenda') de um partido e fornecer uma avaliação estratégica concisa. Identifique pontos fortes, possíveis lacunas (geográficas, setoriais, etc.) e sugira perfis de candidatos que poderiam fortalecer a lista. Seja objetivo e direto. Use formato de tópicos (markdown) com os títulos exatos: **Pontos Fortes**, **Fraquezas e Lacunas**, e **Sugestões Estratégicas**. Responda em português do Brasil.";
-        const userQuery = `Analise a seguinte legenda de candidatos para o partido **${partyName}** em Santa Catarina:\n\n- ${candidateNames.join('\n- ')}\n\nAvalie os pontos fortes, as fraquezas/lacunas e sugira 1 ou 2 perfis de candidatos que poderiam complementar esta legenda para maximizar o potencial de votos.`;
+        const apiKey = "";
         
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-        const payload = {
-            contents: [{ parts: [{ text: userQuery }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-        };
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error(`API error: ${response.statusText}`);
-            
-            const result = await response.json();
-            const text = result.candidates[0].content.parts[0].text;
-
-            const sections = {
-                fortes: { title: "Pontos Fortes", icon: "fa-thumbs-up", color: "text-success", content: "" },
-                fracos: { title: "Fraquezas e Lacunas", icon: "fa-triangle-exclamation", color: "text-warning", content: "" },
-                sugestoes: { title: "Sugestões Estratégicas", icon: "fa-lightbulb", color: "text-secondary", content: "" }
-            };
-
-            const fortesMatch = text.match(/\*\*(Pontos Fortes)\*\*\s*([\s\S]*?)(?=\*\*|$)/);
-            const fracosMatch = text.match(/\*\*(Fraquezas e Lacunas|Fraquezas|Lacunas)\*\*\s*([\s\S]*?)(?=\*\*|$)/);
-            const sugestoesMatch = text.match(/\*\*(Sugestões Estratégicas|Sugestões|Recomendações)\*\*\s*([\s\S]*?)(?=$)/);
-
-            if (fortesMatch) sections.fortes.content = fortesMatch[2].trim();
-            if (fracosMatch) sections.fracos.content = fracosMatch[2].trim();
-            if (sugestoesMatch) sections.sugestoes.content = sugestoesMatch[2].trim();
-            
-            if (!fortesMatch && !fracosMatch && !sugestoesMatch) {
-                let fallbackHtml = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-                document.getElementById('ai-slate-result').innerHTML = fallbackHtml;
-                return;
-            }
-
-            let html = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
-            
-            for (const key in sections) {
-                const section = sections[key];
-                let contentHtml = section.content
-                    .replace(/\n\s*-\s/g, '</li><li class="mb-1">')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .trim();
-
-                if (contentHtml.startsWith('</li>')) {
-                     contentHtml = contentHtml.substring(5);
-                }
-                
-                html += `
-                    <div class="bg-background p-4 rounded-lg border border-border">
-                        <h4 class="font-bold ${section.color} mb-3 flex items-center"><i class="fa-solid ${section.icon} mr-2"></i>${section.title}</h4>
-                        <ul class="text-sm list-disc pl-5 space-y-2">
-                            ${contentHtml ? `<li>${contentHtml}</li>` : '<li class="list-none">Nenhuma informação gerada.</li>'}
-                        </ul>
-                    </div>
-                `;
-            }
-            
-            html += '</div>';
-
-            document.getElementById('ai-slate-result').innerHTML = html;
-
-        } catch (error) {
-            console.error("Error calling Gemini API for slate analysis:", error);
-            document.getElementById('ai-slate-result').innerHTML = `<p class="text-center text-danger">Ocorreu um erro ao gerar a análise da legenda.</p>`;
-        }
-    }
-
-
-    async function generateAIAnalysis() {
-        const partyName = document.getElementById('ai-party-select').value;
-        const resultContainer = document.getElementById('ai-result-container');
-        const generateBtn = document.getElementById('ai-generate-btn');
-        if (!partyName) return;
-
-        const apiKey = ""; // <-- COLE SUA CHAVE DE API AQUI, ENTRE AS ASPAS
-        if (!apiKey) {
-            resultContainer.innerHTML = `<p class="text-center text-warning">Por favor, insira sua chave de API do Gemini diretamente no código para gerar a análise.</p>`;
-            return;
-        }
-
-        resultContainer.innerHTML = `<div class="flex justify-center items-center h-full"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary"></i><p class="ml-3">Gerando análise estratégica...</div>`;
-        generateBtn.disabled = true;
-
-        const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
-        const competitors = currentSimulatedScenario.cenarios
-            .filter(p => p.nome !== partyName)
-            .sort((a,b) => b.votos - a.votos)
-            .slice(0, 3)
-            .map(p => `${p.nome} (${p.totalVagas} vagas)`);
-            
-        const atRiskSeats = currentSimulatedScenario.sobrasLog
-            .filter(log => log.vencedor === partyName || log.perdedor === partyName)
-            .map(log => `Vaga #${log.vaga}: ${log.vencedor === partyName ? 'Ganhando contra ' + log.perdedor : 'Perdendo para ' + log.vencedor} por ~${Math.ceil(Math.abs(log.mediaVencedor - log.mediaPerdedor))} votos de média.`);
-
-        const systemPrompt = "Você é um estrategista político sênior, especializado em eleições proporcionais no Brasil para o cargo de Deputado Estadual em Santa Catarina. Sua análise deve ser objetiva, baseada em dados e focada em estratégias práticas. Forneça insights em formato de bullet points concisos, usando markdown. Responda em português do Brasil.";
+        const systemPrompt = "Você é um estrategista político de alto nível focando nas eleições de 2026 em Santa Catarina. O usuário fornecerá dados projetados baseados nas eleições de 2022. Suas respostas devem ser EXTREMAMENTE DIRETAS, visuais e dinâmicas. Nunca escreva parágrafos longos. Use emojis para destacar os pontos. O foco é apontar buracos matemáticos, potencial de crescimento cruzando os dados e viabilidade real para 2026.";
         
-        const userQuery = `
-            Analise o cenário eleitoral para o partido **${partyName}** em Santa Catarina para 2026.
-            
-            **Dados da Simulação Atual:**
-            - **Votos Totais Projetados:** ${partyData.votos.toLocaleString('pt-BR')}
-            - **Cadeiras Conquistadas:** ${partyData.totalVagas} (${partyData.vagasDiretas} diretas, ${partyData.vagasSobras} de sobra)
-            - **Nota de Corte Mínima (individual):** ${partyData.notaCorte.toLocaleString('pt-BR')} votos
-            - **Quociente Eleitoral (QE) do Cenário:** ${currentSimulatedScenario.QE.toLocaleString('pt-BR')}
-            
-            **Análise de Risco (Disputa por Vagas de Sobra):**
-            ${atRiskSeats.length > 0 ? atRiskSeats.map(s => `- ${s}`).join('\n') : "- Nenhuma disputa direta por sobras identificada."}
-            
-            **Principais Concorrentes (no cenário geral):**
-            ${competitors.map(c => `- ${c}`).join('\n')}
-
-            Com base nestes dados, forneça um relatório estratégico contendo:
-            1.  **Pontos Fortes:** Principais vantagens do partido neste cenário.
-            2.  **Pontos Fracos e Riscos:** Vulnerabilidades e ameaças imediatas.
-            3.  **Recomendações Estratégicas:** Ações práticas para maximizar o número de cadeiras e mitigar riscos.
-        `;
-
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const userQuery = `Analise a seguinte composição de legenda (projetada para 2026, com base em 2022) do partido **${partyName}** em SC:\n\n- ${candidateNames.join('\n- ')}\n\nForneça um briefing tático super rápido:\n🔥 **Maior Força:** (1 linha)\n⚠️ **Grande Risco da Legenda:** (1 linha)\n🎯 **Alvo para 2026:** (O que falta buscar? Que tipo de perfil de candidato adicionar? Máximo 2 linhas)`;
+        
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const payload = {
             contents: [{ parts: [{ text: userQuery }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -1437,24 +1335,160 @@
                 body: JSON.stringify(payload)
             });
             if (!response.ok) {
-                throw new Error(`API error: ${response.statusText}`);
+                const errData = await response.json();
+                throw new Error(`Erro na API: ${errData.error?.message || response.statusText}`);
+            }
+            
+            const result = await response.json();
+            const text = result.candidates[0].content.parts[0].text;
+
+            // Formatação dinâmica limpa
+            let html = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white text-lg">$1</strong>')
+                .replace(/\n/g, '<br>');
+            
+            html = html.replace(/(<br>\s*){2,}/g, '<br><br>'); // Clean up excessive line breaks
+
+            document.getElementById('ai-slate-result').innerHTML = `<div class="bg-background p-5 rounded-xl border border-border text-base leading-relaxed space-y-2 shadow-inner">${html}</div>`;
+
+        } catch (error) {
+            console.error("Error calling Gemini API for slate analysis:", error);
+            document.getElementById('ai-slate-result').innerHTML = `<p class="text-center text-danger">Ocorreu um erro ao gerar a análise da legenda:<br><span class="text-sm">${error.message}</span></p>`;
+        }
+    }
+
+
+    async function generateAIAnalysis() {
+        const partyName = document.getElementById('ai-party-select').value;
+        const candidateName = document.getElementById('ai-candidate-select').value;
+        const resultContainer = document.getElementById('ai-result-container');
+        const generateBtn = document.getElementById('ai-generate-btn');
+        if (!partyName) return;
+
+        const apiKey = ""; 
+
+        resultContainer.innerHTML = `<div class="flex justify-center items-center h-full min-h-[10rem]"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary"></i><p class="ml-3 font-semibold">Analisando cenários robustos e movimentações para 2026...</p></div>`;
+        generateBtn.disabled = true;
+
+        const partyData = currentSimulatedScenario.cenarios.find(p => p.nome === partyName);
+        
+        // Novo System Prompt: Mais robusto, analítico, mas mantendo a formatação dinâmica de Dashboard
+        let systemPrompt = "Você é um Consultor Estratégico Sênior de alto nível, especializado em eleições proporcionais no Brasil (foco SC 2026). Produza análises ROBUSTAS, TÁTICAS e PROFUNDAS, mas apresentadas de forma EXTREMAMENTE escaneável (formato de Painel Executivo). Use tópicos curtos, frases de impacto e emojis. Vá além da matemática básica: sugira movimentações de janela partidária, perfil ideal de novas filiações, impacto de federações e roubo de votos. NUNCA escreva parágrafos longos.";
+        let userQuery = "";
+
+        if (candidateName) {
+            // Análise Específica do Candidato
+            const candidateList = [...partyData.currentCandidateList].sort((a, b) => {
+                const projA = Math.floor(a.votos * (1 + (a.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
+                const projB = Math.floor(b.votos * (1 + (b.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
+                return projB - projA;
+            });
+            const candidateIndex = candidateList.findIndex(c => c.nome === candidateName);
+            const candidate = candidateList[candidateIndex];
+            
+            const projectedVotes = Math.floor(candidate.votos * (1 + (candidate.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
+            const position = candidateIndex + 1;
+            const isElectedDirect = position <= partyData.vagasDiretas;
+            const isElectedSobras = position > partyData.vagasDiretas && position <= partyData.totalVagas;
+            const statusStr = isElectedDirect ? "Eleito Direto" : (isElectedSobras ? "Eleito por Sobra" : "Suplente");
+            const diffCorte = projectedVotes - partyData.notaCorte;
+
+            const concorrenteDireto = position > 1 ? candidateList[candidateIndex - 1] : null;
+            const perseguidorDireto = position < candidateList.length ? candidateList[candidateIndex + 1] : null;
+            
+            let concorrenciaInterna = "";
+            if (concorrenteDireto) {
+                 const projAcima = Math.floor(concorrenteDireto.votos * (1 + (concorrenteDireto.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
+                 concorrenciaInterna += `- Alvo Imediato Acima: ${concorrenteDireto.nome} (${(projAcima - projectedVotes).toLocaleString('pt-BR')} votos de distância)\n`;
+            }
+            if (perseguidorDireto) {
+                 const projAbaixo = Math.floor(perseguidorDireto.votos * (1 + (perseguidorDireto.growth || 0)) * (partyData.customCandidatos ? 1 : (1 + partyData.boost)));
+                 concorrenciaInterna += `- Ameaça Imediata Abaixo: ${perseguidorDireto.nome} (${(projectedVotes - projAbaixo).toLocaleString('pt-BR')} votos de distância)\n`;
+            }
+
+            userQuery = `Elabore um Dossiê Tático para o candidato **${candidateName}** (${partyName}) visando 2026.
+            
+            **Dados (Projeção 2026 baseada na eleição passada):**
+            - Votos Estimados: ${projectedVotes.toLocaleString('pt-BR')}
+            - Posição na Chapa: ${position}º (Status Atual: ${statusStr})
+            - Margem para a Nota de Corte do Partido: ${diffCorte > 0 ? '+' : ''}${diffCorte.toLocaleString('pt-BR')} votos
+            - Quociente Eleitoral (QE): ${currentSimulatedScenario.QE.toLocaleString('pt-BR')}
+            
+            **Cenário de Concorrência Interna:**
+            ${concorrenciaInterna || "- Isolado confortavelmente na chapa."}
+
+            Responda EXATAMENTE com estes 4 blocos (use bullet points rápidos):
+            🎯 **Diagnóstico de Sobrevivência:** (Chances reais na legenda atual considerando os números)
+            🚪 **Tática de Janela Partidária:** (Vale a pena ficar? Se fosse mudar, qual seria o tamanho do partido ideal para otimizar esses votos?)
+            ⚔️ **Guerra de Posição:** (Como lidar com os concorrentes que estão logo acima ou abaixo dele na lista)
+            🚀 **Plano de Crescimento:** (Ação prática agressiva para consolidar a cadeira nas urnas)`;
+
+        } else {
+            // Análise Geral do Partido
+            const competitors = currentSimulatedScenario.cenarios
+                .filter(p => p.nome !== partyName && p.votos > 0)
+                .sort((a,b) => b.votos - a.votos)
+                .slice(0, 3)
+                .map(p => `${p.nome}`);
+                
+            const atRiskSeats = currentSimulatedScenario.sobrasLog
+                .filter(log => log.vencedor === partyName || log.perdedor === partyName)
+                .map(log => log.vencedor === partyName ? `Vencendo disputa contra ${log.perdedor}` : `Sendo engolido por ${log.vencedor}`);
+
+            userQuery = `Elabore um Dossiê Tático Macro para o partido **${partyName}** visando 2026.
+            
+            **Projeção Matemática 2026:**
+            - Total de Votos da Legenda: ${partyData.votos.toLocaleString('pt-BR')}
+            - Expectativa de Cadeiras: ${partyData.totalVagas} (Diretas: ${partyData.vagasDiretas} | Sobras: ${partyData.vagasSobras})
+            - Nota de Corte Projetada: ${partyData.notaCorte.toLocaleString('pt-BR')} votos
+            - Quociente Eleitoral (QE): ${currentSimulatedScenario.QE.toLocaleString('pt-BR')}
+            
+            **Guerra pelas Sobras:**
+            ${atRiskSeats.length > 0 ? atRiskSeats.join('\n') : "- Sem embates diretos nas últimas cadeiras de sobra."}
+            
+            **Ameaças Externas Principais:** ${competitors.join(', ')}
+
+            Responda EXATAMENTE com estes 4 blocos (use bullet points rápidos):
+            📊 **Radiografia da Força:** (A legenda é eficiente? Depende muito de puxadores ou é pulverizada?)
+            🧲 **Engenharia de Filiação:** (Exatamente qual perfil de candidato ou volume de votos o partido PRECISA buscar na janela partidária para garantir a próxima sobra?)
+            🤝 **Jogo de Alianças:** (Qual o perfil de bloco ideológico ou federação seria vital para proteger a chapa?)
+            ⚠️ **Risco de Esvaziamento:** (Há perigo de candidatos atuais fugirem para legendas com corte menor? Como blindar?)`;
+        }
+
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const payload = {
+            contents: [{ parts: [{ text: userQuery }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(`Erro na API: ${errData.error?.message || response.statusText}`);
             }
             const result = await response.json();
             const text = result.candidates[0].content.parts[0].text;
 
-            // Simple markdown to HTML
+            // Formatação dinâmica limpa e estilizada para parecer um Dossiê
             let html = text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n\s*-\s/g, '</li><li>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white text-lg">$1</strong>')
+                .replace(/\n\s*-\s/g, '</li><li class="ml-4 mb-2">') // Transforma hífens em itens de lista
                 .replace(/\n/g, '<br>');
-            html = html.replace(/<br>(\d\.)/g, '</ul><h4 class="font-bold text-secondary mt-4 mb-2">$1</h4><ul><li>');
-            html = `<ul>${html}</li></ul>`.replace('<ul><br>', '<ul>').replace('<ul></ul>', '');
+            
+            // Corrige inícios e fins de listas gerados dinamicamente
+            html = html.replace(/<\/li><li class="ml-4 mb-2">/g, '</li><li class="ml-4 mb-2 text-text-light">');
+            
+            html = html.replace(/(<br>\s*){2,}/g, '<br><br>'); // Limpa quebras duplas
 
-
-            resultContainer.innerHTML = html;
+            resultContainer.innerHTML = `<div class="bg-background p-6 rounded-xl border border-border shadow-md text-sm leading-relaxed">${html}</div>`;
         } catch (error) {
             console.error("Error calling Gemini API:", error);
-            resultContainer.innerHTML = `<p class="text-center text-danger">Ocorreu um erro ao gerar a análise. Por favor, tente novamente.</p>`;
+            resultContainer.innerHTML = `<p class="text-center text-danger">Ocorreu um erro ao gerar a análise. Verifique sua chave de API.<br><span class="text-sm">${error.message}</span></p>`;
         } finally {
             generateBtn.disabled = false;
         }
@@ -2088,8 +2122,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
