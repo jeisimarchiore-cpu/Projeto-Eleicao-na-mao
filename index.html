@@ -476,6 +476,25 @@
         };
     }
 
+    // Função de fetch com Retry Exponencial (Melhora a estabilidade de chamadas à API da IA)
+    async function fetchWithRetry(url, options, retries = 5) {
+        const delays = [1000, 2000, 4000, 8000, 16000];
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    let errData;
+                    try { errData = await response.json(); } catch(e) {}
+                    throw new Error((errData && errData.error && errData.error.message) || response.statusText);
+                }
+                return await response.json();
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await new Promise(resolve => setTimeout(resolve, delays[i]));
+            }
+        }
+    }
+
     // =================================================================================
     // MAIN LOGIC
     // =================================================================================
@@ -1458,30 +1477,26 @@
         const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2><p class="text-xs mt-1">Cruzando projeções de 2026 com base municipal de 2024</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[15rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
         showModal(modalContent);
         
-        const apiKey = "AIzaSyDevJVkgNV88TqFyeLljL7njzqxbLDuPec";
+        // Use an empty string for the API key so the execution environment provides it automatically
+        const apiKey = "";
         
         const systemPrompt = "Você é um estrategista político de alto nível focando nas eleições de 2026 em Santa Catarina. O usuário fornecerá dados estaduais projetados e a base municipal real conquistada em 2024. Suas respostas devem ser EXTREMAMENTE DIRETAS, visuais e dinâmicas (sem parágrafos longos, use emojis). O foco é cruzar os dados: a base de prefeitos/vereadores de 2024 sustenta a meta de votos de 2026? Aponte buracos matemáticos e viabilidade tática.";
         
         const userQuery = `Analise a composição de legenda do partido **${partyName}** em SC:\n\n**Projeção Estadual 2026:**\n- Candidatos: ${candidateNames.join(', ')}\n- Votos Totais Projetados: ${totalVotosLegenda.toLocaleString('pt-BR')}\n\n**Força Municipal Real (Eleitos em 2024):**\n- Prefeitos/Vices: ${prefeitos2024}\n- Vereadores: ${vereadores2024}\n- Votos de Apoio Monitorados pelo Usuário: ${Math.round(totalSupportVotes).toLocaleString('pt-BR')}\n\nCom base nesse cruzamento de dados, forneça um briefing tático super rápido:\n🔥 **Maior Força Estrutural:** (A base de 2024 aguenta o projeto de 2026?)\n⚠️ **Grande Risco de Desidratação:** (Onde a conta não fecha?)\n🎯 **Alvo Tático para 2026:** (Ação prática: filiar mais prefeitos? Focar em dobradinhas?)`;
         
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const payload = {
             contents: [{ parts: [{ text: userQuery }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
         };
 
         try {
-            const response = await fetch(apiUrl, {
+            const result = await fetchWithRetry(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(`Erro na API: ${errData.error?.message || response.statusText}`);
-            }
             
-            const result = await response.json();
             const text = result.candidates[0].content.parts[0].text;
 
             // Formatação dinâmica limpa
@@ -1507,7 +1522,8 @@
         const generateBtn = document.getElementById('ai-generate-btn');
         if (!partyName) return;
 
-        const apiKey = "AIzaSyDevJVkgNV88TqFyeLljL7njzqxbLDuPec";
+        // Use an empty string for the API key so the execution environment provides it automatically
+        const apiKey = ""; 
 
         resultContainer.innerHTML = `<div class="flex justify-center items-center h-full min-h-[10rem]"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary"></i><p class="ml-3 font-semibold">Cruzando dados de 2024 e projetando 2026...</p></div>`;
         generateBtn.disabled = true;
@@ -1613,23 +1629,18 @@
             🎯 **Estratégia Definitiva:** (Qual a ação mais importante agora? Fechar com federações, aliciar suplentes, investir em capitais?)`;
         }
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
         const payload = {
             contents: [{ parts: [{ text: userQuery }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
         };
 
         try {
-            const response = await fetch(apiUrl, {
+            const result = await fetchWithRetry(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(`Erro na API: ${errData.error?.message || response.statusText}`);
-            }
-            const result = await response.json();
             const text = result.candidates[0].content.parts[0].text;
 
             // Formatação dinâmica limpa e estilizada para parecer um Dossiê
