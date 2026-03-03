@@ -336,6 +336,7 @@
                                  <p class="text-text-light mt-1">Gere insights e recomendações para um partido com base no cenário simulado atual.</p>
                              </div>
                         </div>
+
                          <div class="flex flex-col lg:flex-row items-end gap-4">
                              <div class="flex-grow w-full lg:w-auto">
                                  <label for="ai-party-select" class="block text-sm font-medium text-text-light mb-1">Selecione o Partido</label>
@@ -1457,7 +1458,7 @@
         const modalContent = `<div class="p-6 text-text-light"><div class="flex justify-between items-start mb-4"><div><h2 class="text-2xl font-bold text-secondary">${modalTitle}</h2><p class="text-xs mt-1">Cruzando projeções de 2026 com base municipal de 2024</p></div><button onclick="closeModal()" class="text-text-light hover:text-text-main text-2xl">&times;</button></div>${summaryHtml}<div id="ai-slate-result" class="min-h-[15rem] flex justify-center items-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-primary"></i></div></div>`;
         showModal(modalContent);
         
-        const apiKey = "";
+        const apiKey = "AIzaSyDevJVkgNV88TqFyeLljL7njzqxbLDuPec";
         
         const systemPrompt = "Você é um estrategista político de alto nível focando nas eleições de 2026 em Santa Catarina. O usuário fornecerá dados estaduais projetados e a base municipal real conquistada em 2024. Suas respostas devem ser EXTREMAMENTE DIRETAS, visuais e dinâmicas (sem parágrafos longos, use emojis). O foco é cruzar os dados: a base de prefeitos/vereadores de 2024 sustenta a meta de votos de 2026? Aponte buracos matemáticos e viabilidade tática.";
         
@@ -1506,7 +1507,7 @@
         const generateBtn = document.getElementById('ai-generate-btn');
         if (!partyName) return;
 
-        const apiKey = ""; 
+        const apiKey = "AIzaSyDevJVkgNV88TqFyeLljL7njzqxbLDuPec";
 
         resultContainer.innerHTML = `<div class="flex justify-center items-center h-full min-h-[10rem]"><i class="fa-solid fa-spinner fa-spin text-2xl text-primary"></i><p class="ml-3 font-semibold">Cruzando dados de 2024 e projetando 2026...</p></div>`;
         generateBtn.disabled = true;
