@@ -1464,7 +1464,7 @@
         
         const userQuery = `Analise a composição de legenda do partido **${partyName}** em SC:\n\n**Projeção Estadual 2026:**\n- Candidatos: ${candidateNames.join(', ')}\n- Votos Totais Projetados: ${totalVotosLegenda.toLocaleString('pt-BR')}\n\n**Força Municipal Real (Eleitos em 2024):**\n- Prefeitos/Vices: ${prefeitos2024}\n- Vereadores: ${vereadores2024}\n- Votos de Apoio Monitorados pelo Usuário: ${Math.round(totalSupportVotes).toLocaleString('pt-BR')}\n\nCom base nesse cruzamento de dados, forneça um briefing tático super rápido:\n🔥 **Maior Força Estrutural:** (A base de 2024 aguenta o projeto de 2026?)\n⚠️ **Grande Risco de Desidratação:** (Onde a conta não fecha?)\n🎯 **Alvo Tático para 2026:** (Ação prática: filiar mais prefeitos? Focar em dobradinhas?)`;
         
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         const payload = {
             contents: [{ parts: [{ text: userQuery }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -1613,7 +1613,7 @@
             🎯 **Estratégia Definitiva:** (Qual a ação mais importante agora? Fechar com federações, aliciar suplentes, investir em capitais?)`;
         }
 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         const payload = {
             contents: [{ parts: [{ text: userQuery }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
